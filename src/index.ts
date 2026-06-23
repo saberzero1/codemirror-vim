@@ -56,6 +56,7 @@ const vimPlugin = ViewPlugin.fromClass(
     public cm: CodeMirror;
     public status = "";
     blockCursor: BlockCursorPlugin;
+    _escapeHandler: ((e: KeyboardEvent) => void) | null = null;
     constructor(view: EditorView) {
       this.view = view as EditorViewExtended;
       const cm = (this.cm = new CodeMirror(view));
@@ -66,6 +67,27 @@ const vimPlugin = ViewPlugin.fromClass(
 
       this.blockCursor = new BlockCursorPlugin(view, cm);
       this.updateClass();
+
+      // Obsidian intercepts Escape at the app level before CM6 ViewPlugin
+      // event handlers see it.  Install a capture-phase listener on document
+      // so the vim layer processes Escape before the host swallows it.
+      this._escapeHandler = (e: KeyboardEvent) => {
+        if (e.key !== "Escape") return;
+        if (!view.hasFocus) return;
+        const vimState = this.cm.state.vim;
+        if (!vimState) return;
+        if (vimState.insertMode || vimState.visualMode || (vimState.inputState && vimState.inputState.operator)) {
+          const handled = Vim.handleKey(this.cm, "<Esc>", "user");
+          if (handled) {
+            this.blockCursor.scheduleRedraw();
+            this.updateStatus();
+            this.updateClass();
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }
+        }
+      };
+      view.dom.ownerDocument.addEventListener("keydown", this._escapeHandler, true);
 
       this.cm.on("vim-command-done", () => {
         if (cm.state.vim) cm.state.vim.status = "";
@@ -168,6 +190,10 @@ const vimPlugin = ViewPlugin.fromClass(
     }
 
     destroy() {
+      if (this._escapeHandler) {
+        this.view.dom.ownerDocument.removeEventListener("keydown", this._escapeHandler, true);
+        this._escapeHandler = null;
+      }
       Vim.leaveVimMode(this.cm);
       this.updateClass();
       this.blockCursor.destroy();
