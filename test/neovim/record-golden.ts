@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { NeovimClient } from './client.js';
-import { saveGoldenFile, type GoldenCase, type GoldenFile } from './golden.js';
+import { saveGoldenFile, type GoldenCase, type GoldenFile, type StepResult } from './golden.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,6 +63,7 @@ async function recordSuite(
                 const initialCursor = clampCursor(tc.content, tc.cursor.line, tc.cursor.ch);
                 await nvim.setCursor(initialCursor.line, initialCursor.ch);
 
+                const stepResults: StepResult[] = [];
                 if (tc.steps && tc.steps.length > 0) {
                     for (const step of tc.steps) {
                         if (step.type === 'setCursor') {
@@ -71,6 +72,11 @@ async function recordSuite(
                             await nvim.setCursor(cursor.line, cursor.ch);
                         } else if (step.type === 'keys') {
                             await nvim.input(step.keys);
+                            stepResults.push({
+                                content: await nvim.getContent(),
+                                cursor: await nvim.getCursor(),
+                                mode: await nvim.getMode(),
+                            });
                         } else if (step.type === 'setRegister') {
                             await nvim.setRegister(step.register, step.text, step.linewise ? 'l' : 'c');
                         }
@@ -83,6 +89,7 @@ async function recordSuite(
                     content: await nvim.getContent(),
                     cursor: await nvim.getCursor(),
                     mode: await nvim.getMode(),
+                    stepResults: stepResults.length > 0 ? stepResults : undefined,
                 };
             }, 5000);
 
@@ -90,7 +97,8 @@ async function recordSuite(
                 name: tc.name,
                 initial: { content: tc.content, cursor: tc.cursor },
                 keys: tc.keys ?? getKeysFromSteps(tc.steps),
-                result,
+                result: { content: result.content, cursor: result.cursor, mode: result.mode },
+                stepResults: result.stepResults,
             });
             process.stderr.write(' ok\n');
         } catch (e) {

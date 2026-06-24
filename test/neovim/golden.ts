@@ -5,6 +5,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export interface StepResult {
+    content: string;
+    cursor: { line: number; ch: number };
+    mode: string;
+}
+
 export interface GoldenCase {
     name: string;
     initial: { content: string; cursor: { line: number; ch: number } };
@@ -14,6 +20,7 @@ export interface GoldenCase {
         cursor: { line: number; ch: number };
         mode: string;
     };
+    stepResults?: StepResult[];
 }
 
 export interface GoldenFile {

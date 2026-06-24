@@ -205,6 +205,17 @@ function testVim(name, run, opts, expectedFail) {
           }
           typeKey(key);
         }
+        if (typeof window !== 'undefined' && window.__NEOVIM_INSTRUMENT && __stepLog.length > 0) {
+          var lastStep = __stepLog[__stepLog.length - 1];
+          if (lastStep.type === 'keys') {
+            var vimState = CodeMirror.Vim.maybeInitVimState_(cm);
+            lastStep.stateAfter = {
+              content: cm.getValue(),
+              cursor: { line: cm.getCursor().line, ch: cm.getCursor().ch },
+              mode: vimState.insertMode ? 'insert' : (vimState.visualMode ? 'visual' : 'normal'),
+            };
+          }
+        }
       },
       doEx: function(command) {
         helpers.doKeys(':', command, '\n');

@@ -17,6 +17,12 @@ interface Snapshot {
     error: string | null;
 }
 
+interface StepState {
+    content: string;
+    cursor: { line: number; ch: number };
+    mode: string;
+}
+
 interface Step {
     type: 'keys' | 'setCursor' | 'setRegister';
     keys?: string[];
@@ -25,6 +31,7 @@ interface Step {
     register?: string;
     text?: string;
     linewise?: boolean;
+    stateAfter?: StepState;
 }
 
 interface TestDefinition {
@@ -32,7 +39,7 @@ interface TestDefinition {
     content: string;
     cursor: { line: number; ch: number };
     steps?: Array<
-        | { type: 'keys'; keys: string }
+        | { type: 'keys'; keys: string; stateAfter?: StepState }
         | { type: 'setCursor'; line: number; ch: number }
         | { type: 'setRegister'; register: string; text: string; linewise: boolean }
     >;
@@ -68,7 +75,11 @@ function snapshotToDefinition(snap: Snapshot): TestDefinition | null {
         if (step.type === 'keys') {
             const keys = (step.keys ?? []).map(translateKey).join('');
             if (keys.length === 0) continue;
-            steps.push({ type: 'keys', keys });
+            const keysEntry: { type: 'keys'; keys: string; stateAfter?: StepState } = { type: 'keys', keys };
+            if (step.stateAfter) {
+                keysEntry.stateAfter = step.stateAfter;
+            }
+            steps.push(keysEntry);
             hasKeys = true;
         } else if (step.type === 'setCursor') {
             if (typeof step.line === 'number' && typeof step.ch === 'number') {

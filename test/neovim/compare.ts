@@ -23,11 +23,24 @@ interface SuiteReport {
     results: CompareResult[];
 }
 
+interface StepState {
+    content: string;
+    cursor: { line: number; ch: number };
+    mode: string;
+}
+
+interface DefinitionStep {
+    type: string;
+    keys?: string;
+    stateAfter?: StepState;
+}
+
 interface DefinitionWithExpected {
     name: string;
     expectedContent?: string;
     expectedCursor?: { line: number; ch: number };
     expectedSelection?: string;
+    steps?: DefinitionStep[];
 }
 
 function loadDefinitions(suiteName: string): DefinitionWithExpected[] {
@@ -47,22 +60,47 @@ function compareSuite(golden: GoldenFile): SuiteReport {
         const diffs: string[] = [];
         const def = defMap.get(gc.name);
 
-        if (def?.expectedContent !== undefined) {
-            if (gc.result.content !== def.expectedContent) {
-                diffs.push(
-                    `content: neovim=${JSON.stringify(gc.result.content)} fork-expects=${JSON.stringify(def.expectedContent)}`,
-                );
+        if (gc.stepResults && def?.steps) {
+            const keySteps = def.steps.filter(
+                (s): s is DefinitionStep & { stateAfter: StepState } =>
+                    s.type === 'keys' && s.stateAfter !== undefined,
+            );
+            const stepCount = Math.min(gc.stepResults.length, keySteps.length);
+            for (let i = 0; i < stepCount; i++) {
+                const nvimStep = gc.stepResults[i];
+                const forkStep = keySteps[i].stateAfter;
+                if (forkStep.content !== nvimStep.content) {
+                    diffs.push(
+                        `step[${i}] content: neovim=${JSON.stringify(nvimStep.content)} fork=${JSON.stringify(forkStep.content)}`,
+                    );
+                }
+                if (
+                    forkStep.cursor.line !== nvimStep.cursor.line ||
+                    forkStep.cursor.ch !== nvimStep.cursor.ch
+                ) {
+                    diffs.push(
+                        `step[${i}] cursor: neovim=${JSON.stringify(nvimStep.cursor)} fork=${JSON.stringify(forkStep.cursor)}`,
+                    );
+                }
             }
-        }
+        } else {
+            if (def?.expectedContent !== undefined) {
+                if (gc.result.content !== def.expectedContent) {
+                    diffs.push(
+                        `content: neovim=${JSON.stringify(gc.result.content)} fork-expects=${JSON.stringify(def.expectedContent)}`,
+                    );
+                }
+            }
 
-        if (def?.expectedCursor !== undefined) {
-            if (
-                gc.result.cursor.line !== def.expectedCursor.line ||
-                gc.result.cursor.ch !== def.expectedCursor.ch
-            ) {
-                diffs.push(
-                    `cursor: neovim=${JSON.stringify(gc.result.cursor)} fork-expects=${JSON.stringify(def.expectedCursor)}`,
-                );
+            if (def?.expectedCursor !== undefined) {
+                if (
+                    gc.result.cursor.line !== def.expectedCursor.line ||
+                    gc.result.cursor.ch !== def.expectedCursor.ch
+                ) {
+                    diffs.push(
+                        `cursor: neovim=${JSON.stringify(gc.result.cursor)} fork-expects=${JSON.stringify(def.expectedCursor)}`,
+                    );
+                }
             }
         }
 
