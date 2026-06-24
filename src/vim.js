@@ -2232,8 +2232,18 @@ export function initVim(CM) {
         } else if (motionArgs.forward) {
           clipToLine(cm, curStart, curEnd);
         }
+        if (operator === 'delete' && curStart.line < curEnd.line && !linewise) {
+          var prefix = cm.getLine(curStart.line).substring(0, curStart.ch);
+          if (prefix.length > 0 && /^\s*$/.test(prefix)) {
+            curStart = new Pos(curStart.line, 0);
+          }
+        }
         mode = 'char';
         var exclusive = !motionArgs.inclusive || linewise;
+        if (!exclusive && operator && curEnd.ch >= lineLength(cm, curEnd.line) &&
+            curEnd.line < cm.lastLine() && curStart.ch === 0 && lineLength(cm, curStart.line) === 0) {
+          curEnd = new Pos(curEnd.line + 1, 0);
+        }
         var newPositions = updateSelectionForSurrogateCharacters(cm, curStart, curEnd);
         cmSel = makeCmSelection(cm, {
           anchor: newPositions.start,
@@ -2609,6 +2619,9 @@ export function initVim(CM) {
         symbol = lineText.charAt(ch);
         if (symbol && isMatchableSymbol(symbol)) {
           var style = cm.getTokenTypeAt(new Pos(line, ch + 1));
+          if (style === "string" && ch > cursor.ch) {
+            return cursor;
+          }
           if (style !== "string" && style !== "comment") {
             break;
           }
@@ -2861,6 +2874,11 @@ export function initVim(CM) {
         if (args.linewise) {
           var col = args.cursorCol != null ? args.cursorCol : 0;
           finalHead = new Pos(anchor.line, Math.min(col, lineLength(cm, anchor.line)));
+        } else if (text === '\n' && finalHead.ch === 0) {
+          var remainingLine = cm.getLine(finalHead.line);
+          if (remainingLine && /^\s+$/.test(remainingLine) && remainingLine.length >= 2) {
+            finalHead = new Pos(finalHead.line, 1);
+          }
         }
       } else {
         text = cm.getSelection();

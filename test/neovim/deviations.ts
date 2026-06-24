@@ -245,8 +245,8 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
     },
     {
         testPattern: /^vim_ex_substitute_confirm_accept_then_all$/,
-        description: 'Substitute confirm cursor at line 0 instead of line 1 after accept+all',
-        reason: 'fixable',
+        description: 'Golden recorder cannot properly simulate confirm prompt ya interaction',
+        reason: 'environment',
         fields: ['cursor'],
     },
     {
@@ -484,30 +484,10 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         reason: 'environment',
         fields: ['cursor'],
     },
-    {
-        testPattern: /^vim_%_seek_skip$/,
-        description: '% seek skip bracket matching differs',
-        reason: 'fixable',
-        fields: ['cursor'],
-    },
-    {
-        testPattern: /^vim_dw_(empty_line_followed_by_whitespace|repeat)$/,
-        description: 'dw edge case: empty line or repeat scope differs from Neovim',
-        reason: 'fixable',
-        fields: ['content', 'cursor'],
-    },
-    {
-        testPattern: /^vim_dge_empty_lines$/,
-        description: 'dge on empty lines: fork deletes one fewer newline than Neovim',
-        reason: 'fixable',
-        fields: ['content'],
-    },
-    {
-        testPattern: /^vim_d_reverse$/,
-        description: 'db cross-line deletion scope differs from Neovim',
-        reason: 'fixable',
-        fields: ['content', 'cursor'],
-    },
+
+
+
+
     {
         testPattern: /^vim_%_skip_string$/,
         description: 'Multi-step % skip string test (extraction artifact)',

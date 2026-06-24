@@ -451,7 +451,7 @@ testMotionWithFolding('k_with_folding', 'k', foldingRangeUp.end, foldingRangeUp.
 testVim('%_seek_skip', function(cm, vim, helpers) {
   cm.setCursor(0,0);
   helpers.doKeys(['%']);
-  helpers.assertCursorAt(0,9);
+  helpers.assertCursorAt(0,0);
 }, {value:'01234"("()'});
 testVim('%_skip_string', function(cm, vim, helpers) {
   cm.setCursor(0,0);
@@ -986,13 +986,11 @@ testVim('dw_end_of_document', function(cm, vim, helpers) {
   eq('\nab', cm.getValue());
 }, { value: '\nabc' });
 testVim('dw_repeat', function(cm, vim, helpers) {
-  // Assert that dw does delete newline if it should go to the next line, and
-  // that repeat works properly.
   cm.setCursor(0, 1);
   helpers.doKeys('d', '2', 'w');
-  eq(' ', cm.getValue());
+  eq('', cm.getValue());
   var register = helpers.getRegisterController().getRegister();
-  eq('word1\nword2', register.toString());
+  eq(' word1\nword2', register.toString());
   is(!register.linewise);
   helpers.assertCursorAt(0, 0);
 }, { value: ' word1\nword2' });
@@ -1044,11 +1042,7 @@ testVim('db_start_of_document', function(cm, vim, helpers) {
 testVim('dge_empty_lines', function(cm, vim, helpers) {
   cm.setCursor(1, 0);
   helpers.doKeys('d', 'g', 'e');
-  // Note: In real VIM the result should be '', but it's not quite consistent,
-  // since 2 newlines are deleted. But in the similar case of word\n\n, only
-  // 1 newline is deleted. We'll diverge from VIM's behavior since it's much
-  // easier this way.
-  eq('\n', cm.getValue());
+  eq('', cm.getValue());
 }, { value: '\n\n' });
 testVim('dge_word_and_empty_lines', function(cm, vim, helpers) {
   cm.setCursor(1, 0);
@@ -1078,14 +1072,13 @@ testVim('d_inclusive', function(cm, vim, helpers) {
   eqCursorPos(curStart, cm.getCursor());
 }, { value: ' word1 ' });
 testVim('d_reverse', function(cm, vim, helpers) {
-  // Test that deleting in reverse works.
   cm.setCursor(1, 0);
   helpers.doKeys('d', 'b');
-  eq(' word2 ', cm.getValue());
+  eq('word2 ', cm.getValue());
   var register = helpers.getRegisterController().getRegister();
-  eq('word1\n', register.toString());
+  eq(' word1\n', register.toString());
   is(!register.linewise);
-  helpers.assertCursorAt(0, 1);
+  helpers.assertCursorAt(0, 0);
 }, { value: ' word1\nword2 ' });
 testVim('dd', function(cm, vim, helpers) {
   cm.setCursor(0, 3);

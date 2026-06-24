@@ -118,7 +118,7 @@
     ],
     "expectedContent": "01234\"(\"()",
     "expectedCursor": {
-      "ch": 9,
+      "ch": 0,
       "line": 0
     }
   },
@@ -1534,7 +1534,7 @@
     ],
     "expectedContent": "  \nword",
     "expectedCursor": {
-      "ch": 0,
+      "ch": 1,
       "line": 0
     }
   },
@@ -1700,7 +1700,7 @@
         "keys": "d2w"
       }
     ],
-    "expectedContent": " ",
+    "expectedContent": "",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -1940,7 +1940,7 @@
         "keys": "dge"
       }
     ],
-    "expectedContent": "\n",
+    "expectedContent": "",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -2060,9 +2060,9 @@
         "keys": "db"
       }
     ],
-    "expectedContent": " word2 ",
+    "expectedContent": "word2 ",
     "expectedCursor": {
-      "ch": 1,
+      "ch": 0,
       "line": 0
     }
   },
