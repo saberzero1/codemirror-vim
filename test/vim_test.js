@@ -4613,7 +4613,7 @@ testVim('ex_substitute_empty_arguments', function(cm,vim,helpers) {
   helpers.doEx('s/a/b/g');
   cm.setCursor(1, 0);
   helpers.doEx('s');
-  eq('b b\nb a', cm.getValue());
+  eq('b b\nb b', cm.getValue());
 }, {value: 'a a\na a'});
 testVim('ex_substitute_highlight', function(cm,vim,helpers) {
   is(!searchHighlighted(vim));

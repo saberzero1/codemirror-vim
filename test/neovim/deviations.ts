@@ -508,16 +508,22 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         fields: ['cursor'],
     },
     {
-        testPattern: /^vim_f,$/,
-        description: 'Per-step: f, repeat step cursor differs from Neovim',
+        testPattern: /^vim_t,$/,
+        description: 'Per-step: t, (till comma) repeat cursor position differs',
         reason: 'fixable',
         fields: ['cursor'],
     },
     {
-        testPattern: /^vim_ex_substitute_empty_arguments$/,
-        description: 'Per-step: empty :s repeats different substitution than Neovim',
+        testPattern: /^vim_\[\(, \]\)$/,
+        description: 'Per-step: [( bracket motion cursor differs from Neovim',
         reason: 'fixable',
-        fields: ['content'],
+        fields: ['cursor'],
+    },
+    {
+        testPattern: /^vim_dw_empty_line_followed_by_whitespace$/,
+        description: 'Per-step: dw on empty line cursor at ch:1 vs Neovim ch:0',
+        reason: 'fixable',
+        fields: ['cursor'],
     },
     {
         testPattern: /^vim_paragraph_motions$/,

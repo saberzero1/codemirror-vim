@@ -753,6 +753,7 @@ export function initVim(CM) {
         query?: any;
         isReversed?: boolean;
         lastSubstituteReplacePart: any;
+        lastSubstituteGlobal: boolean;
         searchQuery?: null; 
         searchIsReversed?: boolean; 
       }
@@ -767,6 +768,7 @@ export function initVim(CM) {
       searchIsReversed: false,
       // Replace part of the last substituted pattern
       lastSubstituteReplacePart: undefined,
+      lastSubstituteGlobal: false,
       jumpList: createCircularJumpList(),
       macroModeState: new MacroModeState(),
       // Recording latest f, t, F or T motion command.
@@ -6483,9 +6485,12 @@ export function initVim(CM) {
           }
         }
       }
+      if (tokens && tokens.length) {
+        vimGlobalState.lastSubstituteGlobal = global;
+      } else {
+        global = vimGlobalState.lastSubstituteGlobal;
+      }
       if (regexPart) {
-        // If regex part is empty, then use the previous query. Otherwise use
-        // the regex part as the new query.
         try {
           updateSearchQuery(cm, regexPart, true /** ignoreCase */,
             true /** smartCase */);
