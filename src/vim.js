@@ -2098,6 +2098,19 @@ export function initVim(CM) {
                 rNewAnchor, rNewHead, savedOldAnchor, savedOldHead,
                 savedRepeat
               );
+            } else if (savedVim.visualMode) {
+              rNewHead = clipCursorToContent(cm, rNewHead, savedOldHead);
+              if (rNewAnchor) {
+                rNewAnchor = clipCursorToContent(cm, rNewAnchor);
+              }
+              rNewAnchor = rNewAnchor || savedOldAnchor;
+              savedSel.anchor = rNewAnchor;
+              savedSel.head = rNewHead;
+              updateCmSelection(cm);
+              updateMark(cm, savedVim, '<',
+                  cursorIsBefore(rNewAnchor, rNewHead) ? rNewAnchor : rNewHead);
+              updateMark(cm, savedVim, '>',
+                  cursorIsBefore(rNewAnchor, rNewHead) ? rNewHead : rNewAnchor);
             } else {
               rNewHead = clipCursorToContent(cm, rNewHead, savedOldHead);
               cm.setCursor(rNewHead.line, rNewHead.ch);
