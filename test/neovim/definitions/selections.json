@@ -77,7 +77,7 @@
       "ch": 3
     },
     "keys": "vi{",
-    "expectedSelection": "\n\tbar\n\t"
+    "expectedSelection": "\tbar"
   },
   {
     "name": "vim_va{_middle_spc",

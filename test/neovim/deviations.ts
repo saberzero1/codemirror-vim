@@ -43,16 +43,12 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         reason: 'environment',
         fields: ['cursor'],
     },
-    {
-        testPattern: 'vim_di(_outside_should_stay',
-        description: 'di( outside parens cursor differs',
-        reason: 'fixable',
-        fields: ['cursor'],
-    },
+
+
     {
         testPattern: /^vim_di[\[{\}\]<>]_middle_spc$/,
-        description: 'Multiline inner brace/bracket collapses newlines',
-        reason: 'fixable',
+        description: 'Duplicate test names cause golden comparison to match wrong entry',
+        reason: 'environment',
         fields: ['content'],
     },
     {
@@ -255,8 +251,8 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
     },
     {
         testPattern: /^vim_\/_nongreedy$/,
-        description: 'Non-greedy search cursor differs from Neovim',
-        reason: 'fixable',
+        description: 'Multi-step test with setCursor between n presses (extraction artifact)',
+        reason: 'environment',
         fields: ['cursor'],
     },
     {
@@ -481,12 +477,7 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         reason: 'codemirror-limitation',
         fields: ['content', 'cursor'],
     },
-    {
-        testPattern: /^vim_jumplist_N$/,
-        description: 'Jump list N position differs',
-        reason: 'fixable',
-        fields: ['cursor'],
-    },
+
     {
         testPattern: /^vim_e_start_to_end$/,
         description: 'e motion at document start differs (extraction context issue)',

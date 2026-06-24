@@ -567,7 +567,7 @@
       "ch": 3
     },
     "keys": "di{",
-    "expectedContent": "a{}b"
+    "expectedContent": "a{\n}b"
   },
   {
     "name": "vim_di}_middle_spc",
@@ -577,7 +577,7 @@
       "ch": 3
     },
     "keys": "di}",
-    "expectedContent": "a{}b"
+    "expectedContent": "a{\n}b"
   },
   {
     "name": "vim_da{_middle_spc",
@@ -617,7 +617,7 @@
       "ch": 3
     },
     "keys": "di{",
-    "expectedContent": "a{}b"
+    "expectedContent": "a{\n\t}b"
   },
   {
     "name": "vim_di}_middle_spc",
@@ -627,7 +627,7 @@
       "ch": 3
     },
     "keys": "di}",
-    "expectedContent": "a{}b"
+    "expectedContent": "a{\n\t}b"
   },
   {
     "name": "vim_da{_middle_spc",
@@ -657,7 +657,7 @@
       "ch": 3
     },
     "keys": "di[",
-    "expectedContent": "a\t[]b"
+    "expectedContent": "a\t[\n]b"
   },
   {
     "name": "vim_di]_middle_spc",
@@ -667,7 +667,7 @@
       "ch": 3
     },
     "keys": "di]",
-    "expectedContent": "a\t[]b"
+    "expectedContent": "a\t[\n]b"
   },
   {
     "name": "vim_da[_middle_spc",
@@ -697,7 +697,7 @@
       "ch": 3
     },
     "keys": "di<",
-    "expectedContent": "a\t<>b"
+    "expectedContent": "a\t<\n>b"
   },
   {
     "name": "vim_di>_middle_spc",
@@ -707,7 +707,7 @@
       "ch": 3
     },
     "keys": "di>",
-    "expectedContent": "a\t<>b"
+    "expectedContent": "a\t<\n>b"
   },
   {
     "name": "vim_da<_middle_spc",
