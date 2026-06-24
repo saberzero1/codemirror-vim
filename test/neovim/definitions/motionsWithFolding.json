@@ -1,0 +1,28 @@
+[
+  {
+    "name": "vim_j_with_folding",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 7,
+      "ch": 3
+    },
+    "keys": "j",
+    "expectedCursor": {
+      "line": 11,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_k_with_folding",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 11,
+      "ch": 0
+    },
+    "keys": "k",
+    "expectedCursor": {
+      "line": 7,
+      "ch": 0
+    }
+  }
+]

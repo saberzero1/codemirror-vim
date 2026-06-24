@@ -1,0 +1,802 @@
+[
+  {
+    "name": "vim_diw_mid_spc",
+    "content": "foo \tbAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "diw",
+    "expectedContent": "foo \t\t baz"
+  },
+  {
+    "name": "vim_daw_mid_spc",
+    "content": "foo \tbAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "daw",
+    "expectedContent": "foo \tbaz"
+  },
+  {
+    "name": "vim_diw_mid_punct",
+    "content": "foo \tbAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "diw",
+    "expectedContent": "foo \t.\t baz"
+  },
+  {
+    "name": "vim_daw_mid_punct",
+    "content": "foo \tbAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "daw",
+    "expectedContent": "foo.\t baz"
+  },
+  {
+    "name": "vim_diw_mid_punct2",
+    "content": "foo \t,bAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 7
+    },
+    "keys": "diw",
+    "expectedContent": "foo \t,.\t baz"
+  },
+  {
+    "name": "vim_daw_mid_punct2",
+    "content": "foo \t,bAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 7
+    },
+    "keys": "daw",
+    "expectedContent": "foo \t,.\t baz"
+  },
+  {
+    "name": "vim_diw_start_spc",
+    "content": "bAr \tbaz",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "diw",
+    "expectedContent": " \tbaz"
+  },
+  {
+    "name": "vim_daw_start_spc",
+    "content": "bAr \tbaz",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "daw",
+    "expectedContent": "baz"
+  },
+  {
+    "name": "vim_diw_start_punct",
+    "content": "bAr. \tbaz",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "diw",
+    "expectedContent": ". \tbaz"
+  },
+  {
+    "name": "vim_daw_start_punct",
+    "content": "bAr. \tbaz",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "daw",
+    "expectedContent": ". \tbaz"
+  },
+  {
+    "name": "vim_diw_end_spc",
+    "content": "foo \tbAr",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "diw",
+    "expectedContent": "foo \t"
+  },
+  {
+    "name": "vim_daw_end_spc",
+    "content": "foo \tbAr",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "daw",
+    "expectedContent": "foo"
+  },
+  {
+    "name": "vim_diw_end_punct",
+    "content": "foo \tbAr.",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "diw",
+    "expectedContent": "foo \t."
+  },
+  {
+    "name": "vim_daw_end_punct",
+    "content": "foo \tbAr.",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "daw",
+    "expectedContent": "foo."
+  },
+  {
+    "name": "vim_diw_space_word1",
+    "content": "foo \t\n\tbar.",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "diw",
+    "expectedContent": "foo\n\tbar."
+  },
+  {
+    "name": "vim_diw_space_word2",
+    "content": "foo +bar.",
+    "cursor": {
+      "line": 0,
+      "ch": 3
+    },
+    "keys": "diw",
+    "expectedContent": "foo+bar."
+  },
+  {
+    "name": "vim_diw_space_word3",
+    "content": " foo bar.",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "diw",
+    "expectedContent": "foo bar."
+  },
+  {
+    "name": "vim_diW_mid_spc",
+    "content": "foo \tbAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "diW",
+    "expectedContent": "foo \t\t baz"
+  },
+  {
+    "name": "vim_daW_mid_spc",
+    "content": "foo \tbAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "daW",
+    "expectedContent": "foo \tbaz"
+  },
+  {
+    "name": "vim_diW_mid_punct",
+    "content": "foo \tbAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "diW",
+    "expectedContent": "foo \t\t baz"
+  },
+  {
+    "name": "vim_daW_mid_punct",
+    "content": "foo \tbAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "daW",
+    "expectedContent": "foo \tbaz"
+  },
+  {
+    "name": "vim_diW_mid_punct2",
+    "content": "foo \t,bAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 7
+    },
+    "keys": "diW",
+    "expectedContent": "foo \t\t baz"
+  },
+  {
+    "name": "vim_daW_mid_punct2",
+    "content": "foo \t,bAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 7
+    },
+    "keys": "daW",
+    "expectedContent": "foo \tbaz"
+  },
+  {
+    "name": "vim_diW_start_spc",
+    "content": "bAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "diW",
+    "expectedContent": "\t baz"
+  },
+  {
+    "name": "vim_daW_start_spc",
+    "content": "bAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "daW",
+    "expectedContent": "baz"
+  },
+  {
+    "name": "vim_diW_start_punct",
+    "content": "bAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "diW",
+    "expectedContent": "\t baz"
+  },
+  {
+    "name": "vim_daW_start_punct",
+    "content": "bAr.\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "daW",
+    "expectedContent": "baz"
+  },
+  {
+    "name": "vim_diW_end_spc",
+    "content": "foo \tbAr",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "diW",
+    "expectedContent": "foo \t"
+  },
+  {
+    "name": "vim_daW_end_spc",
+    "content": "foo \tbAr",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "daW",
+    "expectedContent": "foo"
+  },
+  {
+    "name": "vim_diW_end_punct",
+    "content": "foo \tbAr.",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "diW",
+    "expectedContent": "foo \t"
+  },
+  {
+    "name": "vim_daW_end_punct",
+    "content": "foo \tbAr.",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "daW",
+    "expectedContent": "foo"
+  },
+  {
+    "name": "vim_diW_space_word2",
+    "content": "foo +bar.",
+    "cursor": {
+      "line": 0,
+      "ch": 3
+    },
+    "keys": "diW",
+    "expectedContent": "foo+bar."
+  },
+  {
+    "name": "vim_di(_open_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "di(",
+    "expectedContent": "foo () baz"
+  },
+  {
+    "name": "vim_di)_open_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "di)",
+    "expectedContent": "foo () baz"
+  },
+  {
+    "name": "vim_dib_open_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "dib",
+    "expectedContent": "foo () baz"
+  },
+  {
+    "name": "vim_da(_open_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "da(",
+    "expectedContent": "foo  baz"
+  },
+  {
+    "name": "vim_da)_open_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "da)",
+    "expectedContent": "foo  baz"
+  },
+  {
+    "name": "vim_di(_middle_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "di(",
+    "expectedContent": "foo () baz"
+  },
+  {
+    "name": "vim_di)_middle_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "di)",
+    "expectedContent": "foo () baz"
+  },
+  {
+    "name": "vim_da(_middle_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "da(",
+    "expectedContent": "foo  baz"
+  },
+  {
+    "name": "vim_da)_middle_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "da)",
+    "expectedContent": "foo  baz"
+  },
+  {
+    "name": "vim_di(_close_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "di(",
+    "expectedContent": "foo () baz"
+  },
+  {
+    "name": "vim_di)_close_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "di)",
+    "expectedContent": "foo () baz"
+  },
+  {
+    "name": "vim_da(_close_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "da(",
+    "expectedContent": "foo  baz"
+  },
+  {
+    "name": "vim_da)_close_spc",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "da)",
+    "expectedContent": "foo  baz"
+  },
+  {
+    "name": "vim_di`",
+    "content": "foo `bAr` baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "di`",
+    "expectedContent": "foo `` baz"
+  },
+  {
+    "name": "vim_di>",
+    "content": "foo <bAr> baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "di>",
+    "expectedContent": "foo <> baz"
+  },
+  {
+    "name": "vim_da<",
+    "content": "foo <bAr> baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "da<",
+    "expectedContent": "foo  baz"
+  },
+  {
+    "name": "vim_dab_on_(_should_delete_around_()block",
+    "content": "o( in(abc) )",
+    "cursor": {
+      "line": 0,
+      "ch": 5
+    },
+    "keys": "dab",
+    "expectedContent": "o( in )"
+  },
+  {
+    "name": "vim_daB_on_{_should_delete_around_{}block",
+    "content": "o{ in{abc} }",
+    "cursor": {
+      "line": 0,
+      "ch": 5
+    },
+    "keys": "daB",
+    "expectedContent": "o{ in }"
+  },
+  {
+    "name": "vim_diB_on_{_should_delete_inner_{}block",
+    "content": "o{ in{abc} }",
+    "cursor": {
+      "line": 0,
+      "ch": 5
+    },
+    "keys": "diB",
+    "expectedContent": "o{ in{} }"
+  },
+  {
+    "name": "vim_da{_on_{_should_delete_inner_block",
+    "content": "o{ in{abc} }",
+    "cursor": {
+      "line": 0,
+      "ch": 5
+    },
+    "keys": "da{",
+    "expectedContent": "o{ in }"
+  },
+  {
+    "name": "vim_di[_on_(_should_not_delete",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "di[",
+    "expectedContent": "foo (bAr) baz"
+  },
+  {
+    "name": "vim_di[_on_)_should_not_delete",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "di[",
+    "expectedContent": "foo (bAr) baz"
+  },
+  {
+    "name": "vim_da[_on_(_should_not_delete",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "da[",
+    "expectedContent": "foo (bAr) baz"
+  },
+  {
+    "name": "vim_da[_on_)_should_not_delete",
+    "content": "foo (bAr) baz",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "da[",
+    "expectedContent": "foo (bAr) baz"
+  },
+  {
+    "name": "vim_di{_middle_spc",
+    "content": "a{\n\tbar\n}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "di{",
+    "expectedContent": "a{}b"
+  },
+  {
+    "name": "vim_di}_middle_spc",
+    "content": "a{\n\tbar\n}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "di}",
+    "expectedContent": "a{}b"
+  },
+  {
+    "name": "vim_da{_middle_spc",
+    "content": "a{\n\tbar\n}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "da{",
+    "expectedContent": "ab"
+  },
+  {
+    "name": "vim_da}_middle_spc",
+    "content": "a{\n\tbar\n}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "da}",
+    "expectedContent": "ab"
+  },
+  {
+    "name": "vim_daB_middle_spc",
+    "content": "a{\n\tbar\n}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "daB",
+    "expectedContent": "ab"
+  },
+  {
+    "name": "vim_di{_middle_spc",
+    "content": "a{\n\tbar\n\t}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "di{",
+    "expectedContent": "a{}b"
+  },
+  {
+    "name": "vim_di}_middle_spc",
+    "content": "a{\n\tbar\n\t}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "di}",
+    "expectedContent": "a{}b"
+  },
+  {
+    "name": "vim_da{_middle_spc",
+    "content": "a{\n\tbar\n\t}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "da{",
+    "expectedContent": "ab"
+  },
+  {
+    "name": "vim_da}_middle_spc",
+    "content": "a{\n\tbar\n\t}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "da}",
+    "expectedContent": "ab"
+  },
+  {
+    "name": "vim_di[_middle_spc",
+    "content": "a\t[\n\tbar\n]b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "di[",
+    "expectedContent": "a\t[]b"
+  },
+  {
+    "name": "vim_di]_middle_spc",
+    "content": "a\t[\n\tbar\n]b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "di]",
+    "expectedContent": "a\t[]b"
+  },
+  {
+    "name": "vim_da[_middle_spc",
+    "content": "a\t[\n\tbar\n]b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "da[",
+    "expectedContent": "a\tb"
+  },
+  {
+    "name": "vim_da]_middle_spc",
+    "content": "a\t[\n\tbar\n]b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "da]",
+    "expectedContent": "a\tb"
+  },
+  {
+    "name": "vim_di<_middle_spc",
+    "content": "a\t<\n\tbar\n>b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "di<",
+    "expectedContent": "a\t<>b"
+  },
+  {
+    "name": "vim_di>_middle_spc",
+    "content": "a\t<\n\tbar\n>b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "di>",
+    "expectedContent": "a\t<>b"
+  },
+  {
+    "name": "vim_da<_middle_spc",
+    "content": "a\t<\n\tbar\n>b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "da<",
+    "expectedContent": "a\tb"
+  },
+  {
+    "name": "vim_da>_middle_spc",
+    "content": "a\t<\n\tbar\n>b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "da>",
+    "expectedContent": "a\tb"
+  },
+  {
+    "name": "vim_dat_noop",
+    "content": "<outer><inner>hello</inner></outer>",
+    "cursor": {
+      "line": 0,
+      "ch": 9
+    },
+    "keys": "dat",
+    "expectedContent": "<outer><inner>hello</inner></outer>"
+  },
+  {
+    "name": "vim_dat_open_tag",
+    "content": "<outer><inner>hello</inner></outer>",
+    "cursor": {
+      "line": 0,
+      "ch": 9
+    },
+    "keys": "dat",
+    "expectedContent": "<outer></outer>"
+  },
+  {
+    "name": "vim_dat_inside_tag",
+    "content": "<outer><inner>hello</inner></outer>",
+    "cursor": {
+      "line": 0,
+      "ch": 16
+    },
+    "keys": "dat",
+    "expectedContent": "<outer></outer>"
+  },
+  {
+    "name": "vim_dat_close_tag",
+    "content": "<outer><inner>hello</inner></outer>",
+    "cursor": {
+      "line": 0,
+      "ch": 20
+    },
+    "keys": "dat",
+    "expectedContent": "<outer></outer>"
+  },
+  {
+    "name": "vim_dit_open_tag",
+    "content": "<outer><inner>hello</inner></outer>",
+    "cursor": {
+      "line": 0,
+      "ch": 9
+    },
+    "keys": "dit",
+    "expectedContent": "<outer><inner></inner></outer>"
+  },
+  {
+    "name": "vim_dit_inside_tag",
+    "content": "<outer><inner>hello</inner></outer>",
+    "cursor": {
+      "line": 0,
+      "ch": 16
+    },
+    "keys": "dit",
+    "expectedContent": "<outer><inner></inner></outer>"
+  },
+  {
+    "name": "vim_dit_close_tag",
+    "content": "<outer><inner>hello</inner></outer>",
+    "cursor": {
+      "line": 0,
+      "ch": 20
+    },
+    "keys": "dit",
+    "expectedContent": "<outer><inner></inner></outer>"
+  }
+]

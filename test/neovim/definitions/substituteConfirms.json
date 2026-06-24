@@ -1,0 +1,198 @@
+[
+  {
+    "name": "vim_ex_substitute_confirm_emptydoc",
+    "content": "",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":%s/x/b/c\n",
+    "expectedContent": "",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_nomatch",
+    "content": "ba a\nbab",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":%s/x/b/c\n",
+    "expectedContent": "ba a\nbab",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_accept",
+    "content": "ba a\nbab",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":%s/a/b/cg\nyyy",
+    "expectedContent": "bb b\nbbb",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_random_keys",
+    "content": "ba a\nbab",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":%s/a/b/cg\nysdkywerty",
+    "expectedContent": "bb b\nbbb",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_some",
+    "content": "ba a\nbab",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":%s/a/b/cg\nyny",
+    "expectedContent": "bb a\nbbb",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_all",
+    "content": "ba a\nbab",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":%s/a/b/cg\na",
+    "expectedContent": "bb b\nbbb",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_accept_then_all",
+    "content": "ba a\nbab",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":%s/a/b/cg\nya",
+    "expectedContent": "bb b\nbbb",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_quit",
+    "content": "ba a\nbab",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":%s/a/b/cg\nyq",
+    "expectedContent": "bb a\nbab",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_last",
+    "content": "ba a\nbab",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":%s/a/b/cg\nyl",
+    "expectedContent": "bb b\nbab",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_oneline",
+    "content": "ba a\nbab",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":1s/a/b/cg\nyl",
+    "expectedContent": "bb b\nbab",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_range_accept",
+    "content": "aa\na \na\na",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":1,2s/a/b/cg\nyyy",
+    "expectedContent": "bb\nb \na\na",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_range_some",
+    "content": "aa\na \na\na",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":1,3s/a/b/cg\nynyy",
+    "expectedContent": "ba\nb \nb\na",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_range_all",
+    "content": "aa\na \na\na",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":1,3s/a/b/cg\na",
+    "expectedContent": "bb\nb \nb\na",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_confirm_range_last",
+    "content": "aa\na \na\na",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": ":1,3s/a/b/cg\nyyl",
+    "expectedContent": "bb\nb \na\na",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 0
+    }
+  }
+]

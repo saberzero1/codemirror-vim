@@ -1,0 +1,6064 @@
+[
+  {
+    "name": "vim_qq@q",
+    "content": "            ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qqllq@q",
+    "expectedContent": "            ",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_@@",
+    "content": "            ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qqllq@q@@",
+    "expectedContent": "            ",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_jumplist_'",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mah'ah<C-i>",
+    "expectedContent": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_%_seek_skip",
+    "content": "01234\"(\"()",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "%",
+    "expectedContent": "01234\"(\"()",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_%_skip_string",
+    "content": "(\")\")",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "%%",
+    "expectedContent": "(\")\")",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_%_skip_comment",
+    "content": "(/*)*/)",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "%%",
+    "expectedContent": "(/*)*/)",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_Changing lines after Eol operation",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "$jjhjjj",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 17,
+      "line": 5
+    }
+  },
+  {
+    "name": "vim_gj_gk_clipping",
+    "content": "line 1\n\nline 2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "gjgjgjgkgk9gj",
+    "expectedContent": "line 1\n\nline 2",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_j_k_and_gj_gk",
+    "content": "This line is intentionally long. It tests movements of gj and gk over wrapped lines. Starts on the end of this line, then makes a step up and back to set the origin for j and k.\nThis line is supposed to be even longer than the previous. I will jump here and make another wiggle with gj and gk, before I jump back to the line above. Both wiggles should not change my cursor's target character but both j/k and gj/gk change each other's reference position.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "$gkgjj3gkgj2gjk",
+    "expectedContent": "This line is intentionally long. It tests movements of gj and gk over wrapped lines. Starts on the end of this line, then makes a step up and back to set the origin for j and k.\nThis line is supposed to be even longer than the previous. I will jump here and make another wiggle with gj and gk, before I jump back to the line above. Both wiggles should not change my cursor's target character but both j/k and gj/gk change each other's reference position.",
+    "expectedCursor": {
+      "ch": 176,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_gj_gk",
+    "content": "Thislineisintentionallylongtotestmovementofgjandgkoverwrappedlines.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "gj10gkgjgjh100gj",
+    "expectedContent": "Thislineisintentionallylongtotestmovementofgjandgkoverwrappedlines.",
+    "expectedCursor": {
+      "ch": 60,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_g0_g$",
+    "content": "This line is long to test movement of g$ and g0 over wrapped lines.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "gDowng0g$$g0dg$",
+    "expectedContent": "This line is long to test movement of g$ and g0 over wrapped ",
+    "expectedCursor": {
+      "ch": 60,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_}",
+    "content": "a\n\nb\nc\n\nd",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "}2}6}",
+    "expectedContent": "a\n\nb\nc\n\nd",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 5
+    }
+  },
+  {
+    "name": "vim_{",
+    "content": "a\n\nb\nc\n\nd",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "{2{6{",
+    "expectedContent": "a\n\nb\nc\n\nd",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_(",
+    "content": "sentence1.\n\n\nsentence2\n\nsentence3. sentence4\n   sentence5? sentence6!",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "(2((((((",
+    "expectedContent": "sentence1.\n\n\nsentence2\n\nsentence3. sentence4\n   sentence5? sentence6!",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_)",
+    "content": "sentence1.\n\n\nsentence2\n\nsentence3. sentence4\n   sentence5? sentence6!",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2)))))))",
+    "expectedContent": "sentence1.\n\n\nsentence2\n\nsentence3. sentence4\n   sentence5? sentence6!",
+    "expectedCursor": {
+      "ch": 23,
+      "line": 6
+    }
+  },
+  {
+    "name": "vim_paragraph_motions",
+    "content": "a\na\n\n\n\nb\nc\n\n\n\n\n\n\nd\n\ne\nf",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "{{2}2}}}vipip2ip<Esc>vip<Esc>Vip<Esc>vapapvapvapvapdip3jpyip",
+    "expectedContent": "\n\n\nb\na\na\nc\n\n\n\n\n\n\nd\n\ne\nf",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 4
+    }
+  },
+  {
+    "name": "vim_sentence_selections",
+    "content": "Test sentence. Test question?\nAgain.Never. Again.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "visvasvisvasvisvasvisdisudasucas<Esc>uyasyas",
+    "expectedContent": "Test sentence. Test question?\nAgain.Never. Again.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+    "expectedCursor": {
+      "ch": 31,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_w_text_object_repeat",
+    "content": " w1  ++  w_2   \n w3   xx \n\nw4\nword5\nword6",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "v3aw<Esc>vaw2awawc3aw",
+    "expectedContent": "  w0 word4",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dl",
+    "content": " word1 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dl",
+    "expectedContent": "word1 ",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dl_eol",
+    "content": " word1 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dl",
+    "expectedContent": " word1",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dl_repeat",
+    "content": " word1 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2dl",
+    "expectedContent": "ord1 ",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dh",
+    "content": " word1 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dh",
+    "expectedContent": " wrd1 ",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dj",
+    "content": " word1\nword2\n word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dj",
+    "expectedContent": " word3",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dj_end_of_document",
+    "content": " word1 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dj",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dk",
+    "content": " word1\nword2\n word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dk",
+    "expectedContent": " word3",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dk_start_of_document",
+    "content": " word1 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dk",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_space",
+    "content": " word1 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": "word1 ",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_word",
+    "content": " word1 word2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": " word2",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_unicode_word",
+    "content": "  բարև»eµg  ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dwdwdwde",
+    "expectedContent": "  ",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_only_word",
+    "content": " word1 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": " ",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_eol",
+    "content": " word1\nword2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": " \nword2",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_eol_with_multiple_newlines",
+    "content": " word1\n\nword2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": " \n\nword2",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_empty_line_followed_by_whitespace",
+    "content": "\n  \nword",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": "  \nword",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_empty_line_followed_by_word",
+    "content": "\nword",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": "word",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_empty_line_followed_by_empty_line",
+    "content": "\n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": "\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_whitespace_followed_by_whitespace",
+    "content": "  \n   \n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": "\n   \n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_whitespace_followed_by_empty_line",
+    "content": "  \n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": "\n\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_word_whitespace_word",
+    "content": "word1\n   \nword2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": "\n   \nword2",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dw_end_of_document",
+    "content": "\nabc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dw",
+    "expectedContent": "\nab",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_dw_repeat",
+    "content": " word1\nword2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "d2w",
+    "expectedContent": " ",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_de_word_start_and_empty_lines",
+    "content": "word\n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "de",
+    "expectedContent": "\n\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_de_word_end_and_empty_lines",
+    "content": "word\n\n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "de",
+    "expectedContent": "wor",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_de_whitespace_and_empty_lines",
+    "content": "   \n\n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "de",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_de_end_of_document",
+    "content": "\nabc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "de",
+    "expectedContent": "\nab",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_db_empty_lines",
+    "content": "\n\n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "db",
+    "expectedContent": "\n\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_db_word_start_and_empty_lines",
+    "content": "\n\nword",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "db",
+    "expectedContent": "\nword",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_db_word_end_and_empty_lines",
+    "content": "\n\nword",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "db",
+    "expectedContent": "\n\nd",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_db_whitespace_and_empty_lines",
+    "content": "\n   \n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "db",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_db_start_of_document",
+    "content": "abc\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "db",
+    "expectedContent": "abc\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dge_empty_lines",
+    "content": "\n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dge",
+    "expectedContent": "\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dge_word_and_empty_lines",
+    "content": "word\n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dge",
+    "expectedContent": "wor\n",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dge_whitespace_and_empty_lines",
+    "content": "\n  \n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dge",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dge_start_of_document",
+    "content": "abc\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dge",
+    "expectedContent": "bc\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_d_inclusive",
+    "content": " word1 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "de",
+    "expectedContent": "  ",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_d_reverse",
+    "content": " word1\nword2 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "db",
+    "expectedContent": " word2 ",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dd",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dd",
+    "expectedContent": " word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dd_prefix_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2dd",
+    "expectedContent": "aopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dd_motion_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "d2d",
+    "expectedContent": "aopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dd_multiply_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2d3d",
+    "expectedContent": "  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dd_lastline",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dd",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 14
+    }
+  },
+  {
+    "name": "vim_dd_only_line",
+    "content": "thisistheonlyline",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dd",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cG",
+    "content": "line1\nline2\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "cGinserted<Esc>cGinserted",
+    "expectedContent": "    inserted",
+    "expectedCursor": {
+      "ch": 12,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yw_repeat",
+    "content": " word1\nword2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "y2w",
+    "expectedContent": " word1\nword2",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yy_multiply_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2y3y",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_2dd_blank_P",
+    "content": "\na\n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2ddP",
+    "expectedContent": "\na\n\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cw",
+    "content": "word1 word2 word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "c2w",
+    "expectedContent": " word3",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cw_repeat",
+    "content": " word1\nword2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "c2w",
+    "expectedContent": " ",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cc_multiply_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2c3c",
+    "expectedContent": " \n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ct",
+    "content": "  word1  word2  word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ctw<Esc>c|<Esc>2uwhc2ge",
+    "expectedContent": "  wordword3",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cc_should_not_append_to_document",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "cc",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 15
+    }
+  },
+  {
+    "name": "vim_c_visual_block",
+    "content": "1234\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jlllchello<Esc><C-v>2khCworld",
+    "expectedContent": "1hworld\n5hworld\nahworld",
+    "expectedCursor": {
+      "ch": 7,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_c_visual_block_replay",
+    "content": "1234\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jlcfo<Esc>.",
+    "expectedContent": "foo4\nfoo8\nfoodefg",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_I_visual_block_replay",
+    "content": "1234\n5678\nabcdefg\nxyz",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jlI+-<Esc>gv<C-v>1j2lgv.",
+    "expectedContent": "12+-34\n5+-6+-78\na+-b+-cdefg\nx+-yz",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_visual_block_backwards",
+    "content": "01234 line 1\n56789 line 2\nabcdefg line 3\nline 4",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "3l<C-v>2j2<Left>AA<Esc>gvxgv",
+    "expectedContent": "0A4 line 1\n5A9 line 2\naAefg line 3\nline 4",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_d_visual_block",
+    "content": "1234\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jllld",
+    "expectedContent": "1\n5\nafg",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_D_visual_block",
+    "content": "1234\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jlD",
+    "expectedContent": "1\n5\na",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_s_visual_block",
+    "content": "1234\n5678\nabcdefg\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jlllshello{<Esc><C-v>1khSworld",
+    "expectedContent": "1hello{\n  world\n",
+    "expectedCursor": {
+      "ch": 7,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_gcc",
+    "content": "var line1\nline2\nline3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "gcc2gcc",
+    "expectedContent": "// // var line1\n// line2\nline3",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_on_mode_change",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<Esc><Esc>vc<Esc><C-v>I<Esc>Rx<C-[>vV<C-v>v<C-c>a<Esc>v:y\n:startinsert\n",
+    "expectedContent": "xOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_g~w_repeat",
+    "content": " word1\nword2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "g~2w",
+    "expectedContent": " WORD1\nWORD2",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_g~g~",
+    "content": " word1\nword2\nword3\nword4\nword5\nword6",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2g~3g~",
+    "expectedContent": " WORD1\nWORD2\nWORD3\nWORD4\nWORD5\nWORD6",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_gu_and_gU",
+    "content": "wa wb xx wc wd",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2gUw2guw2gUBguiwgUgUguugU2U",
+    "expectedContent": "ABC EFG\nXYZ",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_g?",
+    "content": "wa wb xx wc wd",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2g?w2g?w2g?Bg?iwg?g?g??g?2?l<C-v>ljg?",
+    "expectedContent": "hrylo\nwbeld",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_block_~",
+    "content": "hello\nwOrld\nabcde",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>llj~vll~",
+    "expectedContent": "hello\nwoRLd\nAbcDe",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_._swapCase_visualBlock",
+    "content": "hEllo\nwOrlD\naBcDe",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>jjl~.",
+    "expectedContent": "HelLO\nWorLd\nAbcdE",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._delete_visualBlock",
+    "content": "give\nme\nsome\nsugar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>jx.jj.u<C-r>.",
+    "expectedContent": "ve\n\nme\ngar",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_>{motion}",
+    "content": " word1\nword2\nword3 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ">k",
+    "expectedContent": "   word1\n  word2\nword3 ",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_>>",
+    "content": " word1\nword2\nword3 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2>>",
+    "expectedContent": "   word1\n  word2\nword3 ",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_<{motion}",
+    "content": "   word1\n  word2\nword3 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<k",
+    "expectedContent": " word1\nword2\nword3 ",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_<<",
+    "content": "   word1\n  word2\nword3 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2<<",
+    "expectedContent": " word1\nword2\nword3 ",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_=",
+    "content": "   word1\n  word2\n  word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>jj=",
+    "expectedContent": "word1\nword2\nword3",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_><visualblock",
+    "content": "  word1\n  word2\n  word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>jj4>gv14<",
+    "expectedContent": "  word1\n  word2\n  word3",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ci\" for two strings",
+    "content": "   \"string1\":  \"string2\";",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ci\"<Esc>uf\"<Right>ci\"<Esc>uf\"ci\"",
+    "expectedContent": "   \"string1\":  \"\";",
+    "expectedCursor": {
+      "ch": 16,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_mouse_select",
+    "content": "abcdef",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<Esc>gv",
+    "expectedContent": "abcdef",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_D",
+    "content": " word1\nword2\n word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "D",
+    "expectedContent": " wo\nword2\n word3",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_C",
+    "content": " word1\nword2\n word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "C",
+    "expectedContent": " wo\nword2\n word3",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_Y",
+    "content": " word1\nword2\n word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "Y",
+    "expectedContent": " word1\nword2\n word3",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_Yy_blockwise",
+    "content": "123456\n123456\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>j2lYGpgg<C-v>j2ly$p$jp$jP",
+    "expectedContent": "123456123\n123456123123\n123456   121233\n123456     123",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_~",
+    "content": "abcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "3~",
+    "expectedContent": "ABCdefg",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ctrl-a",
+    "content": "-10",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-a>2<C-a>",
+    "expectedContent": "-7",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ctrl-x",
+    "content": "0",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-x>2<C-x>",
+    "expectedContent": "-3",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_<C-x>/<C-a> search forward",
+    "content": "__jmp1 jmp2 jmp",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-x>l<C-x><C-x><C-a>l<C-a><C-a>",
+    "expectedContent": "__jmp1 jmp2 jmp",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_insert_ctrl_o",
+    "content": "one two three here",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i<C-o>3w",
+    "expectedContent": "one two three here",
+    "expectedCursor": {
+      "ch": 14,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_insert_ctrl_u",
+    "content": "word1/word2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "a<C-u>",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_insert_ctrl_w",
+    "content": "word1/word2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "a<C-w>",
+    "expectedContent": "word1/",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_normal_ctrl_w",
+    "content": "word",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-w>",
+    "expectedContent": "word",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_a",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "a",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_a_eol",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "a",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 10,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_a with surrogate characters",
+    "content": "😀",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "atest<Esc>",
+    "expectedContent": "😀test",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_A_endOfSelectedArea",
+    "content": "foo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vjlA",
+    "expectedContent": "foo\nbar",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_i",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_i with surrogate characters",
+    "content": "😀",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "itest<Esc>",
+    "expectedContent": "test😀",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_i_repeat",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "3itest<Esc>",
+    "expectedContent": "testtesttest",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_i_repeat_delete",
+    "content": "abcde",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2iz<BS><BS><Esc>",
+    "expectedContent": "abe",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_insert",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i<Ins><Ins>",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_i_backspace",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i<BS>",
+    "expectedContent": "012345678",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_i_overwrite_backspace",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i<Ins><BS>",
+    "expectedContent": "0123456789",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_i_forward_delete",
+    "content": "A1234\nBCD",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i<Del><Del><Del>",
+    "expectedContent": "A12BCD",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_forward_delete",
+    "content": "A1234\nBCD",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<Del><Del><Del>",
+    "expectedContent": "A1\nBCD",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_A",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "A",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 10,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_A_visual_block",
+    "content": "test\nme\nplease",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jllAhello<Esc>.",
+    "expectedContent": "hellotesthello\nhellomehello\nhellopleahellose",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_I",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "I",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_I_repeat",
+    "content": "blah",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "3Itest<Esc>",
+    "expectedContent": "testtesttestblah",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_I_visual_block",
+    "content": "test\nme\nplease",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jllIhello",
+    "expectedContent": "hellotest\nhellome\nhelloplease",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_o",
+    "content": "word1\nword2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "o",
+    "expectedContent": "word1\n\nword2",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_o_repeat",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "3otest<Esc>",
+    "expectedContent": "\ntest\ntest\ntest",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_O",
+    "content": "word1\nword2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "O",
+    "expectedContent": "\nword1\nword2",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_J",
+    "content": "word1 \n    word2\nword3\n word4",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "J",
+    "expectedContent": "word1  word2\nword3\n word4",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_J_repeat",
+    "content": "word1 \n    word2\nword3\n word4",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "3J",
+    "expectedContent": "word1  word2 word3\n word4",
+    "expectedCursor": {
+      "ch": 12,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_gJ",
+    "content": "word1\nword2 \n word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "gJgJ",
+    "expectedContent": "word1word2  word3",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_gi",
+    "content": "12\n  xxxx",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "gIaa<Esc>kgi",
+    "expectedContent": "12\naa  xxxx",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_p",
+    "content": "___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "pyepu",
+    "expectedContent": "__abc\ndef_",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_p_register",
+    "content": "___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "\"ap",
+    "expectedContent": "__abc\ndef_",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_p_wrong_register",
+    "content": "___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "p",
+    "expectedContent": "___",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_p_line",
+    "content": "___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2p",
+    "expectedContent": "___\n  a\nd\n  a\nd",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_p_lastline",
+    "content": "___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2p",
+    "expectedContent": "___\n  a\nd\n  a\nd",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_]p_first_indent_is_smaller",
+    "content": "  ___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "]p",
+    "expectedContent": "  ___\n  abc\n    def",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_]p_first_indent_is_larger",
+    "content": "  ___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "]p",
+    "expectedContent": "  ___\n  abc\ndef",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_]p_with_tab_indents",
+    "content": "\t___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "]p",
+    "expectedContent": "\t___\n\tabc\n\t\tdef",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_]p_with_spaces_translated_to_tabs",
+    "content": "\t___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "]p",
+    "expectedContent": "\t___\n\tabc\n\t\tdef",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_[p",
+    "content": "  ___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "[p",
+    "expectedContent": "  abc\n    def\n  ___",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_P",
+    "content": "___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "PyePu",
+    "expectedContent": "_abc\ndef__",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_P_line",
+    "content": "___",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2P",
+    "expectedContent": "  a\nd\n  a\nd\n___",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_r",
+    "content": "wordet\nanother",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "3ruvjhr<Space>r<C-c>r<Del>r<CR>",
+    "expectedContent": "\nx",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_r with surrogate characters",
+    "content": "😀",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ru",
+    "expectedContent": "u",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_r_visual_block",
+    "content": "1234\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>kkhhrl<C-v>ljr<Space>o\t\t<Esc><C-v>hhrr",
+    "expectedContent": "1  l\n5  l\nalllefg\nrrrrrrrr",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_r_visual with surrogate characters",
+    "content": "😀",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vru",
+    "expectedContent": "u",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_r_visual_block with surrogate characters",
+    "content": "😀",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>ru",
+    "expectedContent": "u",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_R",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "R",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_R_visual",
+    "content": "a11\na22\nb33\nc44\nc55",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>jR0<Esc>2j.kvR1<Esc>k.p",
+    "expectedContent": "1\n0\n1\n0",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_mark",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mt`t't",
+    "expectedContent": " wOrd1 (#%\n word3] \n   haopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_mark'",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "`'j3l````/=\n``'''`gI\n<Esc>l````",
+    "expectedContent": " wOrd1 (#%\n\n   word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_mark.",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "Otesting<Esc>'.`.",
+    "expectedContent": "testing\n wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_jumpToMark_next",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mt]`]'",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_jumpToMark_next_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mambmc2]`2]'",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_jumpToMark_next_sameline",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mamb]`",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_jumpToMark_next_onlyprev",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ma]`",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 4
+    }
+  },
+  {
+    "name": "vim_jumpToMark_next_nomark",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "]`]'",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_jumpToMark_next_linewise_over",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mamb]'",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_jumpToMark_next_action",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mtd]`",
+    "expectedContent": "pop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_jumpToMark_next_line_action",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mtd]'",
+    "expectedContent": " (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_jumpToMark_prev",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mt[`['",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_jumpToMark_prev_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mambmc2[`2['",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_jumpToMark_prev_sameline",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mamb[`",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_jumpToMark_prev_onlynext",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ma[`",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_jumpToMark_prev_nomark",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "[`['",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_jumpToMark_prev_linewise_over",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mamb['",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_delmark_single",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mt:delmarks t\n`t",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_delmark_range",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mambmcmdme:delmarks b-d\n`a`b`c`d`e",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 5
+    }
+  },
+  {
+    "name": "vim_delmark_multi",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mambmcmdme:delmarks bcd\n`a`b`c`d`e",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 5
+    }
+  },
+  {
+    "name": "vim_delmark_multi_space",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mambmcmdme:delmarks b c d\n`a`b`c`d`e",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 5
+    }
+  },
+  {
+    "name": "vim_delmark_all",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "mambmcmdme:delmarks a b-de\n`a`b`c`d`e",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual",
+    "content": "12345",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "lvlld",
+    "expectedContent": "15",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_yank",
+    "content": "a test for yank",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "v3lyp",
+    "expectedContent": "aa te test for yank",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_w",
+    "content": "motion test",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vw",
+    "expectedContent": "motion test",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_initial_selection",
+    "content": "init",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "v",
+    "expectedContent": "init",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_crossover_left",
+    "content": "cross",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vlhh",
+    "expectedContent": "cross",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_crossover_left",
+    "content": "cross",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vhll",
+    "expectedContent": "cross",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_crossover_up",
+    "content": "cross\ncross\ncross\ncross\ncross\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vjkkk",
+    "expectedContent": "cross\ncross\ncross\ncross\ncross\n",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_visual_crossover_down",
+    "content": "cross\ncross\ncross\ncross\ncross\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vkjjj",
+    "expectedContent": "cross\ncross\ncross\ncross\ncross\n",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_visual_exit",
+    "content": "hello\nworld\nfoo",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>ljj<Esc>",
+    "expectedContent": "hello\nworld\nfoo",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_visual_line",
+    "content": " 1\n 2\n 3\n 4\n 5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "lVljjd",
+    "expectedContent": " 4\n 5",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_block_move_to_eol",
+    "content": "123\n45\n6",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>G$2kb",
+    "expectedContent": "123\n45\n6",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_block_different_line_lengths",
+    "content": "1234\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>ljj6lddddd",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_block_truncate_on_short_line",
+    "content": "hello world\n{\nthis is\nsparta!",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>lkkd",
+    "expectedContent": "hello world\n{\ntis\nsa!",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_visual_block_corners",
+    "content": "12345\n67891\nabcde",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2lk4hjj4l",
+    "expectedContent": "12345\n67891\nabcde",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_visual_block_mode_switch",
+    "content": "12345\n67891\nabcde",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>jlv<C-v>V",
+    "expectedContent": "12345\n67891\nabcde",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_visual_block_crossing_short_line",
+    "content": "123456\n78\nabcdefg\nfoobar\n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>jjj3k5jk",
+    "expectedContent": "123456\n78\nabcdefg\nfoobar\n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 4
+    }
+  },
+  {
+    "name": "vim_visual_block_curPos_on_exit",
+    "content": "123456\n78\nabcdefg\nfoobar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>3l<Esc>h<C-v>2j3l4h2l",
+    "expectedContent": "123456\n78\nabcdefg\nfoobar",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_visual_marks",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "lvlljjv'<'>",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_visual_join",
+    "content": " 1\n 2\n 3\n 4\n 5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "lVljjJ",
+    "expectedContent": " 1 2 3\n 4\n 5",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_join_2",
+    "content": "1\n2\n3\n4\n5\n6\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "GVggJ",
+    "expectedContent": "1 2 3 4 5 6",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_join_blank",
+    "content": "1 \n\t2\n\t  \n\n5\n 6\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "GVggJuGVgggJuJJJJu",
+    "expectedContent": "1  2\n5\n 6\n",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_visual_blank",
+    "content": "\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vk",
+    "expectedContent": "\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_reselect_visual",
+    "content": "123456\nfoo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "lvlllygvvvllpgvvvllgvgv",
+    "expectedContent": "123456\n2345\nbar",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_reselect_visual_line",
+    "content": "hello\nthis\nis\nfoo\nand\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "lVjjVgvdVyjVpgvd",
+    "expectedContent": "foo\nand",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_reselect_visual_block",
+    "content": "123456\nfoo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>kh<C-v>vlgvgv<Esc>v<C-v>jdgv",
+    "expectedContent": "123456\nfo\nbr",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_s_normal",
+    "content": "abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "s<Esc>",
+    "expectedContent": "ac",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_s_normal surrogate character",
+    "content": "😀",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "stest<Esc>",
+    "expectedContent": "test",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_s_visual",
+    "content": "abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vs<Esc>",
+    "expectedContent": "ac",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_d with surrogate character",
+    "content": "😀",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vd<Esc>",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_o_visual",
+    "content": "abcd\nefgh\nijkl\nmnop",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vlllovvjjjoOlld",
+    "expectedContent": "p",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_o_visual_block",
+    "content": "abcd\nefgh\nijkl\nmnop",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>3jlloOo",
+    "expectedContent": "abcd\nefgh\nijkl\nmnop",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_changeCase_visual",
+    "content": "abcdef\nghijkl\nmnopq\nshort line\nlong line of text",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vllUvllulll.qavjUqj@aVUj.",
+    "expectedContent": "ABCDEF\nGHIJKL\nMnopq\nSHORT LINE\nLONG LINE OF TEXT",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 4
+    }
+  },
+  {
+    "name": "vim_changeCase_visual_block",
+    "content": "abcdef\nghijkl\nmnopq\nfoo",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>kkhU..",
+    "expectedContent": "ABCDef\nGHIJkl\nMNOPq\nfoO",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_visual_paste",
+    "content": "this is a\nunit test for visual paste",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vlly3ljvlpyyvlllp",
+    "expectedContent": "this is a\nunithi\nthis is a\n for visual paste",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_v_paste_from_register",
+    "content": "register contents\nare not erased",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "\"aywvp:registers\n",
+    "expectedContent": "register contents\nregister re not erased",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_S_normal",
+    "content": "aa{\n  bb\ncc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "jS<Esc>jS<Esc>ddddS",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_blockwise_paste",
+    "content": "hello\nworld\nfoo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>3jlypv4ly<C-v>3jp",
+    "expectedContent": "helheelhelo\norwold\noofo\narba",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_blockwise_paste_long/short_line",
+    "content": "hello\nfoo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>jjyp",
+    "expectedContent": "hellho\nfoo f\nbar b",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_blockwise_paste_cut_paste",
+    "content": "cut\nand\npaste\nme",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jxP",
+    "expectedContent": "cut\nand\npaste\nme",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_blockwise_paste_from_register",
+    "content": "foobar\nhello\nworld",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2j\"ay\"ap",
+    "expectedContent": "foobfar\nhellho\nworlwd",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_blockwise_paste_last_line",
+    "content": "cut\nand\npaste\nme",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2jlyp",
+    "expectedContent": "cut\nand\npaste\nmcue\n an\n pa",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_S_visual",
+    "content": "aa\nbb\ncc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vjS<Esc>",
+    "expectedContent": "\ncc",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_d_/",
+    "content": "text match match \n next",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2d/match\nd:2\n",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_/ and n/N",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/match\nnN2/match\n",
+    "expectedContent": "match nope match \n nope Match",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_/ and gn selects the appropriate word",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/match\ngn<Esc>gn<Esc><Esc>gngnd",
+    "expectedContent": "match nope ",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_/ and gN selects the appropriate word",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/match\ngN<Esc>egN<Esc>gNgNd",
+    "expectedContent": " \n nope Match",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_/ and gn with an associated operator",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/match\ncgnchanged<Esc>..",
+    "expectedContent": "changed nope changed \n nope changed",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_/ and gN with an associated operator",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/match\ncgNchanged<Esc>..",
+    "expectedContent": "changed nope changed \n nope changed",
+    "expectedCursor": {
+      "ch": 12,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_/_case",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/Match\n",
+    "expectedContent": "match nope match \n nope Match",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_/_2_pcre",
+    "content": "word\n another wordword\n wordwordword\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/(word){2}\nn",
+    "expectedContent": "word\n another wordword\n wordwordword\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_/_2_nopcre",
+    "content": "word\n another wordword\n wordwordword\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/\\(word\\)\\{2}\nn",
+    "expectedContent": "word\n another wordword\n wordwordword\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_/_nongreedy",
+    "content": "aaa aa \n a aa",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/aa\nnn",
+    "expectedContent": "aaa aa \n a aa",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_?_nongreedy",
+    "content": "aaa aa \n a aa",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "?aa\nnn",
+    "expectedContent": "aaa aa \n a aa",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_/_greedy",
+    "content": "aaa aa \n a aa",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/a+\nnnn",
+    "expectedContent": "aaa aa \n a aa",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_?_greedy",
+    "content": "aaa aa \n a aa",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "?a+\nnnn",
+    "expectedContent": "aaa aa \n a aa",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_/_greedy_0_or_more",
+    "content": "aaa  aa\n aa",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/a*\nnnnnn",
+    "expectedContent": "aaa  aa\n aa",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_?_greedy_0_or_more",
+    "content": "aaa  aa\n aa",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "?a*\nnnnn",
+    "expectedContent": "aaa  aa\n aa",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_? and n/N",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "?match\nnN2?match\n",
+    "expectedContent": "match nope match \n nope Match",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_? and gn selects the appropriate word",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "?match\nngn<Esc>egn<Esc>gngnd",
+    "expectedContent": " \n nope Match",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_? and gN selects the appropriate word",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "?match\nngN<Esc>gN<Esc>gNgNd",
+    "expectedContent": "match nope ",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_? and gn with an associated operator",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "?match\nncgnchanged<Esc>..",
+    "expectedContent": "changed nope changed \n nope changed",
+    "expectedCursor": {
+      "ch": 12,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_? and gN with an associated operator",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "?match\nncgNchanged<Esc>..",
+    "expectedContent": "changed nope changed \n nope changed",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_*",
+    "content": "nomatch match nomatch match \nnomatch Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "*2*",
+    "expectedContent": "nomatch match nomatch match \nnomatch Match",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_*_no_word",
+    "content": " \n match \n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "*",
+    "expectedContent": " \n match \n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_*_symbol",
+    "content": " /}\n/} match \n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "*",
+    "expectedContent": " /}\n/} match \n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_#",
+    "content": "nomatch match nomatch match \nnomatch Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "#2#",
+    "expectedContent": "nomatch match nomatch match \nnomatch Match",
+    "expectedCursor": {
+      "ch": 22,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_*_seek",
+    "content": "    :=  match nomatch match \nnomatch Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "*",
+    "expectedContent": "    :=  match nomatch match \nnomatch Match",
+    "expectedCursor": {
+      "ch": 22,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_#",
+    "content": "    :=  match nomatch match \nnomatch Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "#",
+    "expectedContent": "    :=  match nomatch match \nnomatch Match",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_g*",
+    "content": "matches match alsoMatch\nmatchme matching",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "g*3g*",
+    "expectedContent": "matches match alsoMatch\nmatchme matching",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_g#",
+    "content": "matches match alsoMatch\nmatchme matching",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "g#3g#",
+    "expectedContent": "matches match alsoMatch\nmatchme matching",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_macro_insert",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qa0ifoo<Esc>q@a",
+    "expectedContent": "foofoo",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_insert_repeat",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qa$alarry.<Esc>acurly.<Esc>qamoe.<Esc>@a.",
+    "expectedContent": "larry.curly.moe.larry.curly.curly.",
+    "expectedCursor": {
+      "ch": 33,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_space",
+    "content": "one line of text.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<Space><Space>qa<Space><Space>q@a@a",
+    "expectedContent": "one line of text.",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_t_search",
+    "content": "one line of text.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qateql@al;",
+    "expectedContent": "one line of text.",
+    "expectedCursor": {
+      "ch": 12,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_f_search",
+    "content": "one line of text.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qbfeq@b;",
+    "expectedContent": "one line of text.",
+    "expectedCursor": {
+      "ch": 13,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_slash_search",
+    "content": "one line of text.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qc/e\nq@cn",
+    "expectedContent": "one line of text.",
+    "expectedCursor": {
+      "ch": 13,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_multislash_search",
+    "content": "one line of text to rule them all.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qd/e\n/t\nq@d",
+    "expectedContent": "one line of text to rule them all.",
+    "expectedCursor": {
+      "ch": 15,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_last_ex_command_register",
+    "content": "aaaaa",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":s/a/b\n2@:",
+    "expectedContent": "bbbaa",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_last_run_macro",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qaCa<Esc>qqbCb<Esc>q@add@@",
+    "expectedContent": "a",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_parens",
+    "content": "see spot run",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qzi(<Esc>ea)<Esc>qw@zw@z",
+    "expectedContent": "(see) (spot) (run)",
+    "expectedCursor": {
+      "ch": 17,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_overwrite",
+    "content": "see spot run",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qz0iI <Esc>qeqza.<Esc>qe@ze@z",
+    "expectedContent": "I see. spot. run.",
+    "expectedCursor": {
+      "ch": 16,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_search_f",
+    "content": "The quick brown fox jumped over the lazy dog.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qaf q0@a",
+    "expectedContent": "The quick brown fox jumped over the lazy dog.",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_search_2f",
+    "content": "The quick brown fox jumped over the lazy dog.",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qa2f q0@a",
+    "expectedContent": "The quick brown fox jumped over the lazy dog.",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_yank_tick",
+    "content": "the ex parrot",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "q'y<Right><Right><Right><Right>p",
+    "expectedContent": "the tex parrot",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yank_register",
+    "content": "foo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "\"ayyj\"byy:registers\n",
+    "expectedContent": "foo\nbar",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_yank_visual_block",
+    "content": "foo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>lj\"ay:registers\n",
+    "expectedContent": "foo\nbar",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yank_append_line_to_line_register",
+    "content": "foo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "\"ayyj\"Ayy:registers\n",
+    "expectedContent": "foo\nbar",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_yank_append_word_to_word_register",
+    "content": "foo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "\"aywj\"Ayw:registers\n",
+    "expectedContent": "foo\nbar",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_yank_append_line_to_word_register",
+    "content": "foo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "\"aywj\"Ayy:registers\n",
+    "expectedContent": "foo\nbar",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_yank_append_word_to_line_register",
+    "content": "foo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "\"ayyj\"Ayw:registers\n",
+    "expectedContent": "foo\nbar",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_black_hole_register",
+    "content": "foo\nbar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ggyG:registers\n\"_dG:registers\n\"_p",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_macro_register",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "qaigangnam<Esc>qqbostyle<Esc>q:registers\n",
+    "expectedContent": "gangnam\nstyle",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_._register",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ifoo<Esc>:registers\n",
+    "expectedContent": "foo",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_:_register",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":bar\n:registers\n",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_registers_html_encoding",
+    "content": "<script>throw \"&amp;\"</script>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "yy:registers\n",
+    "expectedContent": "<script>throw \"&amp;\"</script>",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_search_register_escape",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/waldo\n/foo<Esc>:registers\n",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_search_register",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/foo\n:registers\n",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_search_history",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/this\n/checks\n/search\n/history\n/checks\n/UpUpUpUpDown",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_exCommand_history",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":registers\n:sort\n:map\n:invalid\n:UpUpUpUp<Esc>:sUp",
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_search_clear",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/foo<C-u>",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_exCommand_clear",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":foo<C-u>",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._normal",
+    "content": "1 2 3 4 5 6",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2dw.axy<Esc>.",
+    "expectedContent": "5(xy(xy)) 6",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._repeat",
+    "content": "1 2 3 4 5 6",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2dw3.",
+    "expectedContent": "6",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._insert",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "itest<Esc>.Oxyz<BS>Down<Esc>.",
+    "expectedContent": "xy\nxy\ntestestt",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_._startinsert",
+    "content": "x",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":map i x\ni:start\ntest<Esc>.:start!\nxyz",
+    "expectedContent": "testesttxyz",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._insert_repeat",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "itest<Esc>2.",
+    "expectedContent": "testesttestt",
+    "expectedCursor": {
+      "ch": 10,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._repeat_insert",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "3ite<Esc>.",
+    "expectedContent": "tetettetetee",
+    "expectedCursor": {
+      "ch": 10,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._insert_o",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "oz<Esc>.",
+    "expectedContent": "\nz\nz",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_._insert_o_repeat",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "oz<Esc>2.",
+    "expectedContent": "\nz\nz\nz",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_._insert_o_indent",
+    "content": "{",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "oz<Esc>.",
+    "expectedContent": "{\n  z\n  z",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_._insert_cw",
+    "content": "word1 word2 word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "cwtest<Esc>2l.",
+    "expectedContent": "test test word3",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._insert_cw_repeat",
+    "content": "word1 word2 word3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "cwtest<Esc>l2.",
+    "expectedContent": "test test",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._delete",
+    "content": "zabcde",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i<BS><Esc>.",
+    "expectedContent": "zace",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._delete_repeat",
+    "content": "zzabcde",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i<BS><Esc>2.",
+    "expectedContent": "zzce",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_._visual_>",
+    "content": "1\n2\n3\n4",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "Vj>.",
+    "expectedContent": "  1\n  2\n  3\n  4",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_._replace_repeat",
+    "content": "abcdef\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "R<Esc>2..l\".p",
+    "expectedContent": "12123123\n123123g123",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_f;",
+    "content": "01x3xx678x",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "fx;2;",
+    "expectedContent": "01x3xx678x",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_F;",
+    "content": "01x3xx6x8x",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "Fx;2;",
+    "expectedContent": "01x3xx6x8x",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_t;",
+    "content": "01x3xx678x",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "tx;2;",
+    "expectedContent": "01x3xx678x",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_T;",
+    "content": "0xx3xx678x",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "Tx;2;",
+    "expectedContent": "0xx3xx678x",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_f,",
+    "content": "01x3xx678x",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "fx,2,",
+    "expectedContent": "01x3xx678x",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_F,",
+    "content": "01x3xx678x",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "Fx,2,",
+    "expectedContent": "01x3xx678x",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_t,",
+    "content": "01x3xx678x",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "tx,2,",
+    "expectedContent": "01x3xx678x",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_T,",
+    "content": "01x3xx67xx",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "Tx,2,",
+    "expectedContent": "01x3xx67xx",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_fd,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "f4d;ud,",
+    "expectedContent": "01239",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_Fd,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "F4d;ud,",
+    "expectedContent": "56789",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_td,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "t4d;ud,",
+    "expectedContent": "012349",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_Td,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "T4d;ud,",
+    "expectedContent": "456789",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_fc,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "f4c;<Esc>uc,",
+    "expectedContent": "01239",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_Fc,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "F4c;<Esc>uc,",
+    "expectedContent": "56789",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_tc,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "t4c;<Esc>uc,",
+    "expectedContent": "012349",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_Tc,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "T4c;<Esc>uc,",
+    "expectedContent": "456789",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_fy,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "f4y;Puy,P",
+    "expectedContent": "012345678456789",
+    "expectedCursor": {
+      "ch": 14,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_Fy,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "F4y;puy,P",
+    "expectedContent": "012340123456789",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ty,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "t4y;Puy,p",
+    "expectedContent": "01234567895678",
+    "expectedCursor": {
+      "ch": 13,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_Ty,;",
+    "content": "0123456789",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "T4y;puy,P",
+    "expectedContent": "01230123456789",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_vFT",
+    "content": "1123 123 123",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "vf12t <Esc>vF3T1F1F1",
+    "expectedContent": "1123 123 123",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_vf,;",
+    "content": "ab.cd.ef.g",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "0vf.;;,;2,2,",
+    "expectedContent": "ab.cd.ef.g",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_page_motions",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-u><C-u><C-d><C-d><C-f><C-b>",
+    "expectedContent": "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n32\n33\n34\n35\n36\n37\n38\n39\n40\n41\n42\n43\n44\n45\n46\n47\n48\n49\n50\n51\n52\n53\n54\n55\n56\n57\n58\n59\n60\n61\n62\n63\n64\n65\n66\n67\n68\n69\n70\n71\n72\n73\n74\n75\n76\n77\n78\n79\n80\n81\n82\n83\n84\n85\n86\n87\n88\n89\n90\n91\n92\n93\n94\n95\n96\n97\n98\n99\n100\n101\n102\n103\n104\n105\n106\n107\n108\n109\n110\n111\n112\n113\n114\n115\n116\n117\n118\n119\n120\n121\n122\n123\n124\n125\n126\n127\n128\n129\n130\n131\n132\n133\n134\n135\n136\n137\n138\n139\n140\n141\n142\n143\n144\n145\n146\n147\n148\n149\n150\n151\n152\n153\n154\n155\n156\n157\n158\n159\n160\n161\n162\n163\n164\n165\n166\n167\n168\n169\n170\n171\n172\n173\n174\n175\n176\n177\n178\n179\n180\n181\n182\n183\n184\n185\n186\n187\n188\n189\n190\n191\n192\n193\n194\n195\n196\n197\n198\n199",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 100
+    }
+  },
+  {
+    "name": "vim_HML",
+    "content": "  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "HLM",
+    "expectedContent": "  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 103
+    }
+  },
+  {
+    "name": "vim_zb",
+    "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "zb",
+    "expectedContent": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 250
+    }
+  },
+  {
+    "name": "vim_zz",
+    "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "zz",
+    "expectedContent": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 250
+    }
+  },
+  {
+    "name": "vim_zt",
+    "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "zt",
+    "expectedContent": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 250
+    }
+  },
+  {
+    "name": "vim_z-",
+    "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "z-",
+    "expectedContent": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 250
+    }
+  },
+  {
+    "name": "vim_z.",
+    "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "z.",
+    "expectedContent": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 250
+    }
+  },
+  {
+    "name": "vim_z<CR>",
+    "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "z<CR>",
+    "expectedContent": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 250
+    }
+  },
+  {
+    "name": "vim_moveTillCharacter",
+    "content": "The quick brown fox \n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/q\ntodto.dtqdtzdN",
+    "expectedContent": "The ox \n",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_searchForPipe",
+    "content": "this|that",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/|\n",
+    "expectedContent": "this|that",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_scrollMotion",
+    "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-y><C-e><C-e><C-y>",
+    "expectedContent": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 29
+    }
+  },
+  {
+    "name": "vim_[[, ]]",
+    "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "]]2]]]][[2[[[[",
+    "expectedContent": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_[], ][",
+    "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "][2][][[]2[][]",
+    "expectedContent": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_[{, ]}",
+    "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "[{2[{]}2]}]}[{",
+    "expectedContent": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_[(, ])",
+    "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "[(2[(])2])[(])",
+    "expectedContent": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 8
+    }
+  },
+  {
+    "name": "vim_[*, ]*, [/, ]/",
+    "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2[*2]*2[/2]/",
+    "expectedContent": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 7
+    }
+  },
+  {
+    "name": "vim_[#, ]#",
+    "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "2[#5]#]#",
+    "expectedContent": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 14
+    }
+  },
+  {
+    "name": "vim_[m, ]m, [M, ]M",
+    "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "[m4[m5]m[M3]M5[M",
+    "expectedContent": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 7
+    }
+  },
+  {
+    "name": "vim_i_indent_right",
+    "content": " word1\nword2\nword3 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i<C-t>",
+    "expectedContent": "   word1\nword2\nword3 ",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_i_indent_left",
+    "content": "   word1\nword2\nword3 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "i<C-d>",
+    "expectedContent": " word1\nword2\nword3 ",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_go_to_line",
+    "content": "a\nb\nc\nd\ne\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":4\n:4-1\n",
+    "expectedContent": "a\nb\nc\nd\ne\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_ex_go_to_mark",
+    "content": "a\nb\nc\nd\ne\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ma:'a\n",
+    "expectedContent": "a\nb\nc\nd\ne\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_go_to_line_offset",
+    "content": "a\nb\nc\nd\ne\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":+3\n:-1\n:.2\n:.-3\n",
+    "expectedContent": "a\nb\nc\nd\ne\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_go_to_mark_offset",
+    "content": "a\nb\nc\nd\ne\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ma:'a1\n:'a-1\n:'a+2\n",
+    "expectedContent": "a\nb\nc\nd\ne\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 4
+    }
+  },
+  {
+    "name": "vim_ex_advanced_range_syntax",
+    "content": "1\n2\n3\n4m\n5\n6\n7m\n8\n9m\n10\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":0/m\nma:/m//m/\n:'a,.y x\n:10?m??m?put! x\n:1+++2+/m/,1/m//m/+2-/m/+2d\n3:d\n",
+    "expectedContent": "1\n2\n3\n4m\n5\n6\n10\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 6
+    }
+  },
+  {
+    "name": "vim_ex_write",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":w\n:wr\n:wri\n:writ\n",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_delete",
+    "content": "l 1\nl 2\nl 3\nl 4\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "j:delete\n:d\n",
+    "expectedContent": "l 1\nl 4\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_sort",
+    "content": "b\nZ\nd\nc\na",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort\n",
+    "expectedContent": "Z\na\nb\nc\nd",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_reverse",
+    "content": "b\nd\nc\na",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort!\n",
+    "expectedContent": "d\nc\nb\na",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_range",
+    "content": "b\nd\nc\na",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":2,3sort\n",
+    "expectedContent": "b\nc\nd\na",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_oneline",
+    "content": "b\nd\nc\na",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":2sort\n",
+    "expectedContent": "b\nd\nc\na",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_ignoreCase",
+    "content": "b\nZ\nd\nc\na",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort i\n",
+    "expectedContent": "a\nb\nc\nd\nZ",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_unique",
+    "content": "b\nZ\na\na\nd\na\nc\na",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort u\n",
+    "expectedContent": "Z\na\nb\nc\nd",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_decimal",
+    "content": "6\nd3\n s5\n.9",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort d\n",
+    "expectedContent": "d3\n s5\n6\n.9",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_decimal_negative",
+    "content": "6\nd3\n s5\n.9\nz-9",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort d\n",
+    "expectedContent": "z-9\nd3\n s5\n6\n.9",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_decimal_reverse",
+    "content": "6\nd3\n s5\n.9",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort! d\n",
+    "expectedContent": ".9\n6\n s5\nd3",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_hex",
+    "content": "6\nd3\n s5\n&0xB\n.9",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort x\n",
+    "expectedContent": " s5\n6\n.9\n&0xB\nd3",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_octal",
+    "content": "6\nd3\n s5\n.9\n.8",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort o\n",
+    "expectedContent": ".9\n.8\nd3\n s5\n6",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_decimal_mixed",
+    "content": "a3\nz\nc1\ny\nb2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort d\n",
+    "expectedContent": "z\ny\nc1\nb2\na3",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_decimal_mixed_reverse",
+    "content": "a3\nz\nc1\ny\nb2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort! d\n",
+    "expectedContent": "a3\nb2\nc1\nz\ny",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_pattern_alpha",
+    "content": "z\ny\nc1\nb2\na3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort r/[a-z]/\n",
+    "expectedContent": "a3\nb2\nc1\ny\nz",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_pattern_alpha_reverse",
+    "content": "z\ny\nc1\nb2\na3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort! r /[a-z]/\n",
+    "expectedContent": "z\ny\nc1\nb2\na3",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_pattern_alpha_ignoreCase",
+    "content": "z\nY\nC1\nb2\na3",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort ri/[a-z]/\n",
+    "expectedContent": "a3\nb2\nC1\nY\nz",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_pattern_alpha_longer",
+    "content": "z\nab\naa\nade\nadelle\nalexandra\nalex\nadriana\nadele\ny\nc\nb\na",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort r/[a-z]+/\n",
+    "expectedContent": "a\naa\nab\nade\nadele\nadelle\nadriana\nalex\nalexandra\nb\nc\ny\nz",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_pattern_alpha_only",
+    "content": "z1\ny2\na3\nc\nb",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort r/^[a-z]$/\n",
+    "expectedContent": "z1\ny2\na3\nb\nc",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_pattern_alpha_only_reverse",
+    "content": "z1\ny2\na3\nc\nb",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort! r/^[a-z]$/\n",
+    "expectedContent": "c\nb\nz1\ny2\na3",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_pattern_alpha_num",
+    "content": "z1\ny2\na3\nc\nb",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort r/[a-z][0-9]/\n",
+    "expectedContent": "c\nb\na3\ny2\nz1",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_sort_pattern_no_r",
+    "content": "1 in c \n z \n2 in d \n in\n3 in a \n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":sort /in/\n:sort r/in/\n:sort r/. in/\n:sort /./\n:sort /in d/\n",
+    "expectedContent": "\n3 in a \n1 in c \n in\n z \n2 in d ",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_global",
+    "content": "one one\n one one\n one one",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":g/one/s//two\n:1,2g/two/s//one\n:g/^ /\n",
+    "expectedContent": "one one\n one one\n two one",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_normal",
+    "content": "one one\nx\none\none one",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":norm /<Esc>\"/p\n:norm /x<Cr>\"/p\n:norm /h<Esc>\"/p\n:norm /one<Cr>3li<Right> <Esc>\"/p\n:g/one/normal    cw 1<lt>Esc><Esc>$i$\nrt/<\nxxp:map k j\n:normal kkk\n:normal! kkk\n",
+    "expectedContent": " 1sEc> on$e\nxxx\n 1<Esc> on$e\n 1<Esc> on$t",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_global_substitute_join",
+    "content": "one\ntwo\nthree\nfour\nfive\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":g/o/s/\\n/;\n",
+    "expectedContent": "one;two\nthree\nfour;five\n",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_ex_global_substitute_split",
+    "content": "one\ntwo\nthree\nfour\nfive\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":g/e/s/[or]/\\n\n",
+    "expectedContent": "\nne\ntwo\nth\nee\nfour\nfive\n",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_global_delete",
+    "content": "one\ntwo\nthree\nfour\nfive\nsix\nseven\nnine\n---",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":g/e/d\\n\nu:g/e/g/v/d\\n\n",
+    "expectedContent": "one\ntwo\nthree\nfour\nsix\nnine\n---",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_global_confirm",
+    "content": "one one\n one one\n one one\n one one\n one one",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":g/one/s//two/gc\nnyaqy",
+    "expectedContent": "one two\n two two\n one one\n two one\n one one",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_vglobal",
+    "content": "one\n two\n three\n four\n five\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":v/e/s/o/e\n:v/[vw]\n",
+    "expectedContent": "one\n twe\n three\n feur\n five\n",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_substitute_same_line",
+    "content": "one one\n one one",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":s/one/two/g\n",
+    "expectedContent": "one one\n two two",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_substitute_alternate_separator",
+    "content": "o/e o/e\n o/e o/e",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":s#o/e#two#g\n",
+    "expectedContent": "o/e o/e\n two two",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_substitute_full_file",
+    "content": "one one\n one one",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":%s/one/two/g\n",
+    "expectedContent": "two two\n two two",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_substitute_input_range",
+    "content": "1\n2\n3\n4",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":1,3s/\\d/0/g\n",
+    "expectedContent": "0\n0\n0\n4",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_ex_substitute_range_current_to_input",
+    "content": "1\n2\n3\n4",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":.,3s/\\d/0/g\n",
+    "expectedContent": "1\n0\n0\n4",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_ex_substitute_range_input_to_current",
+    "content": "1\n2\n3\n4\n5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":2,.s/\\d/0/g\n",
+    "expectedContent": "1\n0\n0\n0\n5",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_substitute_range_offset",
+    "content": "1\n2\n3\n4\n5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":-1,+1s/\\d/0/g\n",
+    "expectedContent": "1\n0\n0\n0\n5",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_substitute_range_implicit_offset",
+    "content": "1\n2\n3\n4\n5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":.1,.3s/\\d/0/g\n",
+    "expectedContent": "1\n0\n0\n0\n5",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_substitute_to_eof",
+    "content": "1\n2\n3\n4\n5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":.,$s/\\d/0/g\n",
+    "expectedContent": "1\n2\n0\n0\n0",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 4
+    }
+  },
+  {
+    "name": "vim_ex_substitute_to_relative_eof",
+    "content": "1\n2\n3\n4\n5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":2,$-2s/\\d/0/g\n",
+    "expectedContent": "1\n0\n0\n4\n5",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_ex_substitute_range_mark",
+    "content": "1\n2\n3\n4\n5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ma:.,'as/\\d/0/g\n",
+    "expectedContent": "0\n0\n0\n4\n5",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_ex_substitute_range_mark_offset",
+    "content": "1\n2\n3\n4\n5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ma:'a-1,'a+1s/\\d/0/g\n",
+    "expectedContent": "1\n0\n0\n0\n5",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_substitute_visual_range",
+    "content": "1\n2\n3\n4\n5",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "V2jv:s/\\d/0/g\n",
+    "expectedContent": "1\n0\n0\n0\n5",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_substitute_empty_query",
+    "content": "a11 a12 a13",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/1\n:s//b/g\n",
+    "expectedContent": "abb ab2 ab3",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_javascript",
+    "content": "a 0 b",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":s/\\(\\d\\+\\)/$$ $' $` $& \\1/g\n:s/\\d//g\n",
+    "expectedContent": "WORD",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_empty_arguments",
+    "content": "a a\na a",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":s/a/b/g\n:s\n",
+    "expectedContent": "b b\nb a",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_substitute_highlight",
+    "content": "a a\na a",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":s/a\n",
+    "expectedContent": "a a\na a",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_nopcre_special",
+    "content": "",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":s/\\v<a*(b|\\d){3}c?[x-z]+\\$\\^.> \\V\\<a\\*\\(b\\|\\d\\)\\{3\\}c\\?\\[x-z]\\+$^\\.\\> \\m\\<a*\\(b\\|\\d\\)\\{3}c\\?[x-z]\\+\\$\\^.\\> \\M\\<a\\*\\(b\\|\\d\\)\\{3}c\\?\\[x-z]\\+\\$\\^\\.\\>/M\\4 m\\3 V\\2 v\\1/\n:s/\\m\\(1\\)\\v\\ze(\\d+)/\\2\\1 a\\1/g\n:s/2\\zs\\>/b/g\n:s/\\m\\<\\d\\+ //g\n",
+    "expectedContent": "a10 a12b a13 42b",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_ampersand_pcre",
+    "content": "foo",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":%s/foo/namespace.&/\n",
+    "expectedContent": "namespace.foo",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_substitute_ampersand_multiple_pcre",
+    "content": "foo\nfzo",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":%s/f.o/namespace.&/\n",
+    "expectedContent": "namespace.foo\nnamespace.fzo",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_escaped_ampersand_should_not_substitute_pcre",
+    "content": "foo",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":%s/foo/namespace.\\&/\n",
+    "expectedContent": "namespace.&",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_noh_clearSearchHighlight",
+    "content": "match nope match \n nope Match",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "?match\n:noh\nn",
+    "expectedContent": "match nope match \n nope Match",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_yank",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":y\n",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 3
+    }
+  },
+  {
+    "name": "vim_ex_set_boolean",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":set testoption=22\n:set notestoption\n:set notestoption!\n:set notestoption!\n:set testoption!\n:set testoption!\n",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_set_langmap",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":set langmap==j\n=",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_set_string",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":set notestopt=b\n:set testopt=c\n:set testopt=c\n:setg testopt=d\n:setl testopt=e\n",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_set_callback",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":set notestopt=b\n:set testopt=c\n:setg testopt=d\n:setl testopt=e\n",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_map_prompt",
+    "content": " 0 xyz\n 1 abc \n 2 abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "/a\ni<Esc>:nohl\n:nnoremap i :nohl<CR>i<space>xx<lt>\n:map :sayhi ihi<Esc>\n:map j :sayhi<CR>/<up><up>b\n/1\nj<CR>imapclear",
+    "expectedContent": " 0 xyz\n hi1  xx<mapclearabc \n 2 abc",
+    "expectedCursor": {
+      "ch": 17,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_mapclear",
+    "content": "abc abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "wvwvw",
+    "expectedContent": "abc abc",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_mapclear_context",
+    "content": "abc abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ww",
+    "expectedContent": "abc abc",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_map_key2key",
+    "content": "abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":map a x\na",
+    "expectedContent": "bc",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_unmap_key2key",
+    "content": "abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":map a x\n:unmap a\na",
+    "expectedContent": "abc",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_unmap_key2key_does_not_remove_default",
+    "content": "abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":unmap a\na",
+    "expectedContent": "abc",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_map_key2key_to_colon",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":map ; :\n;",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_map_ex2key:",
+    "content": "abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":map :del x\n:del\n",
+    "expectedContent": "bc",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_map_ex2ex",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":map :del :w\n:del\n",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_map_key2ex",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":map a :w<CR>\na",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_map_key2key_visual_api",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "bvb",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_omap",
+    "content": "hello unfair world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "0wdwu:omap w $\n0wdw",
+    "expectedContent": "hello ",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_nmap",
+    "content": "hello\nunfair\nworld",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":nmap k gj\nkdku:map k gj\ndk<Up>",
+    "expectedContent": "hello\nunfld",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_imap",
+    "content": "1234\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ijk<C-v>2jlcfojj.RxjjijjRxjkggdd:imap a <C-c>\nixap",
+    "expectedContent": "x2\n1",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_ex_api_test",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "::ext to\n<C-CR><Space>",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_special_names",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "::!\n::! x\n::!y\n::!!\n::!! x\n::!!y\n::!!!\n::!!!z\n::#\n::# x\n::#y\n::#!\n::#!z\n::&\n::& x\n::&y\n::&!\n::&!z\n::<\n::< x\n::<y\n::<!\n::<!z\n::=\n::= x\n::=y\n::=!\n::=!z\n::>\n::> x\n::>y\n::>!\n::>!z\n::@\n::@ x\n::@y\n::@!\n::@!z\n::@@\n::@@ x\n::@@y\n::@@!\n::@@!z\n::~\n::~ x\n::~y\n::~!\n::~!z\n::regtest1\n::regtest1 x\n::regtest1-y\n::regtest1!\n::regtest1!z\n::RT2\n::RT2 x\n::RT2-y\n::RT2!\n::RT2!z\n",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ex_map_key2key_from_colon",
+    "content": "abc",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":map : x\n:",
+    "expectedContent": "bc",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_map <Esc> in normal mode",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<Esc><Esc>",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_noremap",
+    "content": "wOrd1",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ":noremap ; l\n:map l $\n:map q l\nlq;r1i;<Esc>:mapclear\nlxpl:noremap x \"_x\nxp:mapclear\n",
+    "expectedContent": "w1;d;1",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_noremap_all_mappings",
+    "content": "HeY",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "yypaVa",
+    "expectedContent": "hey",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_noremap_swap",
+    "content": "foo",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "a<Esc>i",
+    "expectedContent": "foo",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_noremap_map_interaction",
+    "content": "wOrd1\nwOrd2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": ";lm",
+    "expectedContent": "wOrd1\nwOrd2",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_noremap_map_interaction2",
+    "content": "wOrd1\nwOrd2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "lm",
+    "expectedContent": "wOrd1\nwOrd2",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_gq_and_gw",
+    "content": "wOrd1\nwOrd2",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "gqgqgqjgq}gqGgqgg:set tw=15\nggVgq:6\ngqq",
+    "expectedContent": "1 2 hello world\nxxx xxx xxx xxx\nxxx xxx xxx xxx\nxxx xxx xxx xxx\nxxx xxx xxx xxx\nxxx xxx xxx xxx\nyyy\n\nnext paragraph",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 6
+    }
+  },
+  {
+    "name": "vim_updateStatus",
+    "content": "text match match \n next",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "d/match\nd/<Esc>d:<Esc>",
+    "expectedContent": "match match \n next",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_increment_binary",
+    "content": "0b000",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-a><C-a><C-x><C-x><C-a><C-a><C-x><C-x>",
+    "expectedContent": "0b000",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_increment_octal",
+    "content": "000",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-a><C-a><C-x><C-x>",
+    "expectedContent": "000",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_increment_decimal",
+    "content": "100",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-a><C-a><C-x><C-x>",
+    "expectedContent": "100",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_increment_decimal_single_zero",
+    "content": "0",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-a><C-a><C-x><C-x>",
+    "expectedContent": "0",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_increment_hexadecimal",
+    "content": "0x0",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-a><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-x><C-a><C-a><C-x><C-x>",
+    "expectedContent": "0x00",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_option_key_on_mac",
+    "content": "0\n1\n2\n\n\n3\n4\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "\"-pl::map <A-v> i<lt>A-v><Esc>\n::map √ i√G<Esc>\n::unmap √\n::unmap <A-v>\n",
+    "expectedContent": "<A-v√<A-v>G>√",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_<C-c>copy",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ve<C-c>wi<S-C-Right><C-c><C-c><C-c>",
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 10,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_<C-r>_insert_mode",
+    "content": "123 456 ",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dwA<C-r>-",
+    "expectedContent": "456 123 ",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_langmap_dd",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ee",
+    "expectedContent": " word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_langmap_hh",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "dd",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_langmap_qqddq@q",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "''ee'@'",
+    "expectedContent": "aopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_langmap_fd",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "ud",
+    "expectedContent": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_langmap_mark",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "m'`'-'",
+    "expectedContent": " wOrd1 (#%\n word3] \n   haopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 2
+    }
+  },
+  {
+    "name": "vim_langmap_visual_block",
+    "content": "1234\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-k>2hnnnjhello<Esc><C-k>2tdJworld",
+    "expectedContent": "1hworld\n5hworld\nahworld",
+    "expectedCursor": {
+      "ch": 7,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_langmap_visual_block_no_ctrl_remap",
+    "content": "1234\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "<C-v>2hnnnjhello<Esc><C-v>2tdJworld",
+    "expectedContent": "1hworld\n5hworld\nahworld",
+    "expectedCursor": {
+      "ch": 7,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_rendered_cursor_position_cm6",
+    "content": "1234\n\n\n5678\nabcdefg",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "keys": "Vjjj",
+    "expectedContent": "1234\n\n\n5678\nabcdefg",
+    "expectedCursor": {
+      "ch": 4,
+      "line": 3
+    }
+  }
+]

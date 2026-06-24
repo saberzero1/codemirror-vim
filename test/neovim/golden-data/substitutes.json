@@ -1,0 +1,1299 @@
+{
+    "suite": "substitutes",
+    "neovim_version": "0.12.2",
+    "recorded_at": "2026-06-23T23:12:41.282Z",
+    "cases": [
+        {
+            "name": "vim_ex_substitute_capture_pcre",
+            "initial": {
+                "content": "a11 a12 a13",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/(\\d+)/$1$1/g\n",
+            "result": {
+                "content": "a11 a12 a13",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_capture_nopcre",
+            "initial": {
+                "content": "a11 a12 a13",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/\\(\\d\\+\\)/\\1\\1/g\n",
+            "result": {
+                "content": "a1111 a1212 a1313",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_capture2_pcre",
+            "initial": {
+                "content": "a 0 b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/(\\d+)/$$$1$1/g\n",
+            "result": {
+                "content": "a 0 b",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_capture2_nopcre",
+            "initial": {
+                "content": "a 0 b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/\\(\\d\\+\\)/$\\1\\1/g\n",
+            "result": {
+                "content": "a $00 b",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_nocapture_pcre",
+            "initial": {
+                "content": "a11 a12 a13",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/(\\d+)/$$1$$1/g\n",
+            "result": {
+                "content": "a11 a12 a13",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_nocapture_nopcre",
+            "initial": {
+                "content": "a11 a12 a13",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/\\(\\d\\+\\)/$1$1/g\n",
+            "result": {
+                "content": "a$1$1 a$1$1 a$1$1",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_nocapture2_pcre",
+            "initial": {
+                "content": "a 0 b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/(\\d+)/$$1$1/g\n",
+            "result": {
+                "content": "a 0 b",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_nocapture2_nopcre",
+            "initial": {
+                "content": "a 0 b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/\\(\\d\\+\\)/\\$1\\1/g\n",
+            "result": {
+                "content": "a $10 b",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_nocapture_pcre",
+            "initial": {
+                "content": "a b c",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/b/$$/\n",
+            "result": {
+                "content": "a $$ c",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_nocapture_nopcre",
+            "initial": {
+                "content": "a b c",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/b/$/\n",
+            "result": {
+                "content": "a $ c",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_slash_regex_pcre",
+            "initial": {
+                "content": "one/two \n three/four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\//|\n",
+            "result": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_slash_regex_nopcre",
+            "initial": {
+                "content": "one/two \n three/four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\//|\n",
+            "result": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_pipe_regex_pcre",
+            "initial": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\|/,/\n",
+            "result": {
+                "content": ",one|two \n, three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_pipe_regex_nopcre",
+            "initial": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/|/,/\n",
+            "result": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_or_regex_pcre",
+            "initial": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/o|e|u/a/g\n",
+            "result": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_or_regex_nopcre",
+            "initial": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/o\\|e\\|u/a/g\n",
+            "result": {
+                "content": "ana|twa \n thraa|faar",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_or_word_regex_pcre",
+            "initial": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/(one|two)/five/g\n",
+            "result": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_or_word_regex_nopcre",
+            "initial": {
+                "content": "one|two \n three|four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\(one\\|two\\)/five/g\n",
+            "result": {
+                "content": "five|five \n three|four",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_forward_slash_regex_pcre",
+            "initial": {
+                "content": "forward slash \\/ was here",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s#\\/##g\n",
+            "result": {
+                "content": "forward slash \\ was here",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_forward_slash_regex_nopcre",
+            "initial": {
+                "content": "forward slash \\/ was here",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s#/##g\n",
+            "result": {
+                "content": "forward slash \\ was here",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_backslashslash_regex_pcre",
+            "initial": {
+                "content": "one\\\two \n three\\four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\\\/,\n",
+            "result": {
+                "content": "one,\two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_backslashslash_regex_nopcre",
+            "initial": {
+                "content": "one\\\two \n three\\four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\\\/,\n",
+            "result": {
+                "content": "one,\two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_slash_replacement_pcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\/\n",
+            "result": {
+                "content": "one/two \n three/four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_slash_replacement_nopcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\/\n",
+            "result": {
+                "content": "one/two \n three/four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_backslash_replacement_pcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\\\/g\n",
+            "result": {
+                "content": "one\\two \n three\\four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_backslash_replacement_nopcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\\\/g\n",
+            "result": {
+                "content": "one\\two \n three\\four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_multibackslash_replacement_pcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\\\\\\\\\\\\\\\/g\n",
+            "result": {
+                "content": "one\\\\\\\\two \n three\\\\\\\\four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_multibackslash_replacement_nopcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\\\\\\\\\\\\\\\/g\n",
+            "result": {
+                "content": "one\\\\\\\\two \n three\\\\\\\\four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_dollar_assertion_pcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/$/,/g\n",
+            "result": {
+                "content": "one,two ,\n three,four,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_dollar_assertion_nopcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/$/,/g\n",
+            "result": {
+                "content": "one,two ,\n three,four,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_dollar_assertion_empty_lines_pcre",
+            "initial": {
+                "content": "\n\n\n\n\n\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/$/;/g\n",
+            "result": {
+                "content": ";\n;\n;\n;\n;\n;\n;",
+                "cursor": {
+                    "line": 6,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_dollar_assertion_empty_lines_nopcre",
+            "initial": {
+                "content": "\n\n\n\n\n\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/$/;/g\n",
+            "result": {
+                "content": ";\n;\n;\n;\n;\n;\n;",
+                "cursor": {
+                    "line": 6,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_dollar_literal_pcre",
+            "initial": {
+                "content": "one$two\n$three\nfour$\n$",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\$/,/g\n",
+            "result": {
+                "content": "one,two\n,three\nfour,\n,",
+                "cursor": {
+                    "line": 3,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_dollar_literal_nopcre",
+            "initial": {
+                "content": "one$two\n$three\nfour$\n$",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\$/,/g\n",
+            "result": {
+                "content": "one,two\n,three\nfour,\n,",
+                "cursor": {
+                    "line": 3,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_match_pcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\\n/,/g\n",
+            "result": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 6
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_match_nopcre",
+            "initial": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\\n/,/g\n",
+            "result": {
+                "content": "one,two \n three,four",
+                "cursor": {
+                    "line": 1,
+                    "ch": 6
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_join_global_pcre",
+            "initial": {
+                "content": "one,two \n three,four \n five \n six",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":2s/\\\n/,/g\n",
+            "result": {
+                "content": "one,two \n three,four \n five \n six",
+                "cursor": {
+                    "line": 1,
+                    "ch": 6
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_join_global_nopcre",
+            "initial": {
+                "content": "one,two \n three,four \n five \n six",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":2s/\\\n/,/g\n",
+            "result": {
+                "content": "one,two \n three,four \n five \n six",
+                "cursor": {
+                    "line": 1,
+                    "ch": 6
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_join_noglobal_pcre",
+            "initial": {
+                "content": "one,two \n three,four \n five \n six\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":2,3s/\\\n/,/\n",
+            "result": {
+                "content": "one,two \n three,four \n five \n six\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 6
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_join_noglobal_nopcre",
+            "initial": {
+                "content": "one,two \n three,four \n five \n six\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":2,3s/\\\n/,/\n",
+            "result": {
+                "content": "one,two \n three,four \n five \n six\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 6
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_replacement_pcre",
+            "initial": {
+                "content": "one,two, \n three,four,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\\n/g\n",
+            "result": {
+                "content": "one\\two, \n three\\four,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_replacement_nopcre",
+            "initial": {
+                "content": "one,two, \n three,four,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\\n/g\n",
+            "result": {
+                "content": "one\\two, \n three\\four,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_multiple_splits_pcre",
+            "initial": {
+                "content": "one,two, \n three,four,five,six, \n seven,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":2s/,/\\\n/g\n",
+            "result": {
+                "content": "one,two, \n three\\four,five,six, \n seven,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_multiple_splits_nopcre",
+            "initial": {
+                "content": "one,two, \n three,four,five,six, \n seven,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":2s/,/\\\n/g\n",
+            "result": {
+                "content": "one,two, \n three\\four,five,six, \n seven,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_first_occurrences_pcre",
+            "initial": {
+                "content": "one,two, \n three,four,five,six, \n seven,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\\n/\n",
+            "result": {
+                "content": "one\\two, \n three\\four,five,six, \n seven\\",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_newline_first_occurrences_nopcre",
+            "initial": {
+                "content": "one,two, \n three,four,five,six, \n seven,",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/,/\\\n/\n",
+            "result": {
+                "content": "one\\two, \n three\\four,five,six, \n seven\\",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_word_pcre",
+            "initial": {
+                "content": "ababab abb ab{2}",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/(ab){2}//g\n",
+            "result": {
+                "content": "ababab abb ab{2}",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_word_nopcre",
+            "initial": {
+                "content": "ababab abb ab{2}",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\(ab\\)\\{2\\}//g\n",
+            "result": {
+                "content": "ab abb ab{2}",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_range_pcre",
+            "initial": {
+                "content": "a aa aaa aaaa",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/a{2,3}//g\n",
+            "result": {
+                "content": "a aa aaa aaaa",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_range_nopcre",
+            "initial": {
+                "content": "a aa aaa aaaa",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/a\\{2,3\\}//g\n",
+            "result": {
+                "content": "a   a",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_literal_pcre",
+            "initial": {
+                "content": "ababab abb ab{2}",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/ab\\{2\\}//g\n",
+            "result": {
+                "content": "ababab  ab{2}",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_literal_nopcre",
+            "initial": {
+                "content": "ababab abb ab{2}",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/ab{2}//g\n",
+            "result": {
+                "content": "ababab abb ",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_char_pcre",
+            "initial": {
+                "content": "ababab abb ab{2}",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/ab{2}//g\n",
+            "result": {
+                "content": "ababab abb ",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_char_nopcre",
+            "initial": {
+                "content": "ababab abb ab{2}",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/ab\\{2\\}//g\n",
+            "result": {
+                "content": "ababab  ab{2}",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_no_escape_pcre",
+            "initial": {
+                "content": "ababab abb ab{2}",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/ab{2}//g\n",
+            "result": {
+                "content": "ababab abb ",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_braces_no_escape_nopcre",
+            "initial": {
+                "content": "ababab abb ab{2}",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/ab\\{2}//g\n",
+            "result": {
+                "content": "ababab  ab{2}",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_count_pcre",
+            "initial": {
+                "content": "1\n2\n3\n4",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/\\d/0/i 2\n",
+            "result": {
+                "content": "1\n0\n0\n4",
+                "cursor": {
+                    "line": 2,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_count_nopcre",
+            "initial": {
+                "content": "1\n2\n3\n4",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":s/\\d/0/i 2\n",
+            "result": {
+                "content": "1\n0\n0\n4",
+                "cursor": {
+                    "line": 2,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_count_with_range_pcre",
+            "initial": {
+                "content": "1\n2\n3\n4",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":1,3s/\\d/0/ 3\n",
+            "result": {
+                "content": "1\n2\n0\n0",
+                "cursor": {
+                    "line": 3,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_count_with_range_nopcre",
+            "initial": {
+                "content": "1\n2\n3\n4",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":1,3s/\\d/0/ 3\n",
+            "result": {
+                "content": "1\n2\n0\n0",
+                "cursor": {
+                    "line": 3,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_not_global_pcre",
+            "initial": {
+                "content": "aaa\nbaa\ncaa",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/a/x/\n",
+            "result": {
+                "content": "xaa\nbxa\ncxa",
+                "cursor": {
+                    "line": 2,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_not_global_nopcre",
+            "initial": {
+                "content": "aaa\nbaa\ncaa",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/a/x/\n",
+            "result": {
+                "content": "xaa\nbxa\ncxa",
+                "cursor": {
+                    "line": 2,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_optional_pcre",
+            "initial": {
+                "content": "aaa  aa\n aa",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/(a*)/<$1>/g\n",
+            "result": {
+                "content": "aaa  aa\n aa",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_optional_nopcre",
+            "initial": {
+                "content": "aaa  aa\n aa",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\(a*\\)/<\\1>/g\n",
+            "result": {
+                "content": "<aaa> <> <aa>\n<> <aa>",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_empty_match_pcre",
+            "initial": {
+                "content": "aaa  aa\n aa\nbb\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/(a+|$)/<$1>/g\n",
+            "result": {
+                "content": "aaa  aa\n aa\nbb\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_empty_match_nopcre",
+            "initial": {
+                "content": "aaa  aa\n aa\nbb\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\(a\\+\\|$\\)/<\\1>/g\n",
+            "result": {
+                "content": "<aaa>  <aa>\n <aa>\nbb<>\n<>",
+                "cursor": {
+                    "line": 3,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_empty_or_match_pcre",
+            "initial": {
+                "content": "1234\n567\n89\n0\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/(..|$)/<$1>/g\n",
+            "result": {
+                "content": "1234\n567\n89\n0\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_empty_or_match_nopcre",
+            "initial": {
+                "content": "1234\n567\n89\n0\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                }
+            },
+            "keys": ":%s/\\(..\\|$\\)/<\\1>/g\n",
+            "result": {
+                "content": "<12><34>\n<56>7<>\n<89>\n0<>\n<>",
+                "cursor": {
+                    "line": 4,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        }
+    ]
+}

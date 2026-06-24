@@ -1,0 +1,102 @@
+[
+  {
+    "name": "vim_viw_middle_spc",
+    "content": "foo \tbAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "viw",
+    "expectedSelection": "bAr"
+  },
+  {
+    "name": "vim_vaw_middle_spc",
+    "content": "foo \tbAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "vaw",
+    "expectedSelection": "bAr\t "
+  },
+  {
+    "name": "vim_viw_middle_punct",
+    "content": "foo \tbAr,\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "viw",
+    "expectedSelection": "bAr"
+  },
+  {
+    "name": "vim_vaW_middle_punct",
+    "content": "foo \tbAr,\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 6
+    },
+    "keys": "vaW",
+    "expectedSelection": "bAr,\t "
+  },
+  {
+    "name": "vim_viw_start_spc",
+    "content": "foo \tbAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 5
+    },
+    "keys": "viw",
+    "expectedSelection": "bAr"
+  },
+  {
+    "name": "vim_viw_end_spc",
+    "content": "foo \tbAr\t baz",
+    "cursor": {
+      "line": 0,
+      "ch": 7
+    },
+    "keys": "viw",
+    "expectedSelection": "bAr"
+  },
+  {
+    "name": "vim_viw_eol",
+    "content": "foo \tbAr",
+    "cursor": {
+      "line": 0,
+      "ch": 7
+    },
+    "keys": "viw",
+    "expectedSelection": "bAr"
+  },
+  {
+    "name": "vim_vi{_middle_spc",
+    "content": "a{\n\tbar\n\t}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "vi{",
+    "expectedSelection": "\n\tbar\n\t"
+  },
+  {
+    "name": "vim_va{_middle_spc",
+    "content": "a{\n\tbar\n\t}b",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "va{",
+    "expectedSelection": "{\n\tbar\n\t}"
+  },
+  {
+    "name": "vim_va{outside",
+    "content": "xa{\n\tbar\n\t}b",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "va{",
+    "expectedSelection": "{\n\tbar\n\t}"
+  }
+]

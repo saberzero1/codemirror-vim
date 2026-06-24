@@ -1,0 +1,444 @@
+{
+    "suite": "jumplist",
+    "neovim_version": "0.12.2",
+    "recorded_at": "2026-06-23T23:12:40.100Z",
+    "cases": [
+        {
+            "name": "vim_jumplist_H",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 5,
+                    "ch": 2
+                }
+            },
+            "keys": "H<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 5,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_M",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 2
+                }
+            },
+            "keys": "M<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_L",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 2
+                }
+            },
+            "keys": "L<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_[[",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 5,
+                    "ch": 2
+                }
+            },
+            "keys": "[[<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 5,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_]]",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 2
+                }
+            },
+            "keys": "]]<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_G",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 5,
+                    "ch": 2
+                }
+            },
+            "keys": "G<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 5,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_gg",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 5,
+                    "ch": 2
+                }
+            },
+            "keys": "gg<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 5,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_%",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 5
+                }
+            },
+            "keys": "%<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_{",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 5
+                }
+            },
+            "keys": "{<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_}",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 5
+                }
+            },
+            "keys": "}<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_\\'",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 5
+                }
+            },
+            "keys": "mah'ah<C-i>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_`",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 5
+                }
+            },
+            "keys": "mah`ah<C-i>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_*_cachedCursor",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "*<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_#_cachedCursor",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "#<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_n",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 3
+                }
+            },
+            "keys": "#n<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_N",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 3
+                }
+            },
+            "keys": "#N<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_repeat_<c-o>",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 3
+                }
+            },
+            "keys": "***3<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 3
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_repeat_<c-i>",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 3
+                }
+            },
+            "keys": "***3<C-o>2<C-i>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 5,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_repeated_motion",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 3
+                }
+            },
+            "keys": "3*<C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 3
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_/",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 3
+                }
+            },
+            "keys": "/dialog\n<C-o>",
+            "result": {
+                "content": "import { Notice, Plugin } from 'obsidian';\nimport {\n    DEFAULT_SETTINGS,\n    VimMotionsSettings,\n    VimMotionsSettingTab,\n} from './settings';\n\nimport { registerEasyMotion } from './easymotion/register';\nimport type { OperatorPendingEasyMotion } from './easymotion/operator-pending';\nimport {\n    registerNavigationMotions,\n    registerTableMotions,\n    registerBufferNavigation,\n} from './motions/register';\nimport { registerOperators } from './operators/register';\nimport { registerTextObjects } from './text-objects/register';\nimport { VimModeTracker } from './vim/mode-tracker';\nimport { ScrolloffManager, createScrolloffExtension } from './vim/scrolloff';\nimport { loadVimrc, applyVimrcMaps } from './vimrc/loader';\nimport type { VimrcLoadResult } from './vimrc/loader';\nimport type { VimApi } from './types/vim-api';\nimport { registerExCommands, registerObCommand } from './workspace/commands';\nimport { registerWorkspaceNavigation } from './workspace/navigation';\nimport { getVimApi, isVimEnabled } from './vim/vim-api';\nimport { createBundledVimExtension, installVimBridge } from './vim/bundled-vim';\nimport { ExCommandSuggest } from './ui/ex-suggest';\nimport { createHintModeAction } from './ui/hint-mode';\nimport { LeaderRegistry, WhichKeyOverlay } from './ui/which-key';\nimport { InsertEscapeHandler } from './vim/insert-escape';\nimport { registerVimOptions } from './vim/options';\nimport { VimRegistration } from './vim/registration';\nimport {\n    ChangeList,\n    createOlderChangeMotion,\n    createNewerChangeMotion,\n} from './vim/changelist';\nimport { VimInfoModal } from './ui/vim-info-modal';\nimport { EditorView } from '@codemirror/view';\n\nexport default class VimMotionsPlugin extends Plugin {\n    settings!: VimMotionsSettings;\n    registration: VimRegistration | null = null;\n    easyMotionInterceptor: OperatorPendingEasyMotion | null = null;\n    leaderRegistry: LeaderRegistry | null = null;\n    changeList: ChangeList = new ChangeList();\n    modeTracker: VimModeTracker | null = null;\n    scrolloffManager: ScrolloffManager | null = null;\n    insertEscapeHandler: InsertEscapeHandler | null = null;\n    whichKeyOverlay: WhichKeyOverlay | null = null;\n    exSuggest: ExCommandSuggest | null = null;\n    private hintWindowCleanups: Array<() => void> = [];\n    private hintWindowDocs = new Set<Document>();\n    private vimrcLoading = false;\n    private vimrcMaps: VimrcLoadResult['maps'] = [];\n    vimrcLoaded = false;\n    vimrcRetried = false;\n    vimrcCommandCount = 0;\n\n    async onload() {\n        await this.loadSettings();\n\n        const builtinVimOn = isVimEnabled(\n            this.app as unknown as {\n                vault: { getConfig: (key: string) => unknown };\n            },\n        );\n\n        if (!builtinVimOn) {\n            this.registerEditorExtension(createBundledVimExtension());\n            installVimBridge();\n        }\n\n        const vim = getVimApi();\n        if (!vim) {\n            new Notice('Vim Motions: could not initialise vim layer.');\n            return;\n        }\n\n        // --- Vim API setup ---\n        registerVimOptions(vim);\n        this.registration = new VimRegistration(vim);\n\n        // --- Leader key resolution ---\n        this.leaderRegistry = new LeaderRegistry();\n        if (this.settings.enableVimrc) {\n            this.registerEvent(\n                this.app.workspace.on('active-leaf-change', async () => {\n                    if (this.vimrcLoaded) {\n                        applyVimrcMaps(vim, this.vimrcMaps);\n                        return;\n                    }\n                    if (this.vimrcLoading) return;\n                    this.vimrcLoading = true;\n                    let vimrcResult = await loadVimrc(\n                        this.app,\n                        vim,\n                        this.leaderRegistry ?? undefined,\n                    );\n                    for (\n                        let attempt = 0;\n                        !vimrcResult.ready && attempt < 10;\n                        attempt++\n                    ) {\n                        await new Promise((r) => window.setTimeout(r, 100));\n                        vimrcResult = await loadVimrc(\n                            this.app,\n                            vim,\n                            this.leaderRegistry ?? undefined,\n                        );\n                        this.vimrcRetried = true;\n                    }\n                    this.vimrcCommandCount = vimrcResult.commandCount;\n                    if (!vimrcResult.ready) {\n                        this.vimrcLoading = false;\n                        return;\n                    }\n                    if (!vimrcResult.found) {\n                        new Notice(\n                            `Vim Motions: ${vimrcResult.path} not found. Create the file in your vault root to use custom key mappings.`,\n                        );\n                    } else if (vimrcResult.commandCount === 0) {\n                        new Notice(\n                            `Vim Motions: ${vimrcResult.path} loaded but contained no commands.`,\n                        );\n                    } else {\n                        new Notice(\n                            `Vim Motions: loaded ${vimrcResult.commandCount} command${vimrcResult.commandCount === 1 ? '' : 's'} from ${vimrcResult.path}.`,\n                        );\n                    }\n                    this.vimrcMaps = vimrcResult.maps;\n                    applyVimrcMaps(vim, this.vimrcMaps);\n                    this.reapplySettingsLeaderBindings(vim);\n                    this.reregisterLeaderFeatures();\n                    this.rebuildWhichKey();\n                    this.vimrcLoaded = true;\n                }),\n            );\n        }\n\n        // --- Core ex command (needed by leader bindings) ---\n        registerObCommand(this.registration, this.app);\n\n        // --- Feature registrations ---\n        if (this.settings.enableTextObjects) {\n            registerTextObjects(\n                this.registration,\n                this.settings.multilineScanLimit,\n            );\n        }\n        if (this.settings.enableNavigation) {\n            registerNavigationMotions(this.registration);\n            registerBufferNavigation(this.registration, this.app);\n        }\n        if (this.settings.enableTableNav) {\n            registerTableMotions(this.registration);\n        }\n        if (this.settings.enableHardWrap) {\n            registerOperators(this.registration);\n        }\n        if (this.settings.enableWorkspaceNav) {\n            registerWorkspaceNavigation(\n                this.registration,\n                this.app,\n                this.leaderRegistry,\n            );\n            registerExCommands(this.registration, this.app, vim);\n        }\n        if (this.settings.enableEasyMotion) {\n            this.easyMotionInterceptor?.detach();\n            this.easyMotionInterceptor = registerEasyMotion(\n                this.registration,\n                this.app,\n                this.settings.easyMotionLabels,\n                this.leaderRegistry,\n                this.settings.easyMotionDimming,\n            );\n        }\n        if (this.settings.enableHintMode) {\n            this.registerHintMode(this.registration, this.leaderRegistry);\n            this.addCommand({\n                id: 'show-hint-labels',\n                name: 'Show hint labels',\n                callback: () => this.hintModeAction?.(),\n            });\n            this.setupHintModeWindows();\n        }\n\n        // --- Neovim default remaps (always on, use map so user vimrc noremap can override) ---\n        this.registration.map('Y', 'y$', 'normal');\n        this.registration.map('Q', '@@', 'normal');\n\n        // --- Changelist (g; / g,) ---\n        this.registration.defineMotion(\n            'changeListOlder',\n            createOlderChangeMotion(this.changeList),\n        );\n        this.registration.mapCommand('g;', 'motion', 'changeListOlder', {});\n        this.registration.defineMotion(\n            'changeListNewer',\n            createNewerChangeMotion(this.changeList),\n        );\n        this.registration.mapCommand('g,', 'motion', 'changeListNewer', {});\n\n        const changeList = this.changeList;\n        this.registerEditorExtension(\n            EditorView.updateListener.of((update) => {\n                if (!update.docChanged) return;\n                const pos = update.state.selection.main.head;\n                const doc = update.state.doc;\n                const line = doc.lineAt(pos);\n                changeList.recordChange(line.number - 1, pos - line.from);\n            }),\n        );\n\n        // --- :changes command (needs ChangeList instance) ---\n        const cl = this.changeList;\n        this.registration.defineEx('changes', 'cha', () => {\n            const entries = cl.getEntries();\n            const idx = cl.getIndex();\n            const rows = entries.map((pos, i) => [\n                i === idx ? '>' : ' ',\n                String(i),\n                String(pos.line + 1),\n                String(pos.ch),\n            ]);\n            new VimInfoModal(\n                this.app,\n                'Changes',\n                [\n                    { header: '' },\n                    { header: '#' },\n                    { header: 'Line' },\n                    { header: 'Col' },\n                ],\n                rows,\n            ).open();\n        });\n\n        // --- Status bar and scrolloff ---\n        if (this.settings.enableStatusBar) {\n            this.modeTracker = new VimModeTracker(this, {\n                chordDisplay: this.settings.enableChordDisplay,\n                powerline: this.settings.enablePowerline,\n                modePrompts: this.settings.modePrompts,\n            });\n            this.modeTracker.attach(this.app);\n        }\n        this.scrolloffManager = new ScrolloffManager(this);\n        this.scrolloffManager.setup(this.settings.scrolloffLines);\n        this.registerEditorExtension(createScrolloffExtension());\n\n        // --- Settings tab ---\n        this.addSettingTab(new VimMotionsSettingTab(this.app, this));\n\n        // --- Leader bindings from settings UI ---\n        for (const binding of this.settings.leaderBindings) {\n            if (binding.key && binding.commandId) {\n                const leaderKey = this.leaderRegistry.getLeaderKey();\n                const lhs = leaderKey + binding.key;\n                vim.map(lhs, ':ob ' + binding.commandId);\n                this.leaderRegistry.addBinding(lhs, ':ob ' + binding.commandId);\n            }\n        }\n\n        // --- Insert escape handler ---\n        this.insertEscapeHandler = new InsertEscapeHandler(this.app, vim);\n        this.insertEscapeHandler.attach();\n\n        // --- Ex command suggest ---\n        this.rebuildExSuggest();\n\n        // --- Which-key overlay ---\n        this.rebuildWhichKey();\n    }\n\n    reloadFeatures(): void {\n        this.modeTracker?.destroy();\n        this.modeTracker = null;\n        this.registration?.unregisterAll();\n        this.leaderRegistry?.clearBuiltinBindings();\n\n        const vim = getVimApi();\n        if (!vim) return;\n\n        this.registration = new VimRegistration(vim);\n\n        // :ob must be re-registered unconditionally (unregisterAll noops it)\n        registerObCommand(this.registration, this.app);\n\n        if (this.settings.enableTextObjects) {\n            registerTextObjects(\n                this.registration,\n                this.settings.multilineScanLimit,\n            );\n        }\n        if (this.settings.enableNavigation) {\n            registerNavigationMotions(this.registration);\n            registerBufferNavigation(this.registration, this.app);\n        }\n        if (this.settings.enableTableNav) {\n            registerTableMotions(this.registration);\n        }\n        if (this.settings.enableHardWrap) {\n            registerOperators(this.registration);\n        }\n        if (this.settings.enableWorkspaceNav && this.leaderRegistry) {\n            registerWorkspaceNavigation(\n                this.registration,\n                this.app,\n                this.leaderRegistry,\n            );\n            registerExCommands(this.registration, this.app, vim);\n        }\n        if (this.settings.enableEasyMotion && this.leaderRegistry) {\n            this.easyMotionInterceptor?.detach();\n            this.easyMotionInterceptor = registerEasyMotion(\n                this.registration,\n                this.app,\n                this.settings.easyMotionLabels,\n                this.leaderRegistry,\n                this.settings.easyMotionDimming,\n            );\n        }\n        if (this.settings.enableHintMode && this.leaderRegistry) {\n            this.registerHintMode(this.registration, this.leaderRegistry);\n        }\n        this.registration.map('Y', 'y$', 'normal');\n        this.registration.map('Q', '@@', 'normal');\n\n        if (this.settings.enableStatusBar) {\n            this.modeTracker = new VimModeTracker(this, {\n                chordDisplay: this.settings.enableChordDisplay,\n                powerline: this.settings.enablePowerline,\n                modePrompts: this.settings.modePrompts,\n            });\n            this.modeTracker.attach(this.app);\n        }\n\n        this.scrolloffManager?.setup(this.settings.scrolloffLines);\n\n        this.rebuildExSuggest();\n        this.rebuildWhichKey();\n    }\n\n    private rebuildExSuggest(): void {\n        this.exSuggest?.destroy();\n        this.exSuggest = null;\n\n        const editorContainerEl = (\n            this.app as unknown as { workspace: { containerEl: HTMLElement } }\n        ).workspace.containerEl;\n        if (editorContainerEl && this.registration) {\n            this.exSuggest = new ExCommandSuggest(\n                this.registration.getExCommandNames(),\n            );\n            this.exSuggest.attach(editorContainerEl);\n        }\n    }\n\n    private rebuildWhichKey(): void {\n        this.whichKeyOverlay?.destroy();\n        this.whichKeyOverlay = null;\n\n        if (this.leaderRegistry) {\n            const bindings = this.leaderRegistry.getBindings();\n            if (bindings.length > 0) {\n                this.whichKeyOverlay = new WhichKeyOverlay(\n                    this.app,\n                    this.leaderRegistry.getLeaderKey(),\n                    bindings,\n                );\n                this.whichKeyOverlay.attach();\n            }\n        }\n    }\n\n    private reregisterLeaderFeatures(): void {\n        if (!this.registration || !this.leaderRegistry) return;\n        this.leaderRegistry.clearBuiltinBindings();\n        if (this.settings.enableWorkspaceNav) {\n            registerWorkspaceNavigation(\n                this.registration,\n                this.app,\n                this.leaderRegistry,\n            );\n        }\n        if (this.settings.enableEasyMotion) {\n            this.easyMotionInterceptor?.detach();\n            this.easyMotionInterceptor = registerEasyMotion(\n                this.registration,\n                this.app,\n                this.settings.easyMotionLabels,\n                this.leaderRegistry,\n                this.settings.easyMotionDimming,\n            );\n        }\n        if (this.settings.enableHintMode) {\n            this.registerHintMode(this.registration, this.leaderRegistry);\n        }\n    }\n\n    private hintModeAction: (() => void) | null = null;\n\n    private registerHintMode(\n        reg: VimRegistration,\n        leaderRegistry: LeaderRegistry,\n    ): void {\n        this.hintModeAction = createHintModeAction(\n            this.app,\n            this.settings.hintModeLabels,\n        );\n        reg.defineAction('hintMode', this.hintModeAction);\n        const leader = leaderRegistry.getLeaderKey();\n        const hintKeys = leader + leader + 'h';\n        reg.mapCommand(hintKeys, 'action', 'hintMode', {});\n        leaderRegistry.addBinding(hintKeys, 'Hint mode', 'builtin');\n    }\n\n    private parseHotkey(serialized: string): {\n        key: string;\n        ctrl: boolean;\n        shift: boolean;\n        alt: boolean;\n        meta: boolean;\n    } | null {\n        if (!serialized) return null;\n        const colonIdx = serialized.indexOf(':');\n        if (colonIdx === -1) return null;\n        const modPart = serialized.slice(0, colonIdx);\n        const key = serialized.slice(colonIdx + 1);\n        if (!key) return null;\n        const mods = new Set(modPart.split(',').filter(Boolean));\n        return {\n            key,\n            ctrl: mods.has('ctrl'),\n            shift: mods.has('shift'),\n            alt: mods.has('alt'),\n            meta: mods.has('meta'),\n        };\n    }\n\n    private setupHintModeOnWindow(doc: Document): void {\n        if (!this.hintModeAction) return;\n        if (this.hintWindowDocs.has(doc)) return;\n        this.hintWindowDocs.add(doc);\n        const action = this.hintModeAction;\n\n        const handler = (e: KeyboardEvent) => {\n            const parsed = this.parseHotkey(this.settings.hintModeHotkey);\n            if (!parsed) return;\n\n            const eventKey = e.key === 'Unidentified' ? e.code : e.key;\n            if (\n                eventKey === parsed.key &&\n                e.ctrlKey === parsed.ctrl &&\n                e.shiftKey === parsed.shift &&\n                e.altKey === parsed.alt &&\n                e.metaKey === parsed.meta\n            ) {\n                e.preventDefault();\n                e.stopPropagation();\n                action();\n            }\n        };\n        doc.addEventListener('keydown', handler, true);\n        this.hintWindowCleanups.push(() => {\n            doc.removeEventListener('keydown', handler, true);\n        });\n    }\n\n    private setupHintModeWindows(): void {\n        this.cleanupHintModeWindows();\n        const mainDoc = this.app.workspace.containerEl.ownerDocument;\n        this.setupHintModeOnWindow(mainDoc);\n        this.registerEvent(\n            this.app.workspace.on('window-open', (_workspaceWindow, win) => {\n                this.setupHintModeOnWindow(win.document);\n            }),\n        );\n    }\n\n    private cleanupHintModeWindows(): void {\n        for (const cleanup of this.hintWindowCleanups) cleanup();\n        this.hintWindowCleanups = [];\n        this.hintWindowDocs.clear();\n    }\n\n    private reapplySettingsLeaderBindings(vim: VimApi): void {\n        if (!this.leaderRegistry) return;\n        const leaderKey = this.leaderRegistry.getLeaderKey();\n        for (const binding of this.settings.leaderBindings) {\n            if (!binding.key || !binding.commandId) continue;\n            const oldLhs = '\\\\' + binding.key;\n            try {\n                vim.unmap(oldLhs);\n            } catch {\n                /* old binding may not exist */\n            }\n            const lhs = leaderKey + binding.key;\n            vim.map(lhs, ':ob ' + binding.commandId);\n            this.leaderRegistry.addBinding(lhs, ':ob ' + binding.commandId);\n        }\n    }\n\n    onunload() {\n        this.cleanupHintModeWindows();\n        this.easyMotionInterceptor?.detach();\n        this.easyMotionInterceptor = null;\n        this.exSuggest?.destroy();\n        this.exSuggest = null;\n        this.whichKeyOverlay?.destroy();\n        this.whichKeyOverlay = null;\n        this.insertEscapeHandler?.destroy();\n        this.insertEscapeHandler = null;\n        this.modeTracker?.destroy();\n        this.modeTracker = null;\n        this.scrolloffManager?.destroy();\n        this.scrolloffManager = null;\n        this.registration?.unregisterAll();\n        this.registration = null;\n    }\n\n    async loadSettings() {\n        this.settings = Object.assign(\n            {},\n            DEFAULT_SETTINGS,\n            (await this.loadData()) as Partial<VimMotionsSettings>,\n        );\n    }\n\n    async saveSettings() {\n        await this.saveData(this.settings);\n    }\n}",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_?",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 2,
+                    "ch": 3
+                }
+            },
+            "keys": "?dialog\n<C-o>",
+            "result": {
+                "content": "import tseslint from 'typescript-eslint';\nimport obsidianmd from 'eslint-plugin-obsidianmd';\nimport globals from 'globals';\nimport { globalIgnores } from 'eslint/config';\n\nexport default tseslint.config(\n    globalIgnores([\n        'node_modules',\n        'dist',\n        'esbuild.config.mjs',\n        'version-bump.mjs',\n        'versions.json',\n        'main.js',\n        'package.json',\n        'package-lock.json',\n        'tsconfig.json',\n        'wdio.conf.mts',\n        'test',\n        'test-vault',\n    ]),\n    {\n        languageOptions: {\n            globals: {\n                ...globals.browser,\n            },\n            parserOptions: {\n                projectService: {\n                    allowDefaultProject: ['eslint.config.mts', 'manifest.json'],\n                },\n                tsconfigRootDir: import.meta.dirname,\n                extraFileExtensions: ['.json'],\n            },\n        },\n    },\n    ...obsidianmd.configs.recommended,\n    {\n        rules: {\n            'import/no-extraneous-dependencies': [\n                'error',\n                {\n                    peerDependencies: true,\n                    optionalDependencies: false,\n                    bundledDependencies: false,\n                },\n            ],\n            'obsidianmd/ui/sentence-case': [\n                'error',\n                {\n                    brands: [\n                        'EasyMotion',\n                        'Markdown',\n                        'Powerline',\n                        'Vim',\n                        'Vim Motions',\n                    ],\n                },\n            ],\n        },\n        settings: {\n            'import/core-modules': [\n                '@codemirror/autocomplete',\n                '@codemirror/collab',\n                '@codemirror/commands',\n                '@codemirror/language',\n                '@codemirror/lint',\n                '@codemirror/search',\n                '@codemirror/state',\n                '@codemirror/view',\n                '@lezer/common',\n                '@lezer/highlight',\n                '@lezer/lr',\n            ],\n        },\n    },\n);",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_skip_deleted_mark<c-o>",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                }
+            },
+            "keys": "*nnkdk<C-o><C-o><C-o>",
+            "result": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_jumplist_skip_deleted_mark<c-i>",
+            "initial": {
+                "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                }
+            },
+            "keys": "*nnkdk<C-o><C-i><C-i>",
+            "result": {
+                "content": "word\nword.\n\nword search\n}word\nword\nword\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        }
+    ]
+}

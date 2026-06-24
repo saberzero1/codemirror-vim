@@ -1,0 +1,873 @@
+[
+  {
+    "name": "vim_|",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "|",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_|_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 4
+    },
+    "keys": "3|",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_h",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "h",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_h_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 5
+    },
+    "keys": "3h",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_l",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "l",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_Space",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "<Space>",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_l_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "2l",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_j",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 5
+    },
+    "keys": "j",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_j_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 5
+    },
+    "keys": "2j",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_j_repeat_clip",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "1000j",
+    "expectedCursor": {
+      "line": 15,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_k",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 1,
+      "ch": 5
+    },
+    "keys": "k",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_k_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 4
+    },
+    "keys": "2k",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 4
+    }
+  },
+  {
+    "name": "vim_k_repeat_clip",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 4
+    },
+    "keys": "1000k",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 4
+    }
+  },
+  {
+    "name": "vim_w",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "w",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_keepHPos",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 12,
+      "ch": 12
+    },
+    "keys": "5jj7k",
+    "expectedCursor": {
+      "line": 8,
+      "ch": 12
+    }
+  },
+  {
+    "name": "vim_keepHPosEol",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "$2j",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 18
+    }
+  },
+  {
+    "name": "vim_w_multiple_newlines_no_space",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 11,
+      "ch": 2
+    },
+    "keys": "w",
+    "expectedCursor": {
+      "line": 12,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_w_multiple_newlines_with_space",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 12,
+      "ch": 51
+    },
+    "keys": "w",
+    "expectedCursor": {
+      "line": 14,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_w_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "2w",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 7
+    }
+  },
+  {
+    "name": "vim_w_wrap",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 7
+    },
+    "keys": "w",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_w_endOfDocument",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 15,
+      "ch": 0
+    },
+    "keys": "w",
+    "expectedCursor": {
+      "line": 15,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_w_start_to_end",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "1000w",
+    "expectedCursor": {
+      "line": 15,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_W",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "W",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_W_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "2W",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_e",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "e",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_e_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "2e",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 9
+    }
+  },
+  {
+    "name": "vim_e_wrap",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 9
+    },
+    "keys": "e",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_e_endOfDocument",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 15,
+      "ch": 0
+    },
+    "keys": "e",
+    "expectedCursor": {
+      "line": 15,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_e_start_to_end",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "1000e",
+    "expectedCursor": {
+      "line": 15,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_b",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 1,
+      "ch": 5
+    },
+    "keys": "b",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_b_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 1,
+      "ch": 5
+    },
+    "keys": "2b",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 7
+    }
+  },
+  {
+    "name": "vim_b_wrap",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 1,
+      "ch": 1
+    },
+    "keys": "b",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 7
+    }
+  },
+  {
+    "name": "vim_b_startOfDocument",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "b",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_b_end_to_start",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 15,
+      "ch": 0
+    },
+    "keys": "1000b",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_ge",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 1,
+      "ch": 5
+    },
+    "keys": "ge",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 9
+    }
+  },
+  {
+    "name": "vim_ge_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 1,
+      "ch": 1
+    },
+    "keys": "2ge",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_ge_wrap",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 1,
+      "ch": 1
+    },
+    "keys": "ge",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 9
+    }
+  },
+  {
+    "name": "vim_ge_startOfDocument",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "ge",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_ge_end_to_start",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 15,
+      "ch": 0
+    },
+    "keys": "1000ge",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_gg",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 3,
+      "ch": 1
+    },
+    "keys": "gg",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_gg_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "3gg",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_G",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 3,
+      "ch": 1
+    },
+    "keys": "G",
+    "expectedCursor": {
+      "line": 15,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_G_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "3G",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_0",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "0",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_^",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "^",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_+",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "+",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_-",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 1,
+      "ch": 4
+    },
+    "keys": "-",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim__",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 8
+    },
+    "keys": "6_",
+    "expectedCursor": {
+      "line": 5,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_$",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "$",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 9
+    }
+  },
+  {
+    "name": "vim_$_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 3
+    },
+    "keys": "2$",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 7
+    }
+  },
+  {
+    "name": "vim_$",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "v$",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 10
+    }
+  },
+  {
+    "name": "vim_f",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 0
+    },
+    "keys": "fp",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_f_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 2
+    },
+    "keys": "2fp",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 6
+    }
+  },
+  {
+    "name": "vim_f_num",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 0
+    },
+    "keys": "f2",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 14
+    }
+  },
+  {
+    "name": "vim_f<S-Space>",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 1
+    },
+    "keys": "f<S-Space>",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 6
+    }
+  },
+  {
+    "name": "vim_t",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 0
+    },
+    "keys": "tp",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_t_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 2
+    },
+    "keys": "2tp",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_F",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 4
+    },
+    "keys": "Fp",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_F_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 6
+    },
+    "keys": "2Fp",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_T",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 4
+    },
+    "keys": "Tp",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_T_repeat",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 2,
+      "ch": 6
+    },
+    "keys": "2Tp",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_%_parens",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 3,
+      "ch": 1
+    },
+    "keys": "%",
+    "expectedCursor": {
+      "line": 3,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_%_squares",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 3,
+      "ch": 5
+    },
+    "keys": "%",
+    "expectedCursor": {
+      "line": 3,
+      "ch": 7
+    }
+  },
+  {
+    "name": "vim_%_braces",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 3,
+      "ch": 9
+    },
+    "keys": "%",
+    "expectedCursor": {
+      "line": 3,
+      "ch": 11
+    }
+  },
+  {
+    "name": "vim_%_seek_outside",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 4,
+      "ch": 1
+    },
+    "keys": "%",
+    "expectedCursor": {
+      "line": 4,
+      "ch": 16
+    }
+  },
+  {
+    "name": "vim_%_seek_inside",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 4,
+      "ch": 14
+    },
+    "keys": "%",
+    "expectedCursor": {
+      "line": 4,
+      "ch": 11
+    }
+  },
+  {
+    "name": "vim_di(_outside_should_stay",
+    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+    "cursor": {
+      "line": 0,
+      "ch": 0
+    },
+    "keys": "di(",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 0
+    }
+  }
+]

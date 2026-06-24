@@ -14,7 +14,11 @@
     "build": "cm-buildhelper src/index.ts && node scripts/addVersion.cjs && npm run build-types",
     "publish": "yarn run build && npm publish",
     "build-test-package": "bash ./scripts/build-test-package.sh",
-    "prepare": "yarn run build"
+    "prepare": "yarn run build",
+    "test:neovim-extract": "tsx test/neovim/extract-definitions.ts",
+    "test:neovim-record": "tsx test/neovim/record-golden.ts",
+    "test:neovim-compare": "tsx test/neovim/compare.ts",
+    "test:neovim-collect": "tsx test/neovim/collect-snapshots.ts"
   },
   "keywords": [
     "editor",
@@ -44,6 +48,8 @@
     "@codemirror/language": "6.x.x",
     "codemirror": "6.x.x",
     "dts-bundle-generator": "^9.5.1",
+    "neovim": "^5.4.0",
+    "tsx": "^4.22.4",
     "typescript": "^5.8.2",
     "vite": "^6.2.2"
   },

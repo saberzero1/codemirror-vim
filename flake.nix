@@ -18,6 +18,7 @@
             yarn
             chromium
             chromedriver
+            neovim
           ];
 
           shellHook = ''

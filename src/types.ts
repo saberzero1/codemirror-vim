@@ -149,7 +149,7 @@ export type MotionArgsPartial = {
 
 export type MotionArgs = MotionArgsPartial & {repeat: number};
 
-export type MotionFn = (cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs, vim: vimState, inputState: InputStateInterface) => Pos|[Pos,Pos]|null|undefined
+export type MotionFn = (cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs, vim: vimState, inputState: InputStateInterface) => Pos|[Pos,Pos]|Promise<Pos|[Pos,Pos]|null>|null|undefined
 export type vimMotions = {
     moveToTopLine(cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs): Pos
     moveToMiddleLine(cm: CodeMirrorV): Pos
@@ -239,6 +239,7 @@ type allCommands = {
     isEdit?: boolean,
     repeatOverride?: number,
     noremap?: boolean,
+    operatorPending?: boolean,
 }
 export type motionCommand = allCommands & {
     type: 'motion',

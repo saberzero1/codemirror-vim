@@ -1,0 +1,301 @@
+[
+  {
+    "name": "vim_jumplist_H",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 5,
+      "ch": 2
+    },
+    "keys": "H<C-o>",
+    "expectedCursor": {
+      "line": 5,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_jumplist_M",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 2
+    },
+    "keys": "M<C-o>",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_jumplist_L",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 2
+    },
+    "keys": "L<C-o>",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_jumplist_[[",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 5,
+      "ch": 2
+    },
+    "keys": "[[<C-o>",
+    "expectedCursor": {
+      "line": 5,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_jumplist_]]",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 2
+    },
+    "keys": "]]<C-o>",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_jumplist_G",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 5,
+      "ch": 2
+    },
+    "keys": "G<C-o>",
+    "expectedCursor": {
+      "line": 5,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_jumplist_gg",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 5,
+      "ch": 2
+    },
+    "keys": "gg<C-o>",
+    "expectedCursor": {
+      "line": 5,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_jumplist_%",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 1,
+      "ch": 5
+    },
+    "keys": "%<C-o>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_jumplist_{",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 1,
+      "ch": 5
+    },
+    "keys": "{<C-o>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_jumplist_}",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 1,
+      "ch": 5
+    },
+    "keys": "}<C-o>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_jumplist_\\'",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 1,
+      "ch": 5
+    },
+    "keys": "mah'ah<C-i>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_jumplist_`",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 1,
+      "ch": 5
+    },
+    "keys": "mah`ah<C-i>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 5
+    }
+  },
+  {
+    "name": "vim_jumplist_*_cachedCursor",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "*<C-o>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_jumplist_#_cachedCursor",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 1,
+      "ch": 3
+    },
+    "keys": "#<C-o>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_jumplist_n",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 3
+    },
+    "keys": "#n<C-o>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_jumplist_N",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 3
+    },
+    "keys": "#N<C-o>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 1
+    }
+  },
+  {
+    "name": "vim_jumplist_repeat_<c-o>",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 3
+    },
+    "keys": "***3<C-o>",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_jumplist_repeat_<c-i>",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 3
+    },
+    "keys": "***3<C-o>2<C-i>",
+    "expectedCursor": {
+      "line": 5,
+      "ch": 0
+    }
+  },
+  {
+    "name": "vim_jumplist_repeated_motion",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 3
+    },
+    "keys": "3*<C-o>",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_jumplist_/",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 3
+    },
+    "keys": "/dialog\n<C-o>",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_jumplist_?",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 2,
+      "ch": 3
+    },
+    "keys": "?dialog\n<C-o>",
+    "expectedCursor": {
+      "line": 2,
+      "ch": 3
+    }
+  },
+  {
+    "name": "vim_jumplist_skip_deleted_mark<c-o>",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 0,
+      "ch": 2
+    },
+    "keys": "*nnkdk<C-o><C-o><C-o>",
+    "expectedCursor": {
+      "line": 0,
+      "ch": 2
+    }
+  },
+  {
+    "name": "vim_jumplist_skip_deleted_mark<c-i>",
+    "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
+    "cursor": {
+      "line": 0,
+      "ch": 2
+    },
+    "keys": "*nnkdk<C-o><C-i><C-i>",
+    "expectedCursor": {
+      "line": 1,
+      "ch": 0
+    }
+  }
+]

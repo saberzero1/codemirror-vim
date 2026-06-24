@@ -1,0 +1,1527 @@
+{
+    "suite": "edits",
+    "neovim_version": "0.12.2",
+    "recorded_at": "2026-06-23T23:12:40.507Z",
+    "cases": [
+        {
+            "name": "vim_diw_mid_spc",
+            "initial": {
+                "content": "foo \tbAr\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": "foo \t\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daw_mid_spc",
+            "initial": {
+                "content": "foo \tbAr\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "daw",
+            "result": {
+                "content": "foo \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diw_mid_punct",
+            "initial": {
+                "content": "foo \tbAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": "foo \t.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daw_mid_punct",
+            "initial": {
+                "content": "foo \tbAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "daw",
+            "result": {
+                "content": "foo.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diw_mid_punct2",
+            "initial": {
+                "content": "foo \t,bAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": "foo \t,.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daw_mid_punct2",
+            "initial": {
+                "content": "foo \t,bAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                }
+            },
+            "keys": "daw",
+            "result": {
+                "content": "foo \t,.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diw_start_spc",
+            "initial": {
+                "content": "bAr \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": " \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daw_start_spc",
+            "initial": {
+                "content": "bAr \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                }
+            },
+            "keys": "daw",
+            "result": {
+                "content": "baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diw_start_punct",
+            "initial": {
+                "content": "bAr. \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": ". \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daw_start_punct",
+            "initial": {
+                "content": "bAr. \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                }
+            },
+            "keys": "daw",
+            "result": {
+                "content": ". \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diw_end_spc",
+            "initial": {
+                "content": "foo \tbAr",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": "foo \t",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daw_end_spc",
+            "initial": {
+                "content": "foo \tbAr",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "daw",
+            "result": {
+                "content": "foo",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diw_end_punct",
+            "initial": {
+                "content": "foo \tbAr.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": "foo \t.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daw_end_punct",
+            "initial": {
+                "content": "foo \tbAr.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "daw",
+            "result": {
+                "content": "foo.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diw_space_word1",
+            "initial": {
+                "content": "foo \t\n\tbar.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": "foo\n\tbar.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diw_space_word2",
+            "initial": {
+                "content": "foo +bar.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": "foo+bar.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diw_space_word3",
+            "initial": {
+                "content": " foo bar.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                }
+            },
+            "keys": "diw",
+            "result": {
+                "content": "foo bar.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diW_mid_spc",
+            "initial": {
+                "content": "foo \tbAr\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "diW",
+            "result": {
+                "content": "foo \t\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daW_mid_spc",
+            "initial": {
+                "content": "foo \tbAr\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "daW",
+            "result": {
+                "content": "foo \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diW_mid_punct",
+            "initial": {
+                "content": "foo \tbAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "diW",
+            "result": {
+                "content": "foo \t\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daW_mid_punct",
+            "initial": {
+                "content": "foo \tbAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "daW",
+            "result": {
+                "content": "foo \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diW_mid_punct2",
+            "initial": {
+                "content": "foo \t,bAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                }
+            },
+            "keys": "diW",
+            "result": {
+                "content": "foo \t\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daW_mid_punct2",
+            "initial": {
+                "content": "foo \t,bAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                }
+            },
+            "keys": "daW",
+            "result": {
+                "content": "foo \tbaz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diW_start_spc",
+            "initial": {
+                "content": "bAr\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                }
+            },
+            "keys": "diW",
+            "result": {
+                "content": "\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daW_start_spc",
+            "initial": {
+                "content": "bAr\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                }
+            },
+            "keys": "daW",
+            "result": {
+                "content": "baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diW_start_punct",
+            "initial": {
+                "content": "bAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                }
+            },
+            "keys": "diW",
+            "result": {
+                "content": "\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daW_start_punct",
+            "initial": {
+                "content": "bAr.\t baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                }
+            },
+            "keys": "daW",
+            "result": {
+                "content": "baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diW_end_spc",
+            "initial": {
+                "content": "foo \tbAr",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "diW",
+            "result": {
+                "content": "foo \t",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daW_end_spc",
+            "initial": {
+                "content": "foo \tbAr",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "daW",
+            "result": {
+                "content": "foo",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diW_end_punct",
+            "initial": {
+                "content": "foo \tbAr.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "diW",
+            "result": {
+                "content": "foo \t",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daW_end_punct",
+            "initial": {
+                "content": "foo \tbAr.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "daW",
+            "result": {
+                "content": "foo",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diW_space_word2",
+            "initial": {
+                "content": "foo +bar.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                }
+            },
+            "keys": "diW",
+            "result": {
+                "content": "foo+bar.",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di(_open_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "di(",
+            "result": {
+                "content": "foo () baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di)_open_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "di)",
+            "result": {
+                "content": "foo () baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_dib_open_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "dib",
+            "result": {
+                "content": "foo () baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da(_open_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "da(",
+            "result": {
+                "content": "foo  baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da)_open_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "da)",
+            "result": {
+                "content": "foo  baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di(_middle_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "di(",
+            "result": {
+                "content": "foo () baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di)_middle_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "di)",
+            "result": {
+                "content": "foo () baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da(_middle_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "da(",
+            "result": {
+                "content": "foo  baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da)_middle_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                }
+            },
+            "keys": "da)",
+            "result": {
+                "content": "foo  baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di(_close_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                }
+            },
+            "keys": "di(",
+            "result": {
+                "content": "foo () baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di)_close_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                }
+            },
+            "keys": "di)",
+            "result": {
+                "content": "foo () baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da(_close_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                }
+            },
+            "keys": "da(",
+            "result": {
+                "content": "foo  baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da)_close_spc",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                }
+            },
+            "keys": "da)",
+            "result": {
+                "content": "foo  baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di`",
+            "initial": {
+                "content": "foo `bAr` baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "di`",
+            "result": {
+                "content": "foo `` baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di>",
+            "initial": {
+                "content": "foo <bAr> baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "di>",
+            "result": {
+                "content": "foo <> baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da<",
+            "initial": {
+                "content": "foo <bAr> baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "da<",
+            "result": {
+                "content": "foo  baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_dab_on_(_should_delete_around_()block",
+            "initial": {
+                "content": "o( in(abc) )",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                }
+            },
+            "keys": "dab",
+            "result": {
+                "content": "o( in )",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daB_on_{_should_delete_around_{}block",
+            "initial": {
+                "content": "o{ in{abc} }",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                }
+            },
+            "keys": "daB",
+            "result": {
+                "content": "o{ in }",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_diB_on_{_should_delete_inner_{}block",
+            "initial": {
+                "content": "o{ in{abc} }",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                }
+            },
+            "keys": "diB",
+            "result": {
+                "content": "o{ in{} }",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da{_on_{_should_delete_inner_block",
+            "initial": {
+                "content": "o{ in{abc} }",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                }
+            },
+            "keys": "da{",
+            "result": {
+                "content": "o{ in }",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di[_on_(_should_not_delete",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "di[",
+            "result": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di[_on_)_should_not_delete",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                }
+            },
+            "keys": "di[",
+            "result": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da[_on_(_should_not_delete",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                }
+            },
+            "keys": "da[",
+            "result": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da[_on_)_should_not_delete",
+            "initial": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                }
+            },
+            "keys": "da[",
+            "result": {
+                "content": "foo (bAr) baz",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di{_middle_spc",
+            "initial": {
+                "content": "a{\n\tbar\n}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "di{",
+            "result": {
+                "content": "a{\n}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di}_middle_spc",
+            "initial": {
+                "content": "a{\n\tbar\n}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "di}",
+            "result": {
+                "content": "a{\n}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da{_middle_spc",
+            "initial": {
+                "content": "a{\n\tbar\n}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "da{",
+            "result": {
+                "content": "ab",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da}_middle_spc",
+            "initial": {
+                "content": "a{\n\tbar\n}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "da}",
+            "result": {
+                "content": "ab",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_daB_middle_spc",
+            "initial": {
+                "content": "a{\n\tbar\n}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "daB",
+            "result": {
+                "content": "ab",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di{_middle_spc",
+            "initial": {
+                "content": "a{\n\tbar\n\t}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "di{",
+            "result": {
+                "content": "a{\n\t}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di}_middle_spc",
+            "initial": {
+                "content": "a{\n\tbar\n\t}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "di}",
+            "result": {
+                "content": "a{\n\t}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da{_middle_spc",
+            "initial": {
+                "content": "a{\n\tbar\n\t}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "da{",
+            "result": {
+                "content": "ab",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da}_middle_spc",
+            "initial": {
+                "content": "a{\n\tbar\n\t}b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "da}",
+            "result": {
+                "content": "ab",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di[_middle_spc",
+            "initial": {
+                "content": "a\t[\n\tbar\n]b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "di[",
+            "result": {
+                "content": "a\t[\n]b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di]_middle_spc",
+            "initial": {
+                "content": "a\t[\n\tbar\n]b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "di]",
+            "result": {
+                "content": "a\t[\n]b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da[_middle_spc",
+            "initial": {
+                "content": "a\t[\n\tbar\n]b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "da[",
+            "result": {
+                "content": "a\tb",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da]_middle_spc",
+            "initial": {
+                "content": "a\t[\n\tbar\n]b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "da]",
+            "result": {
+                "content": "a\tb",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di<_middle_spc",
+            "initial": {
+                "content": "a\t<\n\tbar\n>b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "di<",
+            "result": {
+                "content": "a\t<\n>b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_di>_middle_spc",
+            "initial": {
+                "content": "a\t<\n\tbar\n>b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "di>",
+            "result": {
+                "content": "a\t<\n>b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da<_middle_spc",
+            "initial": {
+                "content": "a\t<\n\tbar\n>b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "da<",
+            "result": {
+                "content": "a\tb",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_da>_middle_spc",
+            "initial": {
+                "content": "a\t<\n\tbar\n>b",
+                "cursor": {
+                    "line": 1,
+                    "ch": 3
+                }
+            },
+            "keys": "da>",
+            "result": {
+                "content": "a\tb",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_dat_noop",
+            "initial": {
+                "content": "<outer><inner>hello</inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 9
+                }
+            },
+            "keys": "dat",
+            "result": {
+                "content": "<outer></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_dat_open_tag",
+            "initial": {
+                "content": "<outer><inner>hello</inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 9
+                }
+            },
+            "keys": "dat",
+            "result": {
+                "content": "<outer></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_dat_inside_tag",
+            "initial": {
+                "content": "<outer><inner>hello</inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 16
+                }
+            },
+            "keys": "dat",
+            "result": {
+                "content": "<outer></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_dat_close_tag",
+            "initial": {
+                "content": "<outer><inner>hello</inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 20
+                }
+            },
+            "keys": "dat",
+            "result": {
+                "content": "<outer></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 7
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_dit_open_tag",
+            "initial": {
+                "content": "<outer><inner>hello</inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 9
+                }
+            },
+            "keys": "dit",
+            "result": {
+                "content": "<outer><inner></inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 14
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_dit_inside_tag",
+            "initial": {
+                "content": "<outer><inner>hello</inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 16
+                }
+            },
+            "keys": "dit",
+            "result": {
+                "content": "<outer><inner></inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 14
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_dit_close_tag",
+            "initial": {
+                "content": "<outer><inner>hello</inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 20
+                }
+            },
+            "keys": "dit",
+            "result": {
+                "content": "<outer><inner></inner></outer>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 14
+                },
+                "mode": "normal"
+            }
+        }
+    ]
+}

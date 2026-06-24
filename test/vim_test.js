@@ -179,12 +179,16 @@ function testVim(name, run, opts, expectedFail) {
         }
     });
 
+    var __keyLog = [];
     var helpers = {
       doKeys: function() {
         var args = arguments[0]
         if (!Array.isArray(args)) { args = arguments; }
         for (var i = 0; i < args.length; i++) {
           var key = args[i];
+          if (typeof window !== 'undefined' && window.__NEOVIM_INSTRUMENT) {
+            __keyLog.push(key);
+          }
           if (key.length > 1 && key[0] == "<" && key.slice(-1) == ">") {
               key = vimKeyToKeyName(key.slice(1, -1));
           }
@@ -212,11 +216,26 @@ function testVim(name, run, opts, expectedFail) {
       }
     };
     CodeMirror.Vim.resetVimGlobalState_();
+    var __initialContent = cm.getValue();
+    var __initialCursor = cm.getCursor();
     var successful = false;
     try {
       await run(cm, vim, helpers);
       successful = true;
     } finally {
+      if (typeof window !== 'undefined' && window.__NEOVIM_INSTRUMENT && window.__neovimSnapshots) {
+        var vimState = CodeMirror.Vim.maybeInitVimState_(cm);
+        window.__neovimSnapshots.push({
+          name: 'vim_' + name,
+          initialContent: __initialContent,
+          initialCursor: {line: __initialCursor.line, ch: __initialCursor.ch},
+          keySequence: __keyLog.slice(),
+          finalContent: cm.getValue(),
+          finalCursor: {line: cm.getCursor().line, ch: cm.getCursor().ch},
+          finalMode: vimState.insertMode ? 'insert' : (vimState.visualMode ? 'visual' : 'normal'),
+          error: null
+        });
+      }
       if (successful && !window.verbose) {
         cm.getWrapperElement().remove();
       }

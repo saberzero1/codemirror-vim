@@ -27,13 +27,38 @@ update, and class update. The event is stopped with `stopImmediatePropagation`.
 
 The listener is removed in `destroy()`.
 
-**Note**: This fix is specifically needed when codemirror-vim is loaded via
-Obsidian's `registerEditorExtension()`. It is harmless when loaded as part of
-Obsidian's built-in vim mode because the guard conditions (`hasFocus`, mode
-checks) prevent double-handling. WebDriver (used by wdio-obsidian-service for
-e2e testing) sends Escape through Electron's accelerator layer which bypasses
-DOM entirely — the test helpers use `Vim.handleKey` directly for Escape via
-the `sendVimEscape()` helper.
+---
+
+### 2. Testing API surface
+
+**File**: `src/vim.js` — `vimApi` object
+
+**Fix**: Added `getInputState(cm)`, `getLastEditInfo(cm)`, `getSearchState(cm)`, `getJumpList()`, and `getMacroState()` methods to the `vimApi` object. These methods provide internal state introspection for testing and debugging without exposing the full `Vim` object internals.
+
+### 3. Behavioral fixes
+
+**File**: `src/vim.js` — `operators.delete`, `onChange`
+
+**Fixes**:
+- `operators.delete`: Fixed linewise delete to end of file (`dG`) leaving a trailing newline. The anchor is now expanded to include the preceding newline when deleting from a non-first line to past the last line.
+- `onChange`: Expanded insert-mode change capture to accept CM6-style input origins (prefixed with "input"). This ensures `cw` dot-repeat recording works in environments where the origin is "input.type" instead of "+input".
+- `findNext` (internal): Fixed search wrap-around cursor position — when the cursor is inside the current match, `findNext` now skips to the next match instead of returning the current one, making `n`/`N` wrap-around consistent after incremental search.
+
+### 4. Operator-pending action support
+
+**Files**: `src/vim.js` — `commandMatches`, `evalInput`; `src/types.ts`
+
+**Fixes**:
+- `commandMatches`: Added `operatorPending` boolean flag to keymap entries. Actions with `operatorPending: true` bypass the operator-pending filter, enabling native dispatch for async actions like EasyMotion.
+- `types.ts`: Added `operatorPending?: boolean` to the `allCommands` type.
+
+### 5. Async motion dispatch
+
+**Files**: `src/vim.js` — `evalInput`; `src/types.ts`
+
+**Fixes**:
+- `evalInput`: Refactored operator application into a new `applyOperator` method. Motion results that are thenables (Promises) now defer operator application via `.then()`. This enables async motions like EasyMotion label selection to work with operators.
+- `types.ts`: Widened `MotionFn` return type to include `Promise<Pos|[Pos,Pos]|null>`.
 
 ---
 
@@ -48,14 +73,9 @@ defaults where the motions plugin already expects Neovim semantics:
 - `Y` → `y$` (Neovim default, already overridden by the motions plugin via
   `mapCommand`)
 - `Q` → `@@` (Neovim default, already overridden by the motions plugin)
-- Operator-pending mode accepting async actions (the core reason for this fork)
 - Other behavioral deltas tracked in the motions plugin's
   `test/neovim/deviations.ts`
 
 ### Async operator-pending support
 
-The primary motivation for this fork: modifying `commandMatches()` (vim.js
-line 3630) and `evalInput()` (vim.js line 2043) to allow actions to fire in
-operator-pending context, enabling `d<leader><leader>w{label}` (delete to
-EasyMotion target) to work through the native vim dispatch pipeline instead of
-the current capture-phase interceptor workaround.
+The primary motivation for this fork: modifying `commandMatches()` and `evalInput()` to allow actions to fire in operator-pending context. The core infrastructure for async operator-pending support is now implemented in the fork, enabling `d<leader><leader>w{label}` to work through the native vim dispatch pipeline. Plugin-side registration of these async actions is pending.

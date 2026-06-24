@@ -825,6 +825,33 @@ export function initVim(CM) {
     // Testing hook.
     maybeInitVimState_: maybeInitVimState,
 
+    // Testing hook: returns the current InputState for the given editor.
+    getInputState: function(cm) {
+      var vim = maybeInitVimState(cm);
+      return vim.inputState;
+    },
+    // Testing hook: returns last edit info (inputState + actionCommand).
+    getLastEditInfo: function(cm) {
+      var vim = maybeInitVimState(cm);
+      return {
+        inputState: vim.lastEditInputState,
+        actionCommand: vim.lastEditActionCommand,
+      };
+    },
+    // Testing hook: returns the search state for the given editor.
+    getSearchState: function(cm) {
+      var vim = maybeInitVimState(cm);
+      return vim.searchState_;
+    },
+    // Testing hook: returns the global jump list.
+    getJumpList: function() {
+      return vimGlobalState.jumpList;
+    },
+    // Testing hook: returns the global macro mode state.
+    getMacroState: function() {
+      return vimGlobalState.macroModeState;
+    },
+
     suppressErrorLogging: false,
 
     InsertModeKey: InsertModeKey,
@@ -2040,8 +2067,49 @@ export function initVim(CM) {
       motionArgs.repeat = repeat;
       clearInputState(cm);
       if (motion) {
-        var motionResult = motions[motion](cm, origHead, motionArgs, vim, inputState);
+        var motionResultRaw = motions[motion](cm, origHead, motionArgs, vim, inputState);
         vim.lastMotion = motions[motion];
+
+        if (motionResultRaw && typeof (/** @type {any} */ (motionResultRaw)).then === 'function') {
+          var asyncResult = /** @type {Promise<import("./types").Pos|[import("./types").Pos,import("./types").Pos]|null>} */ (motionResultRaw);
+          var savedOperator = operator;
+          var savedOperatorArgs = operatorArgs;
+          var savedMotionArgs = motionArgs;
+          var savedRegisterName = registerName;
+          var savedSel = sel;
+          var savedOldAnchor = oldAnchor;
+          var savedOldHead = oldHead;
+          var savedVim = vim;
+          var savedRepeat = repeat;
+          var dispatcher = this;
+          asyncResult.then(function(resolvedResult) {
+            if (!resolvedResult || !cm.state.vim) return;
+            var rNewHead, rNewAnchor;
+            if (resolvedResult instanceof Array) {
+              rNewAnchor = resolvedResult[0];
+              rNewHead = resolvedResult[1];
+            } else {
+              rNewHead = resolvedResult;
+            }
+            if (savedOperator) {
+              dispatcher.applyOperator(
+                cm, savedVim, savedOperator, savedOperatorArgs,
+                savedMotionArgs, savedRegisterName, savedSel,
+                rNewAnchor, rNewHead, savedOldAnchor, savedOldHead,
+                savedRepeat
+              );
+            } else {
+              rNewHead = clipCursorToContent(cm, rNewHead, savedOldHead);
+              cm.setCursor(rNewHead.line, rNewHead.ch);
+            }
+          }).catch(function() {
+            clearInputState(cm);
+          });
+          return;
+        }
+
+        /** @type {import("./types").Pos|[import("./types").Pos,import("./types").Pos]|null|undefined} */
+        var motionResult = /** @type {import("./types").Pos|[import("./types").Pos,import("./types").Pos]|null|undefined} */ (motionResultRaw);
         if (!motionResult) {
           return;
         }
@@ -2091,108 +2159,99 @@ export function initVim(CM) {
         }
       }
       if (operator) {
-        if (operatorArgs.lastSel) {
-          // Replaying a visual mode operation
-          newAnchor = oldAnchor;
-          var lastSel = operatorArgs.lastSel;
-          var lineOffset = Math.abs(lastSel.head.line - lastSel.anchor.line);
-          var chOffset = Math.abs(lastSel.head.ch - lastSel.anchor.ch);
-          if (lastSel.visualLine) {
-            // Linewise Visual mode: The same number of lines.
-            newHead = new Pos(oldAnchor.line + lineOffset, oldAnchor.ch);
-          } else if (lastSel.visualBlock) {
-            // Blockwise Visual mode: The same number of lines and columns.
-            newHead = new Pos(oldAnchor.line + lineOffset, oldAnchor.ch + chOffset);
-          } else if (lastSel.head.line == lastSel.anchor.line) {
-            // Normal Visual mode within one line: The same number of characters.
-            newHead = new Pos(oldAnchor.line, oldAnchor.ch + chOffset);
-          } else {
-            // Normal Visual mode with several lines: The same number of lines, in the
-            // last line the same number of characters as in the last line the last time.
-            newHead = new Pos(oldAnchor.line + lineOffset, oldAnchor.ch);
-          }
-          vim.visualMode = true;
-          vim.visualLine = lastSel.visualLine;
-          vim.visualBlock = lastSel.visualBlock;
-          sel = vim.sel = {
-            anchor: newAnchor,
-            head: newHead
-          };
-          updateCmSelection(cm);
-        } else if (vim.visualMode) {
-          operatorArgs.lastSel = {
-            anchor: copyCursor(sel.anchor),
-            head: copyCursor(sel.head),
-            visualBlock: vim.visualBlock,
-            visualLine: vim.visualLine
-          };
-        }
-        var curStart, curEnd, linewise;
-        /** @type {'block'|'line'|'char'}*/ var mode;
-        var cmSel;
-        if (vim.visualMode) {
-          // Init visual op
-          curStart = cursorMin(sel.head, sel.anchor);
-          curEnd = cursorMax(sel.head, sel.anchor);
-          linewise = vim.visualLine || operatorArgs.linewise;
-          mode = vim.visualBlock ? 'block' :
-                  linewise ? 'line' :
-                  'char';
-          var newPositions = updateSelectionForSurrogateCharacters(cm, curStart, curEnd);
-          cmSel = makeCmSelection(cm, {
-            anchor: newPositions.start,
-            head: newPositions.end
-          }, mode);
-          if (linewise) {
-            var ranges = cmSel.ranges;
-            if (mode == 'block') {
-              // Linewise operators in visual block mode extend to end of line
-              for (var i = 0; i < ranges.length; i++) {
-                ranges[i].head.ch = lineLength(cm, ranges[i].head.line);
-              }
-            } else if (mode == 'line') {
-              ranges[0].head = new Pos(ranges[0].head.line + 1, 0);
-            }
-          }
+        this.applyOperator(cm, vim, operator, operatorArgs, motionArgs, registerName, sel, newAnchor, newHead, oldAnchor, oldHead, repeat);
+      }
+    },
+    applyOperator: function(cm, vim, operator, operatorArgs, motionArgs, registerName, sel, newAnchor, newHead, oldAnchor, oldHead, repeat) {
+      if (operatorArgs.lastSel) {
+        newAnchor = oldAnchor;
+        var lastSel = operatorArgs.lastSel;
+        var lineOffset = Math.abs(lastSel.head.line - lastSel.anchor.line);
+        var chOffset = Math.abs(lastSel.head.ch - lastSel.anchor.ch);
+        if (lastSel.visualLine) {
+          newHead = new Pos(oldAnchor.line + lineOffset, oldAnchor.ch);
+        } else if (lastSel.visualBlock) {
+          newHead = new Pos(oldAnchor.line + lineOffset, oldAnchor.ch + chOffset);
+        } else if (lastSel.head.line == lastSel.anchor.line) {
+          newHead = new Pos(oldAnchor.line, oldAnchor.ch + chOffset);
         } else {
-          // Init motion op
-          curStart = copyCursor(newAnchor || oldAnchor);
-          curEnd = copyCursor(newHead || oldHead);
-          if (cursorIsBefore(curEnd, curStart)) {
-            var tmp = curStart;
-            curStart = curEnd;
-            curEnd = tmp;
+          newHead = new Pos(oldAnchor.line + lineOffset, oldAnchor.ch);
+        }
+        vim.visualMode = true;
+        vim.visualLine = lastSel.visualLine;
+        vim.visualBlock = lastSel.visualBlock;
+        sel = vim.sel = {
+          anchor: newAnchor,
+          head: newHead
+        };
+        updateCmSelection(cm);
+      } else if (vim.visualMode) {
+        operatorArgs.lastSel = {
+          anchor: copyCursor(sel.anchor),
+          head: copyCursor(sel.head),
+          visualBlock: vim.visualBlock,
+          visualLine: vim.visualLine
+        };
+      }
+      var curStart, curEnd, linewise;
+      /** @type {'block'|'line'|'char'}*/ var mode;
+      var cmSel;
+      if (vim.visualMode) {
+        curStart = cursorMin(sel.head, sel.anchor);
+        curEnd = cursorMax(sel.head, sel.anchor);
+        linewise = vim.visualLine || operatorArgs.linewise;
+        mode = vim.visualBlock ? 'block' :
+                linewise ? 'line' :
+                'char';
+        var newPositions = updateSelectionForSurrogateCharacters(cm, curStart, curEnd);
+        cmSel = makeCmSelection(cm, {
+          anchor: newPositions.start,
+          head: newPositions.end
+        }, mode);
+        if (linewise) {
+          var ranges = cmSel.ranges;
+          if (mode == 'block') {
+            for (var i = 0; i < ranges.length; i++) {
+              ranges[i].head.ch = lineLength(cm, ranges[i].head.line);
+            }
+          } else if (mode == 'line') {
+            ranges[0].head = new Pos(ranges[0].head.line + 1, 0);
           }
-          linewise = motionArgs.linewise || operatorArgs.linewise;
-          if (linewise) {
-            // Expand selection to entire line.
-            expandSelectionToLine(cm, curStart, curEnd);
-          } else if (motionArgs.forward) {
-            // Clip to trailing newlines only if the motion goes forward.
-            clipToLine(cm, curStart, curEnd);
-          }
-          mode = 'char';
-          var exclusive = !motionArgs.inclusive || linewise;
-          var newPositions = updateSelectionForSurrogateCharacters(cm, curStart, curEnd);
-          cmSel = makeCmSelection(cm, {
-            anchor: newPositions.start,
-            head: newPositions.end
-          }, mode, exclusive);
         }
-        cm.setSelections(cmSel.ranges, cmSel.primary);
-        vim.lastMotion = null;
-        operatorArgs.repeat = repeat; // For indent in visual mode.
-        operatorArgs.registerName = registerName;
-        // Keep track of linewise as it affects how paste and change behave.
-        operatorArgs.linewise = linewise;
-        var operatorMoveTo = operators[operator](
-          cm, operatorArgs, cmSel.ranges, oldAnchor, newHead);
-        if (vim.visualMode) {
-          exitVisualMode(cm, operatorMoveTo != null);
+      } else {
+        curStart = copyCursor(newAnchor || oldAnchor);
+        curEnd = copyCursor(newHead || oldHead);
+        if (cursorIsBefore(curEnd, curStart)) {
+          var tmp = curStart;
+          curStart = curEnd;
+          curEnd = tmp;
         }
-        if (operatorMoveTo) {
-          cm.setCursor(operatorMoveTo);
+        linewise = motionArgs.linewise || operatorArgs.linewise;
+        if (linewise) {
+          expandSelectionToLine(cm, curStart, curEnd);
+        } else if (motionArgs.forward) {
+          clipToLine(cm, curStart, curEnd);
         }
+        mode = 'char';
+        var exclusive = !motionArgs.inclusive || linewise;
+        var newPositions = updateSelectionForSurrogateCharacters(cm, curStart, curEnd);
+        cmSel = makeCmSelection(cm, {
+          anchor: newPositions.start,
+          head: newPositions.end
+        }, mode, exclusive);
+      }
+      cm.setSelections(cmSel.ranges, cmSel.primary);
+      vim.lastMotion = null;
+      operatorArgs.repeat = repeat;
+      operatorArgs.registerName = registerName;
+      operatorArgs.linewise = linewise;
+      var operatorMoveTo = operators[operator](
+        cm, operatorArgs, cmSel.ranges, oldAnchor, newHead);
+      if (vim.visualMode) {
+        exitVisualMode(cm, operatorMoveTo != null);
+      }
+      if (operatorMoveTo) {
+        cm.setCursor(operatorMoveTo);
       }
     },
     /**@arg {vimState} vim  @arg {InputStateInterface} inputState, @arg {import("./types").actionCommand} [actionCommand] */
@@ -2771,6 +2830,10 @@ export function initVim(CM) {
           } else {
             anchor = new Pos(anchor.line - 1, lineLength(cm, anchor.line - 1));
           }
+        } else if (args.linewise &&
+            anchor.line != cm.firstLine() &&
+            head.line > cm.lastLine()) {
+          anchor = new Pos(anchor.line - 1, lineLength(cm, anchor.line - 1));
         }
         text = cm.getRange(anchor, head);
         cm.replaceRange('', anchor, head);
@@ -3627,7 +3690,7 @@ export function initVim(CM) {
       var command = keyMap[i];
       if (context == 'insert' && command.context != 'insert' ||
           (command.context && command.context != context) ||
-          inputState.operator && command.type == 'action' ||
+          inputState.operator && command.type == 'action' && !command.operatorPending ||
           !(match = commandMatch(keys, command.keys))) { continue; }
       if (match == 'partial') { partial.push(command); }
       if (match == 'full') { full.push(command); }
@@ -5448,15 +5511,19 @@ export function initVim(CM) {
       var cursor = cm.getSearchCursor(query, pos);
       for (var i = 0; i < repeat; i++) {
         var found = cursor.find(prev);
-        // @ts-ignore
-        if (i == 0 && found && cursorEqual(cursor.from(), pos)) {
-          var lastEndPos = prev ? cursor.from() : cursor.to();
-          found = cursor.find(prev);
-          // @ts-ignore
-          if (found && !found[0] && cursorEqual(cursor.from(), lastEndPos)) {
+        if (i == 0 && found) {
+          var from = cursor.from();
+          var to = cursor.to();
+          var inCurrentMatch = from && to && (cursorEqual(from, pos) || cursorIsBetween(from, pos, to));
+          if (inCurrentMatch) {
+            var lastEndPos = prev ? from : to;
+            found = cursor.find(prev);
             // @ts-ignore
-            if (cm.getLine(lastEndPos.line).length == lastEndPos.ch)
-              found = cursor.find(prev);
+            if (found && !found[0] && cursorEqual(cursor.from(), lastEndPos)) {
+              // @ts-ignore
+              if (cm.getLine(lastEndPos.line).length == lastEndPos.ch)
+                found = cursor.find(prev);
+            }
           }
         }
         if (!found) {
@@ -6847,7 +6914,8 @@ export function initVim(CM) {
           // @ts-ignore
           lastChange.ignoreCount--;
         } else if (changeObj.origin == '+input' || changeObj.origin == 'paste'
-            || changeObj.origin === undefined /* only in testing */) {
+            || changeObj.origin === undefined /* only in testing */
+            || (typeof changeObj.origin == 'string' && changeObj.origin.indexOf('input') === 0)) {
           var selectionCount = cm.listSelections().length;
           if (selectionCount > 1)
             lastChange.ignoreCount = selectionCount;
