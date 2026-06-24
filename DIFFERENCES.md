@@ -5,79 +5,145 @@ This document tracks all modifications made to this fork compared to
 
 Upstream base: commit `1ccb518` (post-v6.3.0, HEAD of `master` as of 2026-06-23).
 
-## Changes
+## Infrastructure changes
 
-### 1. Capture-phase Escape handler for Obsidian compatibility
+### Capture-phase Escape handler for Obsidian compatibility
 
-**File**: `src/index.ts` — `vimPlugin` ViewPlugin class
+**File**: `src/index.ts`
 
-**Problem**: When this package is loaded as a CM6 extension via Obsidian's
-`registerEditorExtension()` (rather than as part of Obsidian's internal editor
-setup), the Escape key never reaches the ViewPlugin's `eventHandlers.keydown`
-callback. Obsidian's application-level key handling intercepts and stops the
-Escape event before CM6 dispatches it to plugin event handlers.
+When loaded as a CM6 extension via `registerEditorExtension()`, Obsidian's
+application-level key handling intercepts Escape before the ViewPlugin sees it.
+The ViewPlugin constructor installs a capture-phase `keydown` listener on
+`document` that catches Escape while the editor has focus and vim is in insert,
+visual, or operator-pending mode. Removed in `destroy()`.
 
-**Fix**: The ViewPlugin constructor installs a capture-phase `keydown` listener
-on `document` that checks for Escape while the editor has focus and vim is in
-insert mode, visual mode, or operator-pending state. When matched, it calls
-`Vim.handleKey(this.cm, "<Esc>", "user")` directly (bypassing the ViewPlugin's
-own `handleKey` method, which relies on `vimKeyFromEvent` and does not reliably
-process Escape in insert mode) and then manually triggers cursor redraw, status
-update, and class update. The event is stopped with `stopImmediatePropagation`.
+### Testing API surface
 
-The listener is removed in `destroy()`.
+**File**: `src/vim.js`
 
----
+Added `getInputState(cm)`, `getLastEditInfo(cm)`, `getSearchState(cm)`,
+`getJumpList()`, and `getMacroState()` to the `vimApi` object for state
+introspection during testing.
 
-### 2. Testing API surface
+### Async motion dispatch
 
-**File**: `src/vim.js` — `vimApi` object
+**Files**: `src/vim.js`, `src/types.ts`
 
-**Fix**: Added `getInputState(cm)`, `getLastEditInfo(cm)`, `getSearchState(cm)`, `getJumpList()`, and `getMacroState()` methods to the `vimApi` object. These methods provide internal state introspection for testing and debugging without exposing the full `Vim` object internals.
+Refactored `evalInput` to extract `applyOperator` as a separate method. Motion
+results that are thenables (Promises) defer operator application via `.then()`.
+Visual mode is properly handled in the async path — selection head/anchor and
+marks are updated when an async motion resolves during visual mode. `MotionFn`
+return type widened to include `Promise<Pos|[Pos,Pos]|null>`.
 
-### 3. Behavioral fixes
+### Neovim golden comparison infrastructure
 
-**File**: `src/vim.js` — `operators.delete`, `onChange`
+**Files**: `test/neovim/`
 
-**Fixes**:
-- `operators.delete`: Fixed linewise delete to end of file (`dG`) leaving a trailing newline. The anchor is now expanded to include the preceding newline when deleting from a non-first line to past the last line.
-- `onChange`: Expanded insert-mode change capture to accept CM6-style input origins (prefixed with "input"). This ensures `cw` dot-repeat recording works in environments where the origin is "input.type" instead of "+input".
-- `findNext` (internal): Fixed search wrap-around cursor position — when the cursor is inside the current match, `findNext` now skips to the next match instead of returning the current one, making `n`/`N` wrap-around consistent after incremental search.
-- `operators.indent`: Changed cursor placement after `>>` / `<<` from first non-whitespace character to column 0, matching Neovim behavior. Fork test expectations updated accordingly.
-- `doReplace` (substitute confirm): Cursor now placed at column 0 of last substitution line after `:s/c` completion, matching Neovim. Quit (`q`/`Esc`) preserves cursor at last accepted match position. Fork test expectations updated.
+Step-based extraction (`extract-definitions.ts`, `collect-snapshots.ts`),
+headless Neovim recording (`record-golden.ts`, `client.ts`), automated
+comparison (`compare.ts`), and deviation registry (`deviations.ts`).
+496/688 tests passing against Neovim 0.12.3.
 
-### 4. Operator-pending action support
+## Behavioral fixes (Neovim parity)
 
-**Files**: `src/vim.js` — `commandMatches`, `evalInput`; `src/types.ts`
+All changes below match verified Neovim behavior. Fork test expectations
+updated accordingly.
 
-**Fixes**:
-- `commandMatches`: Added `operatorPending` boolean flag to keymap entries. Actions with `operatorPending: true` bypass the operator-pending filter, enabling native dispatch for async actions like EasyMotion.
-- `types.ts`: Added `operatorPending?: boolean` to the `allCommands` type.
+### Linewise delete cursor column preservation
 
-### 5. Async motion dispatch
+**File**: `src/vim.js` — `operators.delete`, `applyOperator`
 
-**Files**: `src/vim.js` — `evalInput`; `src/types.ts`
+`dd`/`dj`/`dk` now preserve the cursor column (clamped to remaining line
+length) instead of moving to first non-blank. `operatorArgs.cursorCol` is
+piped from the original cursor position through `applyOperator`.
 
-**Fixes**:
-- `evalInput`: Refactored operator application into a new `applyOperator` method. Motion results that are thenables (Promises) now defer operator application via `.then()`. This enables async motions like EasyMotion label selection to work with operators.
-- `types.ts`: Widened `MotionFn` return type to include `Promise<Pos|[Pos,Pos]|null>`.
+### J join trailing whitespace
 
----
+**File**: `src/vim.js` — `actions.joinLines`
 
-## Planned changes
+`J` now strips trailing whitespace from the current line before adding the
+join space, preventing double spaces when the line ends with whitespace.
 
-### Neovim alignment
+### Multiline inner bracket text objects
 
-Upstream codemirror-vim follows classic Vim behavior in several places where
-Neovim differs. Future patches to this fork may align behavior with Neovim
-defaults where the motions plugin already expects Neovim semantics:
+**File**: `src/vim.js` — text object motion handler
 
-- `Y` → `y$` (Neovim default, already overridden by the motions plugin via
-  `mapCommand`)
-- `Q` → `@@` (Neovim default, already overridden by the motions plugin)
-- Other behavioral deltas tracked in the motions plugin's
-  `test/neovim/deviations.ts`
+`di{`/`di[`/`di<` on multiline brackets now preserves the bracket lines
+(producing `a{\n}b` instead of `a{}b`). When brackets span 3+ lines, the
+range is set linewise covering only the inner content lines.
 
-### Async operator-pending support
+### j/k at document boundary
 
-The primary motivation for this fork: modifying `commandMatches()` and `evalInput()` to allow actions to fire in operator-pending context. The core infrastructure for async operator-pending support is now implemented in the fork, enabling `d<leader><leader>w{label}` to work through the native vim dispatch pipeline. Plugin-side registration of these async actions is pending.
+**File**: `src/vim.js` — `motions.moveByLines`
+
+`j` at the last line and `k` at the first line now return `null` instead of
+moving to end/start of line. This makes `dj` on a single-line document a
+no-op, matching Neovim.
+
+### Substitute cursor positioning
+
+**File**: `src/vim.js` — `doReplace.stop`
+
+Cursor after `:s` now goes to the first non-blank character of the last
+affected line instead of column 0.
+
+### % string-aware bracket matching
+
+**File**: `src/vim.js` — `motions.moveToMatchedSymbol`
+
+When `%` forward-seeks for a bracket and the first candidate is inside a
+string token, the motion aborts (cursor stays). Brackets in comments are
+still skipped (existing behavior).
+
+### Cross-line delete whitespace inclusion
+
+**File**: `src/vim.js` — `applyOperator`
+
+When a delete operation (`db`, `d2w`, etc.) crosses a line boundary and the
+prefix before `curStart` on the starting line is whitespace-only, the delete
+range is expanded to include that whitespace. Applied after `clipToLine` to
+avoid interfering with same-line operations.
+
+### ge/moveByWords at document boundary
+
+**File**: `src/vim.js` — `motions.moveByWords`
+
+Backward word motions (`ge`, `b`) that don't move backward return `null`,
+preventing `dge` at document start from deleting the character under cursor.
+
+### dge on empty lines
+
+**File**: `src/vim.js` — `applyOperator`
+
+Inclusive operator selections at end-of-line on empty lines now extend to
+the next line start, allowing `dge` on `"\n\n"` to delete both lines.
+
+### dG trailing newline
+
+**File**: `src/vim.js` — `operators.delete`
+
+The anchor is expanded to include the preceding newline when deleting
+linewise to end of file from a non-first line.
+
+### ]p tab remainder
+
+**File**: `src/vim.js` — `actions.continuePaste`
+
+`]p` with `indentWithTabs` now preserves remainder spaces when the computed
+indent doesn't divide evenly by tabSize.
+
+### Other fixes
+
+- `operators.indent`: Cursor at column 0 after `>>` / `<<` (was first non-blank)
+- `onChange`: Accept CM6-style input origins (`"input.type"`) for insert recording
+- `findNext`: Skip current match during wrap-around after incremental search
+- Golden recorder `escapeKeysForNeovim`: Convert literal `\n` to `<CR>` so ex commands execute
+
+## Type changes
+
+**File**: `src/types.ts`
+
+- `OperatorArgs`: Added `cursorCol?: number`
+- `moveByLines` return: `Pos | null`
+- `moveByWords` return: `Pos | null | undefined`
+- `MotionFn` return: Widened to include `Promise` variants
