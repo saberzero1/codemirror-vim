@@ -81,8 +81,8 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
     },
     {
         testPattern: 'vim_dat_noop',
-        description: 'dat on nested tags differs',
-        reason: 'fixable',
+        description: 'dat on nested tags: CM6 findMatchingTag does not find tag when cursor is inside tag name',
+        reason: 'codemirror-limitation',
         fields: ['content'],
     },
     {
@@ -221,12 +221,7 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         reason: 'environment',
         fields: ['content'],
     },
-    {
-        testPattern: /^vim_d[jk]_(end|start)_of_document$/,
-        description: 'j/k at document boundary moves to start/end of line instead of being no-op like Neovim',
-        reason: 'fixable',
-        fields: ['content', 'cursor'],
-    },
+
     {
         testPattern: /^vim_[fFtT][cdyCD],?;?$/,
         description: 'Multi-step test with setCursor/undo between steps that flat key replay cannot reproduce',
@@ -245,12 +240,7 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         reason: 'codemirror-limitation',
         fields: ['content'],
     },
-    {
-        testPattern: /^vim_ex_substitute_(same_line|alternate_separator|full_file)$/,
-        description: 'Substitute cursor positioning differs',
-        reason: 'fixable',
-        fields: ['cursor'],
-    },
+
     {
         testPattern: /^vim_ex_substitute_(javascript|highlight|nopcre_special)$/,
         description: 'Substitute regex behavior differs from Vim',
@@ -258,9 +248,21 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         fields: ['content', 'cursor'],
     },
     {
-        testPattern: /^vim_ex_sort_/,
-        description: 'Sort comparison logic differs (JS sort vs Vim sort semantics)',
+        testPattern: /^vim_ex_substitute_confirm_accept_then_all$/,
+        description: 'Substitute confirm cursor at line 0 instead of line 1 after accept+all',
         reason: 'fixable',
+        fields: ['cursor'],
+    },
+    {
+        testPattern: /^vim_\/_nongreedy$/,
+        description: 'Non-greedy search cursor differs from Neovim',
+        reason: 'fixable',
+        fields: ['cursor'],
+    },
+    {
+        testPattern: /^vim_ex_sort_/,
+        description: 'Golden recording sends \\n instead of <CR> for ex commands — sort never executes in Neovim',
+        reason: 'environment',
         fields: ['content'],
     },
     {
@@ -504,8 +506,8 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         fields: ['content', 'cursor'],
     },
     {
-        testPattern: /^vim_dge_(empty_lines|start_of_document)$/,
-        description: 'dge edge case: empty lines or document start boundary',
+        testPattern: /^vim_dge_empty_lines$/,
+        description: 'dge on empty lines: fork deletes one fewer newline than Neovim',
         reason: 'fixable',
         fields: ['content'],
     },

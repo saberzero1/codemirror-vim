@@ -2485,12 +2485,10 @@ export function initVim(CM) {
         line = posV.line;
         endCh = posV.ch;
       }
-      // Vim go to line begin or line end when cursor at first/last line and
-      // move to previous/next line is triggered.
       if (line < first && cur.line == first){
-        return this.moveToStartOfLine(cm, head, motionArgs, vim);
+        return null;
       } else if (line > last && cur.line == last){
-          return moveToEol(cm, head, motionArgs, vim, true);
+        return null;
       }
       if (motionArgs.toFirstChar){
         endCh=findFirstNonWhiteSpaceCharacter(cm.getLine(line));
@@ -2555,8 +2553,12 @@ export function initVim(CM) {
       return curEnd;
     },
     moveByWords: function(cm, head, motionArgs) {
-      return moveToWord(cm, head, motionArgs.repeat, !!motionArgs.forward,
+      var result = moveToWord(cm, head, motionArgs.repeat, !!motionArgs.forward,
           !!motionArgs.wordEnd, !!motionArgs.bigWord);
+      if (result && !motionArgs.forward && !cursorIsBefore(result, head)) {
+        return null;
+      }
+      return result;
     },
     moveTillCharacter: function(cm, head, motionArgs) {
       var repeat = motionArgs.repeat;
@@ -2679,6 +2681,17 @@ export function initVim(CM) {
             // @ts-ignore
             tmp = selectCompanionObject(cm, sc.from(), character, inclusive);
           }
+        }
+        if (tmp && !inclusive && tmp.start.line + 1 < tmp.end.line) {
+          tmp.start = new Pos(tmp.start.line + 1, 0);
+          tmp.end = new Pos(tmp.end.line - 1, lineLength(cm, tmp.end.line - 1));
+          var operatorArgs = vim.inputState.operatorArgs;
+          if (operatorArgs) { operatorArgs.linewise = true; }
+          motionArgs.linewise = true;
+          motionArgs.inclusive = false;
+        } else if (tmp && !inclusive && tmp.start.line < tmp.end.line) {
+          tmp.start = new Pos(tmp.start.line + 1, 0);
+          tmp.end = new Pos(tmp.end.line, 0);
         }
       } else if (selfPaired[character]) {
         move = true;
@@ -6698,7 +6711,7 @@ export function initVim(CM) {
         if (keepCursor) {
           cm.setCursor(lastPos);
         } else {
-          cm.setCursor(lastPos.line, 0);
+          cm.setCursor(lastPos.line, findFirstNonWhiteSpaceCharacter(cm.getLine(lastPos.line)));
         }
         var vim = cm.state.vim;
         vim.exMode = false;

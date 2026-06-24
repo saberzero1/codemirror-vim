@@ -1,7 +1,7 @@
 {
     "suite": "selections",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T10:06:14.896Z",
+    "recorded_at": "2026-06-24T13:15:25.469Z",
     "cases": [
         {
             "name": "vim_viw_middle_spc",
@@ -55,7 +55,7 @@
                 "content": "foo \tbAr,\t baz",
                 "cursor": {
                     "line": 0,
-                    "ch": 6
+                    "ch": 7
                 },
                 "mode": "visual"
             }

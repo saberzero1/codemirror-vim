@@ -867,11 +867,8 @@ testVim('dj_end_of_document', function(cm, vim, helpers) {
   var curStart = makeCursor(0, 3);
   cm.setCursor(curStart);
   helpers.doKeys('d', 'j');
-  eq('', cm.getValue());
-  var register = helpers.getRegisterController().getRegister();
-  eq(' word1 \n', register.toString());
-  is(register.linewise);
-  helpers.assertCursorAt(0, 0);
+  eq(' word1 ', cm.getValue());
+  helpers.assertCursorAt(0, 3);
 }, { value: ' word1 ' });
 testVim('dk', function(cm, vim, helpers) {
   var curStart = makeCursor(1, 3);
@@ -887,11 +884,8 @@ testVim('dk_start_of_document', function(cm, vim, helpers) {
   var curStart = makeCursor(0, 3);
   cm.setCursor(curStart);
   helpers.doKeys('d', 'k');
-  eq('', cm.getValue());
-  var register = helpers.getRegisterController().getRegister();
-  eq(' word1 \n', register.toString());
-  is(register.linewise);
-  helpers.assertCursorAt(0, 0);
+  eq(' word1 ', cm.getValue());
+  helpers.assertCursorAt(0, 3);
 }, { value: ' word1 ' });
 testVim('dw_space', function(cm, vim, helpers) {
   var curStart = makeCursor(0, 0);
@@ -1069,7 +1063,7 @@ testVim('dge_whitespace_and_empty_lines', function(cm, vim, helpers) {
 testVim('dge_start_of_document', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('d', 'g', 'e');
-  eq('bc\n', cm.getValue());
+  eq('abc\n', cm.getValue());
 }, { value: 'abc\n' });
 testVim('d_inclusive', function(cm, vim, helpers) {
   // Assert that when inclusive is set, the character the cursor is on gets
@@ -1661,27 +1655,27 @@ testEdit('da[_on_)_should_not_delete', 'foo (bAr) baz', /\)/, 'da[', 'foo (bAr) 
 testMotion('di(_outside_should_stay', ['d', 'i', '('], new Pos(0, 0), new Pos(0, 0));
 
 //  Open and close on different lines, equally indented
-testEdit('di{_middle_spc', 'a{\n\tbar\n}b', /r/, 'di{', 'a{}b');
-testEdit('di}_middle_spc', 'a{\n\tbar\n}b', /r/, 'di}', 'a{}b');
+testEdit('di{_middle_spc', 'a{\n\tbar\n}b', /r/, 'di{', 'a{\n}b');
+testEdit('di}_middle_spc', 'a{\n\tbar\n}b', /r/, 'di}', 'a{\n}b');
 testEdit('da{_middle_spc', 'a{\n\tbar\n}b', /r/, 'da{', 'ab');
 testEdit('da}_middle_spc', 'a{\n\tbar\n}b', /r/, 'da}', 'ab');
 testEdit('daB_middle_spc', 'a{\n\tbar\n}b', /r/, 'daB', 'ab');
 
 // open and close on diff lines, open indented less than close
-testEdit('di{_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'di{', 'a{}b');
-testEdit('di}_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'di}', 'a{}b');
+testEdit('di{_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'di{', 'a{\n\t}b');
+testEdit('di}_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'di}', 'a{\n\t}b');
 testEdit('da{_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'da{', 'ab');
 testEdit('da}_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'da}', 'ab');
 
 // open and close on diff lines, open indented more than close
-testEdit('di[_middle_spc', 'a\t[\n\tbar\n]b', /r/, 'di[', 'a\t[]b');
-testEdit('di]_middle_spc', 'a\t[\n\tbar\n]b', /r/, 'di]', 'a\t[]b');
+testEdit('di[_middle_spc', 'a\t[\n\tbar\n]b', /r/, 'di[', 'a\t[\n]b');
+testEdit('di]_middle_spc', 'a\t[\n\tbar\n]b', /r/, 'di]', 'a\t[\n]b');
 testEdit('da[_middle_spc', 'a\t[\n\tbar\n]b', /r/, 'da[', 'a\tb');
 testEdit('da]_middle_spc', 'a\t[\n\tbar\n]b', /r/, 'da]', 'a\tb');
 
 // open and close on diff lines, open indented more than close
-testEdit('di<_middle_spc', 'a\t<\n\tbar\n>b', /r/, 'di<', 'a\t<>b');
-testEdit('di>_middle_spc', 'a\t<\n\tbar\n>b', /r/, 'di>', 'a\t<>b');
+testEdit('di<_middle_spc', 'a\t<\n\tbar\n>b', /r/, 'di<', 'a\t<\n>b');
+testEdit('di>_middle_spc', 'a\t<\n\tbar\n>b', /r/, 'di>', 'a\t<\n>b');
 testEdit('da<_middle_spc', 'a\t<\n\tbar\n>b', /r/, 'da<', 'a\tb');
 testEdit('da>_middle_spc', 'a\t<\n\tbar\n>b', /r/, 'da>', 'a\tb');
 
@@ -1726,7 +1720,7 @@ testSelection('vaW_middle_punct', 'foo \tbAr,\t baz', /A/, 'vaW', 'bAr,\t ');
 testSelection('viw_start_spc', 'foo \tbAr\t baz', /b/, 'viw', 'bAr');
 testSelection('viw_end_spc', 'foo \tbAr\t baz', /r/, 'viw', 'bAr');
 testSelection('viw_eol', 'foo \tbAr', /r/, 'viw', 'bAr');
-testSelection('vi{_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'vi{', '\n\tbar\n\t');
+testSelection('vi{_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'vi{', '\tbar');
 testSelection('va{_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'va{', '{\n\tbar\n\t}');
 testSelection('va{outside', 'xa{\n\tbar\n\t}b', /x/, 'va{', '{\n\tbar\n\t}');
 

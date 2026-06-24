@@ -1,7 +1,7 @@
 {
     "suite": "substituteConfirms",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T10:06:18.653Z",
+    "recorded_at": "2026-06-24T13:15:25.483Z",
     "cases": [
         {
             "name": "vim_ex_substitute_confirm_emptydoc",
@@ -130,7 +130,7 @@
             "result": {
                 "content": "bb b\nbbb",
                 "cursor": {
-                    "line": 1,
+                    "line": 0,
                     "ch": 0
                 },
                 "mode": "normal"

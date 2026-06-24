@@ -1,7 +1,7 @@
 {
     "suite": "vim-general",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T11:17:24.418Z",
+    "recorded_at": "2026-06-24T13:16:34.578Z",
     "cases": [
         {
             "name": "vim_qq@q",
@@ -3890,7 +3890,7 @@
             },
             "keys": "\"aywvp:registers\n",
             "result": {
-                "content": "register egister contents\nare not erased",
+                "content": "register contents\nregister re not erased",
                 "cursor": {
                     "line": 1,
                     "ch": 8
@@ -4215,8 +4215,8 @@
             "result": {
                 "content": "aaa aa \n a aa",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 1,
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -4365,10 +4365,10 @@
             },
             "keys": "?match\nngN<Esc>gN<Esc>gNgNd",
             "result": {
-                "content": "match nope matc",
+                "content": "match nope  \n nope Match",
                 "cursor": {
-                    "line": 0,
-                    "ch": 14
+                    "line": 1,
+                    "ch": 10
                 },
                 "mode": "normal"
             }
@@ -4557,8 +4557,8 @@
             "result": {
                 "content": "matches match alsoMatch\nmatchme matching",
                 "cursor": {
-                    "line": 0,
-                    "ch": 8
+                    "line": 1,
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -5546,7 +5546,7 @@
                 "content": "01x3xx67xx",
                 "cursor": {
                     "line": 0,
-                    "ch": 7
+                    "ch": 4
                 },
                 "mode": "normal"
             }
@@ -6248,7 +6248,7 @@
             "result": {
                 "content": "a\nb\nc\nd\ne\n",
                 "cursor": {
-                    "line": 2,
+                    "line": 4,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -7728,10 +7728,10 @@
             },
             "keys": "yypaVa",
             "result": {
-                "content": "HeY",
+                "content": "eY",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -7902,7 +7902,7 @@
                 "content": "0t-v>ext \n1\n2\n\n\n3\n4\n",
                 "cursor": {
                     "line": 1,
-                    "ch": 1
+                    "ch": 0
                 },
                 "mode": "visual"
             }

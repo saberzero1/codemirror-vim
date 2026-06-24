@@ -5,7 +5,10 @@ function escapeKeysForNeovim(keys: string): string {
     let result = '';
     let i = 0;
     while (i < keys.length) {
-        if (keys[i] === '<') {
+        if (keys[i] === '\n') {
+            result += '<CR>';
+            i++;
+        } else if (keys[i] === '<') {
             const closeIdx = keys.indexOf('>', i);
             if (closeIdx !== -1 && closeIdx - i < 20) {
                 const inner = keys.substring(i + 1, closeIdx);

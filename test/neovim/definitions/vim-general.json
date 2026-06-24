@@ -1289,9 +1289,9 @@
         "keys": "dj"
       }
     ],
-    "expectedContent": "",
+    "expectedContent": " word1 ",
     "expectedCursor": {
-      "ch": 0,
+      "ch": 3,
       "line": 0
     }
   },
@@ -1337,9 +1337,9 @@
         "keys": "dk"
       }
     ],
-    "expectedContent": "",
+    "expectedContent": " word1 ",
     "expectedCursor": {
-      "ch": 0,
+      "ch": 3,
       "line": 0
     }
   },
@@ -2012,7 +2012,7 @@
         "keys": "dge"
       }
     ],
-    "expectedContent": "bc\n",
+    "expectedContent": "abc\n",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -15805,7 +15805,7 @@
     ],
     "expectedContent": "one one\n two two",
     "expectedCursor": {
-      "ch": 0,
+      "ch": 1,
       "line": 1
     }
   },
@@ -15829,7 +15829,7 @@
     ],
     "expectedContent": "o/e o/e\n two two",
     "expectedCursor": {
-      "ch": 0,
+      "ch": 1,
       "line": 1
     }
   },
@@ -15853,7 +15853,7 @@
     ],
     "expectedContent": "two two\n two two",
     "expectedCursor": {
-      "ch": 0,
+      "ch": 1,
       "line": 1
     }
   },

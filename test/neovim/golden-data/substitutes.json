@@ -1,7 +1,7 @@
 {
     "suite": "substitutes",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T10:06:16.824Z",
+    "recorded_at": "2026-06-24T13:15:25.540Z",
     "cases": [
         {
             "name": "vim_ex_substitute_capture_pcre",
@@ -435,7 +435,7 @@
                 "content": "one/two \n three/four",
                 "cursor": {
                     "line": 1,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -815,7 +815,7 @@
                 "content": "one,two, \n three\\four,five,six, \n seven,",
                 "cursor": {
                     "line": 1,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "normal"
             }

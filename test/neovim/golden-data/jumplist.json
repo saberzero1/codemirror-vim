@@ -1,7 +1,7 @@
 {
     "suite": "jumplist",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T10:06:13.064Z",
+    "recorded_at": "2026-06-24T13:15:25.408Z",
     "cases": [
         {
             "name": "vim_jumplist_H",
@@ -301,8 +301,8 @@
             "result": {
                 "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
                 "cursor": {
-                    "line": 2,
-                    "ch": 3
+                    "line": 1,
+                    "ch": 1
                 },
                 "mode": "normal"
             }
