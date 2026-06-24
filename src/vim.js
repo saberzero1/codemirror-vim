@@ -2909,7 +2909,8 @@ export function initVim(CM) {
           }
         }
       }
-      return motions.moveToFirstNonWhiteSpaceCharacter(cm, ranges[0].anchor);
+      var firstLine = cursorMin(ranges[0].anchor, ranges[0].head).line;
+      return new Pos(firstLine, 0);
     },
     indentAuto: function(cm, _args, ranges) {
       cm.execCommand("indentAuto");

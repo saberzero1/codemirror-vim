@@ -1495,7 +1495,7 @@ testVim('>{motion}', function(cm, vim, helpers) {
   var register = helpers.getRegisterController().getRegister();
   eq('', register.toString());
   is(!register.linewise);
-  helpers.assertCursorAt(0, 3);
+  helpers.assertCursorAt(0, 0);
 }, { value: ' word1\nword2\nword3 ', indentUnit: 2 });
 testVim('>>', function(cm, vim, helpers) {
   cm.setCursor(0, 3);
@@ -1506,7 +1506,7 @@ testVim('>>', function(cm, vim, helpers) {
   var register = helpers.getRegisterController().getRegister();
   eq('', register.toString());
   is(!register.linewise);
-  helpers.assertCursorAt(0, 3);
+  helpers.assertCursorAt(0, 0);
 }, { value: ' word1\nword2\nword3 ', indentUnit: 2 });
 testVim('<{motion}', function(cm, vim, helpers) {
   cm.setCursor(1, 3);
@@ -1517,7 +1517,7 @@ testVim('<{motion}', function(cm, vim, helpers) {
   var register = helpers.getRegisterController().getRegister();
   eq('', register.toString());
   is(!register.linewise);
-  helpers.assertCursorAt(0, 1);
+  helpers.assertCursorAt(0, 0);
 }, { value: '   word1\n  word2\nword3 ', indentUnit: 2 });
 testVim('<<', function(cm, vim, helpers) {
   cm.setCursor(0, 3);
@@ -1528,7 +1528,7 @@ testVim('<<', function(cm, vim, helpers) {
   var register = helpers.getRegisterController().getRegister();
   eq('', register.toString());
   is(!register.linewise);
-  helpers.assertCursorAt(0, 1);
+  helpers.assertCursorAt(0, 0);
 }, { value: '   word1\n  word2\nword3 ', indentUnit: 2 });
 testVim('=', function(cm, vim, helpers) {
   cm.setCursor(0, 3);
@@ -3677,7 +3677,7 @@ testVim('._visual_>', function(cm, vim, helpers) {
   cm.setCursor(2, 0)
   helpers.doKeys('.');
   eq('  1\n  2\n  3\n  4', cm.getValue());
-  helpers.assertCursorAt(2, 2);
+  helpers.assertCursorAt(2, 0);
 }, { value: '1\n2\n3\n4'});
 testVim('._replace_repeat', function(cm, vim, helpers) {
   helpers.doKeys('R');
