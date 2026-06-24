@@ -44,6 +44,7 @@ The listener is removed in `destroy()`.
 - `onChange`: Expanded insert-mode change capture to accept CM6-style input origins (prefixed with "input"). This ensures `cw` dot-repeat recording works in environments where the origin is "input.type" instead of "+input".
 - `findNext` (internal): Fixed search wrap-around cursor position — when the cursor is inside the current match, `findNext` now skips to the next match instead of returning the current one, making `n`/`N` wrap-around consistent after incremental search.
 - `operators.indent`: Changed cursor placement after `>>` / `<<` from first non-whitespace character to column 0, matching Neovim behavior. Fork test expectations updated accordingly.
+- `doReplace` (substitute confirm): Cursor now placed at column 0 of last substitution line after `:s/c` completion, matching Neovim. Quit (`q`/`Esc`) preserves cursor at last accepted match position. Fork test expectations updated.
 
 ### 4. Operator-pending action support
 

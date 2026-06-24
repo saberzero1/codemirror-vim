@@ -21,7 +21,28 @@ interface TestDefinition {
     name: string;
     content: string;
     cursor: { line: number; ch: number };
-    keys: string;
+    steps?: Array<
+        | { type: 'keys'; keys: string }
+        | { type: 'setCursor'; line: number; ch: number }
+        | { type: 'setRegister'; register: string; text: string; linewise: boolean }
+    >;
+    keys?: string;
+}
+
+function clampCursor(content: string, line: number, ch: number): { line: number; ch: number } {
+    const contentLines = content.split('\n');
+    const clampedLine = Math.min(line, Math.max(0, contentLines.length - 1));
+    const lineLen = contentLines[clampedLine]?.length ?? 0;
+    const clampedCh = Math.min(ch, Math.max(0, lineLen - 1));
+    return { line: clampedLine, ch: clampedCh };
+}
+
+function getKeysFromSteps(steps: TestDefinition['steps']): string {
+    if (!steps) return '';
+    return steps
+        .filter(step => step.type === 'keys')
+        .map(step => (step.type === 'keys' ? step.keys : ''))
+        .join('');
 }
 
 async function recordSuite(
@@ -37,13 +58,26 @@ async function recordSuite(
         process.stderr.write(`  ${tc.name}...`);
         try {
             const result = await withTimeout(async () => {
+                await nvim.input('<Esc><Esc>');
                 await nvim.setContent(tc.content);
-                const contentLines = tc.content.split('\n');
-                const clampedLine = Math.min(tc.cursor.line, contentLines.length - 1);
-                const lineLen = contentLines[clampedLine]?.length ?? 0;
-                const clampedCh = Math.min(tc.cursor.ch, Math.max(0, lineLen - 1));
-                await nvim.setCursor(clampedLine, clampedCh);
-                await nvim.input(tc.keys);
+                const initialCursor = clampCursor(tc.content, tc.cursor.line, tc.cursor.ch);
+                await nvim.setCursor(initialCursor.line, initialCursor.ch);
+
+                if (tc.steps && tc.steps.length > 0) {
+                    for (const step of tc.steps) {
+                        if (step.type === 'setCursor') {
+                            const currentContent = await nvim.getContent();
+                            const cursor = clampCursor(currentContent, step.line, step.ch);
+                            await nvim.setCursor(cursor.line, cursor.ch);
+                        } else if (step.type === 'keys') {
+                            await nvim.input(step.keys);
+                        } else if (step.type === 'setRegister') {
+                            await nvim.setRegister(step.register, step.text, step.linewise ? 'l' : 'c');
+                        }
+                    }
+                } else if (tc.keys) {
+                    await nvim.input(tc.keys);
+                }
 
                 return {
                     content: await nvim.getContent(),
@@ -55,7 +89,7 @@ async function recordSuite(
             goldenCases.push({
                 name: tc.name,
                 initial: { content: tc.content, cursor: tc.cursor },
-                keys: tc.keys,
+                keys: tc.keys ?? getKeysFromSteps(tc.steps),
                 result,
             });
             process.stderr.write(' ok\n');

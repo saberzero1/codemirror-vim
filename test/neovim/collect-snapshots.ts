@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -9,18 +10,33 @@ interface Snapshot {
     name: string;
     initialContent: string;
     initialCursor: { line: number; ch: number };
-    keySequence: string[];
+    steps: Step[];
     finalContent: string;
     finalCursor: { line: number; ch: number };
     finalMode: string;
     error: string | null;
 }
 
+interface Step {
+    type: 'keys' | 'setCursor' | 'setRegister';
+    keys?: string[];
+    line?: number;
+    ch?: number;
+    register?: string;
+    text?: string;
+    linewise?: boolean;
+}
+
 interface TestDefinition {
     name: string;
     content: string;
     cursor: { line: number; ch: number };
-    keys: string;
+    steps?: Array<
+        | { type: 'keys'; keys: string }
+        | { type: 'setCursor'; line: number; ch: number }
+        | { type: 'setRegister'; register: string; text: string; linewise: boolean }
+    >;
+    keys?: string;
     expectedContent?: string;
     expectedCursor?: { line: number; ch: number };
 }
@@ -44,15 +60,39 @@ function translateKey(key: string): string {
 }
 
 function snapshotToDefinition(snap: Snapshot): TestDefinition | null {
-    if (snap.keySequence.length === 0) return null;
+    if (!snap.steps || snap.steps.length === 0) return null;
 
-    const keys = snap.keySequence.map(translateKey).join('');
+    const steps: TestDefinition['steps'] = [];
+    let hasKeys = false;
+    for (const step of snap.steps) {
+        if (step.type === 'keys') {
+            const keys = (step.keys ?? []).map(translateKey).join('');
+            if (keys.length === 0) continue;
+            steps.push({ type: 'keys', keys });
+            hasKeys = true;
+        } else if (step.type === 'setCursor') {
+            if (typeof step.line === 'number' && typeof step.ch === 'number') {
+                steps.push({ type: 'setCursor', line: step.line, ch: step.ch });
+            }
+        } else if (step.type === 'setRegister') {
+            if (typeof step.register === 'string' && typeof step.text === 'string') {
+                steps.push({
+                    type: 'setRegister',
+                    register: step.register,
+                    text: step.text,
+                    linewise: !!step.linewise,
+                });
+            }
+        }
+    }
+
+    if (!hasKeys || steps.length === 0) return null;
 
     return {
         name: snap.name,
         content: snap.initialContent,
         cursor: snap.initialCursor,
-        keys,
+        steps,
         expectedContent: snap.finalContent,
         expectedCursor: snap.finalCursor,
     };

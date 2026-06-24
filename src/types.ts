@@ -80,6 +80,7 @@ export type OperatorArgs = {
         visualBlock: boolean,
     },
     keepCursor?: boolean;
+    cursorCol?: number;
 } 
 // version of CodeMirror with vim state checked
 export type CodeMirrorV = CodeMirror & {state: {vim: vimState}}

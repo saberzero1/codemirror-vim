@@ -1,7 +1,7 @@
 {
     "suite": "motions",
-    "neovim_version": "0.12.2",
-    "recorded_at": "2026-06-23T23:12:39.354Z",
+    "neovim_version": "0.12.3",
+    "recorded_at": "2026-06-24T10:06:09.297Z",
     "cases": [
         {
             "name": "vim_|",
@@ -548,7 +548,7 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 15,
+                    "line": 0,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -988,7 +988,7 @@
                     "line": 2,
                     "ch": 2
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1007,7 +1007,7 @@
                     "line": 2,
                     "ch": 6
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1026,7 +1026,7 @@
                     "line": 2,
                     "ch": 14
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1045,7 +1045,7 @@
                     "line": 0,
                     "ch": 6
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1064,7 +1064,7 @@
                     "line": 2,
                     "ch": 1
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1083,7 +1083,7 @@
                     "line": 2,
                     "ch": 5
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1102,7 +1102,7 @@
                     "line": 2,
                     "ch": 2
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1121,7 +1121,7 @@
                     "line": 2,
                     "ch": 2
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1140,7 +1140,7 @@
                     "line": 2,
                     "ch": 3
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1159,7 +1159,7 @@
                     "line": 2,
                     "ch": 3
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1178,7 +1178,7 @@
                     "line": 3,
                     "ch": 3
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1197,7 +1197,7 @@
                     "line": 3,
                     "ch": 7
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1216,7 +1216,7 @@
                     "line": 3,
                     "ch": 11
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1235,7 +1235,7 @@
                     "line": 4,
                     "ch": 16
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1254,7 +1254,7 @@
                     "line": 4,
                     "ch": 11
                 },
-                "mode": "visual"
+                "mode": "normal"
             }
         },
         {
@@ -1268,12 +1268,12 @@
             },
             "keys": "di(",
             "result": {
-                "content": "(Ord1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         }
     ]

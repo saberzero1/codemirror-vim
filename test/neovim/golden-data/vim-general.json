@@ -1,7 +1,7 @@
 {
     "suite": "vim-general",
-    "neovim_version": "0.12.2",
-    "recorded_at": "2026-06-24T00:13:33.555Z",
+    "neovim_version": "0.12.3",
+    "recorded_at": "2026-06-24T11:17:24.418Z",
     "cases": [
         {
             "name": "vim_qq@q",
@@ -54,7 +54,7 @@
             "result": {
                 "content": "word\n(word)\n{word\nword.\n\nword search\n}word\nword\nword\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -93,7 +93,7 @@
                 "content": "(\")\")",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 2
                 },
                 "mode": "normal"
             }
@@ -150,7 +150,7 @@
                 "content": "line 1\n\nline 2",
                 "cursor": {
                     "line": 2,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -204,10 +204,10 @@
             },
             "keys": "gDowng0g$$g0dg$",
             "result": {
-                "content": "This line is long to test movement of g$ and g0 over wrapped lines.\nwng0g$$g0dg$",
+                "content": "This line g$is lg$g0dg$0ong to test movement of g$ and g0 over wrapped lines.\nwn",
                 "cursor": {
-                    "line": 1,
-                    "ch": 12
+                    "line": 0,
+                    "ch": 23
                 },
                 "mode": "insert"
             }
@@ -223,12 +223,12 @@
             },
             "keys": "}2}6}",
             "result": {
-                "content": "}2}6}a\n\nb\nc\n\nd",
+                "content": "a\n\nb\nc\n\nd",
                 "cursor": {
                     "line": 0,
-                    "ch": 5
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -242,12 +242,12 @@
             },
             "keys": "{2{6{",
             "result": {
-                "content": "{2{6{a\n\nb\nc\n\nd",
+                "content": "a\n\nb\nc\n\nd",
                 "cursor": {
-                    "line": 0,
-                    "ch": 5
+                    "line": 5,
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -261,12 +261,12 @@
             },
             "keys": "(2((((((",
             "result": {
-                "content": "(2((((((sentence1.\n\n\nsentence2\n\nsentence3. sentence4\n   sentence5? sentence6!",
+                "content": "sentence1.\n\n\nsentence2\n\nsentence3. sentence4\n   sentence5? sentence6!",
                 "cursor": {
                     "line": 0,
-                    "ch": 8
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -280,12 +280,12 @@
             },
             "keys": "2)))))))",
             "result": {
-                "content": "2)))))))sentence1.\n\n\nsentence2\n\nsentence3. sentence4\n   sentence5? sentence6!",
+                "content": "sentence1.\n\n\nsentence2\n\nsentence3. sentence4\n   sentence5? sentence6!",
                 "cursor": {
-                    "line": 0,
-                    "ch": 8
+                    "line": 6,
+                    "ch": 23
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -299,10 +299,10 @@
             },
             "keys": "{{2}2}}}vipip2ip<Esc>vip<Esc>Vip<Esc>vapapvapvapvapdip3jpyip",
             "result": {
-                "content": "{{2}2}}}vipip2ipa\na\n\n\n\nb\nc\n\n\n\n\n\n\nd\npvapdip3jpyip\ne\nf",
+                "content": "3jpdipvapa\na\n\n\nyip\nb\nc\n\n\n\n\n\n\nd\n\ne\nfp",
                 "cursor": {
-                    "line": 14,
-                    "ch": 13
+                    "line": 4,
+                    "ch": 3
                 },
                 "mode": "insert"
             }
@@ -318,10 +318,10 @@
             },
             "keys": "visvasvisvasvisvasvisdisudasucas<Esc>uyasyas",
             "result": {
-                "content": "{{2}2}}}vipip2ipa\na\n\n\n\nb\nc\n\n\n\n\n\n\nd\n\ne\nf",
+                "content": "Test sentence. Test question?\nAgain.Never. Againvacassvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                 "cursor": {
-                    "line": 14,
-                    "ch": 0
+                    "line": 3,
+                    "ch": 25
                 },
                 "mode": "normal"
             }
@@ -337,10 +337,10 @@
             },
             "keys": "v3aw<Esc>vaw2awawc3aw",
             "result": {
-                "content": " w1  ++  3aww4\nword5\nword6",
+                "content": " w1  ++ 3aw  \n w3   xx \n\nw4\nword5\nword6",
                 "cursor": {
                     "line": 0,
-                    "ch": 12
+                    "ch": 11
                 },
                 "mode": "insert"
             }
@@ -356,12 +356,12 @@
             },
             "keys": "dl",
             "result": {
-                "content": "dl word1 ",
+                "content": "word1 ",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -375,12 +375,12 @@
             },
             "keys": "dl",
             "result": {
-                "content": "dl word1 ",
+                "content": " word1",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 5
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -394,12 +394,12 @@
             },
             "keys": "2dl",
             "result": {
-                "content": "2dl word1 ",
+                "content": "ord1 ",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -413,12 +413,12 @@
             },
             "keys": "dh",
             "result": {
-                "content": "dh word1 ",
+                "content": " wrd1 ",
                 "cursor": {
                     "line": 0,
                     "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -432,12 +432,12 @@
             },
             "keys": "dj",
             "result": {
-                "content": "dj word1\nword2\n word3",
+                "content": " word3",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -451,12 +451,12 @@
             },
             "keys": "dj",
             "result": {
-                "content": "dj word1 ",
+                "content": " word1 ",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -470,12 +470,12 @@
             },
             "keys": "dk",
             "result": {
-                "content": "dk word1\nword2\n word3",
+                "content": " word3",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -489,12 +489,12 @@
             },
             "keys": "dk",
             "result": {
-                "content": "dk word1 ",
+                "content": " word1 ",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -508,12 +508,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw word1 ",
+                "content": "word1 ",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -527,12 +527,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw word1 word2",
+                "content": " word2",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -546,12 +546,12 @@
             },
             "keys": "dwdwdwde",
             "result": {
-                "content": "dwdwdwde  բարև»eµg  ",
+                "content": "  ",
                 "cursor": {
                     "line": 0,
-                    "ch": 8
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -565,12 +565,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw word1 ",
+                "content": " ",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -584,12 +584,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw word1\nword2",
+                "content": " \nword2",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -603,12 +603,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw word1\n\nword2",
+                "content": " \n\nword2",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -622,12 +622,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw\n  \nword",
+                "content": "  \nword",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -641,12 +641,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw\nword",
+                "content": "word",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -660,12 +660,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw\n\n",
+                "content": "\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -679,12 +679,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw  \n   \n",
+                "content": "\n   \n",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -698,12 +698,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw  \n\n",
+                "content": "\n\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -717,12 +717,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dwword1\n   \nword2",
+                "content": "\n   \nword2",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -736,12 +736,12 @@
             },
             "keys": "dw",
             "result": {
-                "content": "dw\nabc",
+                "content": "\nab",
                 "cursor": {
-                    "line": 0,
-                    "ch": 2
+                    "line": 1,
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -755,12 +755,12 @@
             },
             "keys": "d2w",
             "result": {
-                "content": "d2w word1\nword2",
+                "content": "",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -774,12 +774,12 @@
             },
             "keys": "de",
             "result": {
-                "content": "deword\n\n",
+                "content": "\n\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -793,12 +793,12 @@
             },
             "keys": "de",
             "result": {
-                "content": "deword\n\n\n",
+                "content": "wor",
                 "cursor": {
                     "line": 0,
                     "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -812,12 +812,12 @@
             },
             "keys": "de",
             "result": {
-                "content": "de   \n\n\n",
+                "content": "",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -831,12 +831,12 @@
             },
             "keys": "de",
             "result": {
-                "content": "de\nabc",
+                "content": "\nab",
                 "cursor": {
-                    "line": 0,
-                    "ch": 2
+                    "line": 1,
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -850,12 +850,12 @@
             },
             "keys": "db",
             "result": {
-                "content": "db\n\n\n",
+                "content": "\n\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 2
+                    "line": 1,
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -869,12 +869,12 @@
             },
             "keys": "db",
             "result": {
-                "content": "db\n\nword",
+                "content": "\nword",
                 "cursor": {
-                    "line": 0,
-                    "ch": 2
+                    "line": 1,
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -888,12 +888,12 @@
             },
             "keys": "db",
             "result": {
-                "content": "db\n\nword",
+                "content": "\n\nd",
                 "cursor": {
-                    "line": 0,
-                    "ch": 2
+                    "line": 2,
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -907,12 +907,12 @@
             },
             "keys": "db",
             "result": {
-                "content": "db\n   \n",
+                "content": "",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -926,12 +926,12 @@
             },
             "keys": "db",
             "result": {
-                "content": "dbabc\n",
+                "content": "abc\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -945,12 +945,12 @@
             },
             "keys": "dge",
             "result": {
-                "content": "dge\n\n",
+                "content": "",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -964,12 +964,12 @@
             },
             "keys": "dge",
             "result": {
-                "content": "dgeword\n\n",
+                "content": "wor\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -983,12 +983,12 @@
             },
             "keys": "dge",
             "result": {
-                "content": "dge\n  \n",
+                "content": "",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1002,12 +1002,12 @@
             },
             "keys": "dge",
             "result": {
-                "content": "dgeabc\n",
+                "content": "abc\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1021,12 +1021,12 @@
             },
             "keys": "de",
             "result": {
-                "content": "de word1 ",
+                "content": "  ",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1040,12 +1040,12 @@
             },
             "keys": "db",
             "result": {
-                "content": "db word1\nword2 ",
+                "content": "word2 ",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1059,12 +1059,12 @@
             },
             "keys": "dd",
             "result": {
-                "content": "dd wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1078,12 +1078,12 @@
             },
             "keys": "2dd",
             "result": {
-                "content": "2dd wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": "aopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
                     "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1097,12 +1097,12 @@
             },
             "keys": "d2d",
             "result": {
-                "content": "d2d wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": "aopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
                     "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1116,12 +1116,12 @@
             },
             "keys": "2d3d",
             "result": {
-                "content": "2d3d wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": "  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 4
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1135,12 +1135,12 @@
             },
             "keys": "dd",
             "result": {
-                "content": "dd wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}",
                 "cursor": {
-                    "line": 0,
-                    "ch": 2
+                    "line": 14,
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1154,12 +1154,12 @@
             },
             "keys": "dd",
             "result": {
-                "content": "ddthisistheonlyline",
+                "content": "",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1192,12 +1192,12 @@
             },
             "keys": "y2w",
             "result": {
-                "content": "y2w word1\nword2",
+                "content": " word1\nword2",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1211,12 +1211,12 @@
             },
             "keys": "2y3y",
             "result": {
-                "content": "2y3y wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 4
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1230,12 +1230,12 @@
             },
             "keys": "2ddP",
             "result": {
-                "content": "2ddP\na\n\n",
+                "content": "\na\n\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 4
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1249,10 +1249,10 @@
             },
             "keys": "c2w",
             "result": {
-                "content": "c2wword1 word2 word3",
+                "content": " word3",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
                 "mode": "insert"
             }
@@ -1268,10 +1268,10 @@
             },
             "keys": "c2w",
             "result": {
-                "content": "c2w word1\nword2",
+                "content": " ",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 1
                 },
                 "mode": "insert"
             }
@@ -1287,10 +1287,10 @@
             },
             "keys": "2c3c",
             "result": {
-                "content": "2c3c wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " \n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 4
+                    "ch": 1
                 },
                 "mode": "insert"
             }
@@ -1306,10 +1306,10 @@
             },
             "keys": "ctw<Esc>c|<Esc>2uwhc2ge",
             "result": {
-                "content": "cGinsertedline",
+                "content": "  wordword3",
                 "cursor": {
                     "line": 0,
-                    "ch": 14
+                    "ch": 6
                 },
                 "mode": "insert"
             }
@@ -1325,10 +1325,10 @@
             },
             "keys": "cc",
             "result": {
-                "content": "cc wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 2
+                    "line": 15,
+                    "ch": 0
                 },
                 "mode": "insert"
             }
@@ -1344,10 +1344,10 @@
             },
             "keys": "<C-v>2jlllchello<Esc><C-v>2khCworld",
             "result": {
-                "content": "\u0002jlllchelworld\n5678\nabcdefg",
+                "content": "hworlde\n5e\nae",
                 "cursor": {
                     "line": 0,
-                    "ch": 14
+                    "ch": 6
                 },
                 "mode": "insert"
             }
@@ -1363,10 +1363,10 @@
             },
             "keys": "<C-v>2jlcfo<Esc>.",
             "result": {
-                "content": "1234\u0002jlcfworld\u0002jlcfo\n5678\nabcdefg",
+                "content": "foo4\nfoo8\nfoodefg",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -1382,9 +1382,9 @@
             },
             "keys": "<C-v>2jlI+-<Esc>gv<C-v>1j2lgv.",
             "result": {
-                "content": "+-1234\n+-5678\n+-abcdefg\nxyz",
+                "content": "12+-34\n56+-78\nab+-cdefg\nxyz",
                 "cursor": {
-                    "line": 2,
+                    "line": 1,
                     "ch": 1
                 },
                 "mode": "visual"
@@ -1401,10 +1401,10 @@
             },
             "keys": "3l<C-v>2j2<Left>AA<Esc>gvxgv",
             "result": {
-                "content": "4 line 1\n56789 line 2\nabcdefg line 3A\nline 4",
+                "content": "0A4 line 1\n5A9 line 2\naAefg line 3\nline 4",
                 "cursor": {
-                    "line": 0,
-                    "ch": 3
+                    "line": 2,
+                    "ch": 1
                 },
                 "mode": "visual"
             }
@@ -1420,12 +1420,12 @@
             },
             "keys": "<C-v>2jllld",
             "result": {
-                "content": "1234\n5678\nabcdefg",
+                "content": "1\n5\nafg",
                 "cursor": {
-                    "line": 2,
-                    "ch": 3
+                    "line": 0,
+                    "ch": 0
                 },
-                "mode": "no"
+                "mode": "normal"
             }
         },
         {
@@ -1439,9 +1439,9 @@
             },
             "keys": "<C-v>2jlD",
             "result": {
-                "content": "1234\n5678\ne",
+                "content": "1\n5\na",
                 "cursor": {
-                    "line": 2,
+                    "line": 0,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -1458,9 +1458,9 @@
             },
             "keys": "<C-v>2jlllshello{<Esc><C-v>1khSworld",
             "result": {
-                "content": "world\nhello{\nhello{efg\n",
+                "content": "hello{1\nworld\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 5
                 },
                 "mode": "insert"
@@ -1477,29 +1477,10 @@
             },
             "keys": "gcc2gcc",
             "result": {
-                "content": "gcc2gccvar line1\nline2\nline3",
+                "content": "var line1\nline2\nline3",
                 "cursor": {
                     "line": 0,
-                    "ch": 7
-                },
-                "mode": "insert"
-            }
-        },
-        {
-            "name": "vim_on_mode_change",
-            "initial": {
-                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
-                "cursor": {
-                    "ch": 0,
-                    "line": 0
-                }
-            },
-            "keys": "<Esc><Esc>vc<Esc><C-v>I<Esc>Rx<C-[>vV<C-v>v<C-c>a<Esc>v:y\n:startinsert\n",
-            "result": {
-                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
-                "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "ch": 8
                 },
                 "mode": "normal"
             }
@@ -1515,10 +1496,10 @@
             },
             "keys": "g~2w",
             "result": {
-                "content": " WORD1\nword2",
+                "content": " WORD1\nWORD2",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -1537,7 +1518,7 @@
                 "content": " WORD1\nWORD2\nWORD3\nWORD4\nWORD5\nWORD6",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -1572,7 +1553,7 @@
             },
             "keys": "2g?w2g?w2g?Bg?iwg?g?g??g?2?l<C-v>ljg?",
             "result": {
-                "content": "ja wb xx wc wd",
+                "content": "wn wb kx wc wd",
                 "cursor": {
                     "line": 0,
                     "ch": 1
@@ -1591,9 +1572,9 @@
             },
             "keys": "<C-v>llj~vll~",
             "result": {
-                "content": "hello\nWoRld\nabcde",
+                "content": "hello\nwoRLd\nAbcDe",
                 "cursor": {
-                    "line": 0,
+                    "line": 2,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -1610,10 +1591,10 @@
             },
             "keys": "<C-v>jjl~.",
             "result": {
-                "content": "hEllo\nwOrlD\naBcDe",
+                "content": "HelLO\nWorLd\nAbcdE",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -1648,7 +1629,7 @@
             },
             "keys": ">k",
             "result": {
-                "content": " word1\nword2\nword3 ",
+                "content": "\t word1\n\tword2\nword3 ",
                 "cursor": {
                     "line": 0,
                     "ch": 0
@@ -1686,10 +1667,10 @@
             },
             "keys": "<k",
             "result": {
-                "content": "   word1\n  word2\nword3 ",
+                "content": "word1\nword2\nword3 ",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -1708,7 +1689,7 @@
                 "content": "word1\nword2\nword3 ",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -1727,7 +1708,7 @@
                 "content": "word1\nword2\nword3",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -1743,10 +1724,10 @@
             },
             "keys": "<C-v>jj4>gv14<",
             "result": {
-                "content": "word1\nword2\nword3",
+                "content": "  word1\n  word2\n  word3",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 6
                 },
                 "mode": "normal"
             }
@@ -1784,7 +1765,7 @@
                 "content": "abcdef",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 6
                 },
                 "mode": "visual"
             }
@@ -1800,10 +1781,10 @@
             },
             "keys": "D",
             "result": {
-                "content": "\nword2\n word3",
+                "content": " wo\nword2\n word3",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 2
                 },
                 "mode": "normal"
             }
@@ -1819,10 +1800,10 @@
             },
             "keys": "C",
             "result": {
-                "content": "\nword2\n word3",
+                "content": " wo\nword2\n word3",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
                 "mode": "insert"
             }
@@ -1838,12 +1819,12 @@
             },
             "keys": "Y",
             "result": {
-                "content": "Y word1\nword2\n word3",
+                "content": " word1\nword2\n word3",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1857,12 +1838,12 @@
             },
             "keys": "<C-v>j2lYGpgg<C-v>j2ly$p$jp$jP",
             "result": {
-                "content": "j2lYGpggj2ly$p$jp$jP123456\n123456\n",
+                "content": "123456123\n123456123123\n123      121233\n123        123",
                 "cursor": {
-                    "line": 0,
-                    "ch": 20
+                    "line": 2,
+                    "ch": 11
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1876,12 +1857,12 @@
             },
             "keys": "3~",
             "result": {
-                "content": "3~abcdefg",
+                "content": "ABCdefg",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1895,12 +1876,12 @@
             },
             "keys": "<C-a>2<C-a>",
             "result": {
-                "content": "2-10",
+                "content": "-7",
                 "cursor": {
                     "line": 0,
                     "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1914,12 +1895,12 @@
             },
             "keys": "<C-x>2<C-x>",
             "result": {
-                "content": "20",
+                "content": "-3",
                 "cursor": {
                     "line": 0,
                     "ch": 1
                 },
-                "mode": "ix"
+                "mode": "normal"
             }
         },
         {
@@ -1933,12 +1914,12 @@
             },
             "keys": "<C-x>l<C-x><C-x><C-a>l<C-a><C-a>",
             "result": {
-                "content": "ll__jmp1 jmp2 jmp",
+                "content": "__jmp1 jmp2 jmp",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 11
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -1952,10 +1933,10 @@
             },
             "keys": "i<C-o>3w",
             "result": {
-                "content": "ione two three here",
+                "content": "one two three here",
                 "cursor": {
                     "line": 0,
-                    "ch": 15
+                    "ch": 14
                 },
                 "mode": "insert"
             }
@@ -1971,7 +1952,7 @@
             },
             "keys": "a<C-u>",
             "result": {
-                "content": "word1/word2",
+                "content": "2",
                 "cursor": {
                     "line": 0,
                     "ch": 0
@@ -1990,29 +1971,10 @@
             },
             "keys": "a<C-w>",
             "result": {
-                "content": "word1/word2",
+                "content": "word1/2",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
-                },
-                "mode": "insert"
-            }
-        },
-        {
-            "name": "vim_normal_ctrl_w",
-            "initial": {
-                "content": "word",
-                "cursor": {
-                    "ch": 0,
-                    "line": 0
-                }
-            },
-            "keys": "<C-w>",
-            "result": {
-                "content": "word",
-                "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "ch": 6
                 },
                 "mode": "insert"
             }
@@ -2028,10 +1990,10 @@
             },
             "keys": "a",
             "result": {
-                "content": "a wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 2
                 },
                 "mode": "insert"
             }
@@ -2047,10 +2009,10 @@
             },
             "keys": "a",
             "result": {
-                "content": "a wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 10
                 },
                 "mode": "insert"
             }
@@ -2066,7 +2028,7 @@
             },
             "keys": "atest<Esc>",
             "result": {
-                "content": "atest😀",
+                "content": "𴥳t",
                 "cursor": {
                     "line": 0,
                     "ch": 4
@@ -2088,7 +2050,7 @@
                 "content": "foo\nbar",
                 "cursor": {
                     "line": 1,
-                    "ch": 2
+                    "ch": 3
                 },
                 "mode": "insert"
             }
@@ -2104,7 +2066,7 @@
             },
             "keys": "i",
             "result": {
-                "content": "i wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
                     "ch": 1
@@ -2123,10 +2085,10 @@
             },
             "keys": "itest<Esc>",
             "result": {
-                "content": "itest😀",
+                "content": "test😀",
                 "cursor": {
                     "line": 0,
-                    "ch": 4
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -2142,10 +2104,10 @@
             },
             "keys": "3itest<Esc>",
             "result": {
-                "content": "testtesttest",
+                "content": "testesttestt",
                 "cursor": {
                     "line": 0,
-                    "ch": 11
+                    "ch": 10
                 },
                 "mode": "normal"
             }
@@ -2161,10 +2123,10 @@
             },
             "keys": "2iz<BS><BS><Esc>",
             "result": {
-                "content": "abcde",
+                "content": "abe",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -2199,10 +2161,10 @@
             },
             "keys": "i<BS>",
             "result": {
-                "content": "0123456789",
+                "content": "012345679",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 8
                 },
                 "mode": "insert"
             }
@@ -2218,10 +2180,10 @@
             },
             "keys": "i<Ins><BS>",
             "result": {
-                "content": "i0123456789",
+                "content": "0123456789",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 8
                 },
                 "mode": "R"
             }
@@ -2237,12 +2199,12 @@
             },
             "keys": "i<Del><Del><Del>",
             "result": {
-                "content": "i4\nBCD",
+                "content": "A1\nBCD",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 2
                 },
-                "mode": "R"
+                "mode": "insert"
             }
         },
         {
@@ -2256,12 +2218,12 @@
             },
             "keys": "<Del><Del><Del>",
             "result": {
-                "content": "34\nBCD",
+                "content": "A1\nBCD",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 1
                 },
-                "mode": "R"
+                "mode": "normal"
             }
         },
         {
@@ -2275,12 +2237,12 @@
             },
             "keys": "A",
             "result": {
-                "content": "AwOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 10
                 },
-                "mode": "R"
+                "mode": "insert"
             }
         },
         {
@@ -2294,10 +2256,10 @@
             },
             "keys": "<C-v>2jllAhello<Esc>.",
             "result": {
-                "content": "\u0002jllAhelliA\u0002jllAhello",
+                "content": "teshellohellot\nme hello ellot\nplehelloaellotse",
                 "cursor": {
                     "line": 0,
-                    "ch": 20
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -2332,10 +2294,10 @@
             },
             "keys": "3Itest<Esc>",
             "result": {
-                "content": "3Itestblah",
+                "content": "testtesttestblah",
                 "cursor": {
                     "line": 0,
-                    "ch": 5
+                    "ch": 11
                 },
                 "mode": "normal"
             }
@@ -2370,10 +2332,10 @@
             },
             "keys": "o",
             "result": {
-                "content": "oword1\nword2",
+                "content": "word1\n\nword2",
                 "cursor": {
-                    "line": 0,
-                    "ch": 1
+                    "line": 1,
+                    "ch": 0
                 },
                 "mode": "insert"
             }
@@ -2389,10 +2351,10 @@
             },
             "keys": "3otest<Esc>",
             "result": {
-                "content": "3otest",
+                "content": "\ntes\ntest\ntestt",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 3,
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -2427,12 +2389,12 @@
             },
             "keys": "J",
             "result": {
-                "content": "Jword1 \n    word2\nword3\n word4",
+                "content": "word1 word2\nword3\n word4",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 6
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2446,12 +2408,12 @@
             },
             "keys": "3J",
             "result": {
-                "content": "3Jword1 \n    word2\nword3\n word4",
+                "content": "word1 word2 word3\n word4",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 11
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2465,12 +2427,12 @@
             },
             "keys": "gJgJ",
             "result": {
-                "content": "gJgJword1\nword2 \n word3",
+                "content": "word1word2  word3",
                 "cursor": {
                     "line": 0,
-                    "ch": 4
+                    "ch": 11
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2484,10 +2446,10 @@
             },
             "keys": "gIaa<Esc>kgi",
             "result": {
-                "content": "gIaa12\n  xxxx",
+                "content": "12\naa  xxxx",
                 "cursor": {
-                    "line": 0,
-                    "ch": 4
+                    "line": 1,
+                    "ch": 2
                 },
                 "mode": "insert"
             }
@@ -2503,12 +2465,12 @@
             },
             "keys": "pyepu",
             "result": {
-                "content": "pyepu___",
+                "content": "__abc\ndef_",
                 "cursor": {
                     "line": 0,
-                    "ch": 5
+                    "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2522,12 +2484,12 @@
             },
             "keys": "\"ap",
             "result": {
-                "content": "\"ap___",
+                "content": "___",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2541,12 +2503,12 @@
             },
             "keys": "p",
             "result": {
-                "content": "p___",
+                "content": "__abc_",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 4
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2560,12 +2522,12 @@
             },
             "keys": "2p",
             "result": {
-                "content": "2p___",
+                "content": "___\n  a\nd\n  a\nd",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2579,12 +2541,12 @@
             },
             "keys": "2p",
             "result": {
-                "content": "2p___",
+                "content": "___\n  a\nd\n  a\nd",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2598,12 +2560,12 @@
             },
             "keys": "]p",
             "result": {
-                "content": "]p  ___",
+                "content": "  ___\n  abc\n    def",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2617,12 +2579,12 @@
             },
             "keys": "]p",
             "result": {
-                "content": "]p  ___",
+                "content": "  ___\n  abc\ndef",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2636,12 +2598,12 @@
             },
             "keys": "]p",
             "result": {
-                "content": "]p\t___",
+                "content": "\t___\n\tabc\n\t\tdef",
                 "cursor": {
-                    "line": 0,
-                    "ch": 2
+                    "line": 1,
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2655,12 +2617,12 @@
             },
             "keys": "]p",
             "result": {
-                "content": "]p\t___",
+                "content": "\t___\n\tabc\n\t  def",
                 "cursor": {
-                    "line": 0,
-                    "ch": 2
+                    "line": 1,
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2674,12 +2636,12 @@
             },
             "keys": "[p",
             "result": {
-                "content": "[p  ___",
+                "content": "  abc\n    def\n  ___",
                 "cursor": {
                     "line": 0,
                     "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2693,12 +2655,12 @@
             },
             "keys": "PyePu",
             "result": {
-                "content": "PyePu___",
+                "content": "_abc\ndef__",
                 "cursor": {
                     "line": 0,
-                    "ch": 5
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2712,12 +2674,12 @@
             },
             "keys": "2P",
             "result": {
-                "content": "2P___",
+                "content": "  a\nd\n  a\nd\n___",
                 "cursor": {
                     "line": 0,
                     "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -2731,9 +2693,9 @@
             },
             "keys": "3ruvjhr<Space>r<C-c>r<Del>r<CR>",
             "result": {
-                "content": "wordet\nanother",
+                "content": "\nuuu  \n    her",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -2769,10 +2731,10 @@
             },
             "keys": "<C-v>kkhhrl<C-v>ljr<Space>o\t\t<Esc><C-v>hhrr",
             "result": {
-                "content": "  34\n rrrrrrrrrrrrrrr\n  78\nabcdefg",
+                "content": "1  l\n5  l\nalllefg\nrrrrrrrrrrrrrrrr",
                 "cursor": {
-                    "line": 1,
-                    "ch": 1
+                    "line": 3,
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -2829,7 +2791,7 @@
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "R"
             }
@@ -2845,7 +2807,7 @@
             },
             "keys": "<C-v>jR0<Esc>2j.kvR1<Esc>k.p",
             "result": {
-                "content": "1\njR0\n1\nb3jR0\nc44\nc55",
+                "content": "1\n0\n1\n0",
                 "cursor": {
                     "line": 1,
                     "ch": 0
@@ -2866,8 +2828,8 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 1
+                    "line": 2,
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -2886,7 +2848,7 @@
                 "content": " wOrd1 (#%\n\nword3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 2,
-                    "ch": 1
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -2923,8 +2885,8 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 1
+                    "line": 2,
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -2942,7 +2904,7 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 1
                 },
                 "mode": "normal"
@@ -2961,8 +2923,8 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 2,
+                    "ch": 4
                 },
                 "mode": "normal"
             }
@@ -2980,7 +2942,7 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 4,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -2999,8 +2961,8 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 1
+                    "line": 2,
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -3018,7 +2980,7 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 1
                 },
                 "mode": "normal"
@@ -3035,7 +2997,7 @@
             },
             "keys": "mtd]`",
             "result": {
-                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": "pop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
                     "ch": 0
@@ -3054,7 +3016,7 @@
             },
             "keys": "mtd]'",
             "result": {
-                "content": " word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
                     "ch": 0
@@ -3075,7 +3037,7 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 2,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -3094,7 +3056,7 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 1
                 },
                 "mode": "normal"
@@ -3113,7 +3075,7 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 2,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -3132,7 +3094,7 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 2,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -3151,8 +3113,8 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 1
+                    "line": 2,
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -3170,8 +3132,8 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 1
+                    "line": 2,
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -3208,8 +3170,8 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 5,
+                    "ch": 2
                 },
                 "mode": "normal"
             }
@@ -3227,8 +3189,8 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 5,
+                    "ch": 2
                 },
                 "mode": "normal"
             }
@@ -3246,8 +3208,8 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 5,
+                    "ch": 2
                 },
                 "mode": "normal"
             }
@@ -3282,10 +3244,10 @@
             },
             "keys": "lvlld",
             "result": {
-                "content": "15",
+                "content": "1",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -3342,9 +3304,9 @@
                 "content": "init",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 1
                 },
-                "mode": "normal"
+                "mode": "visual"
             }
         },
         {
@@ -3361,7 +3323,7 @@
                 "content": "cross",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "visual"
             }
@@ -3380,9 +3342,9 @@
                 "content": "cross",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 3
                 },
-                "mode": "normal"
+                "mode": "visual"
             }
         },
         {
@@ -3398,8 +3360,8 @@
             "result": {
                 "content": "cross\ncross\ncross\ncross\ncross\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 1,
+                    "ch": 2
                 },
                 "mode": "visual"
             }
@@ -3418,9 +3380,9 @@
                 "content": "cross\ncross\ncross\ncross\ncross\n",
                 "cursor": {
                     "line": 3,
-                    "ch": 0
+                    "ch": 3
                 },
-                "mode": "normal"
+                "mode": "visual"
             }
         },
         {
@@ -3491,12 +3453,12 @@
             },
             "keys": "<C-v>ljj6lddddd",
             "result": {
-                "content": "1234",
+                "content": "",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
-                "mode": "no"
+                "mode": "normal"
             }
         },
         {
@@ -3510,12 +3472,12 @@
             },
             "keys": "<C-v>lkkd",
             "result": {
-                "content": "ho world\n{\nthis is\nsparta!",
+                "content": "hello world\n{\ntis\nsa!",
                 "cursor": {
-                    "line": 0,
-                    "ch": 1
+                    "line": 1,
+                    "ch": 0
                 },
-                "mode": "no"
+                "mode": "normal"
             }
         },
         {
@@ -3529,12 +3491,12 @@
             },
             "keys": "<C-v>2lk4hjj4l",
             "result": {
-                "content": "145\n67891\nabcde",
+                "content": "12345\n67891\nabcde",
                 "cursor": {
                     "line": 2,
                     "ch": 4
                 },
-                "mode": "normal"
+                "mode": "visual"
             }
         },
         {
@@ -3550,8 +3512,8 @@
             "result": {
                 "content": "12345\n67891\nabcde",
                 "cursor": {
-                    "line": 1,
-                    "ch": 1
+                    "line": 2,
+                    "ch": 3
                 },
                 "mode": "visual"
             }
@@ -3570,7 +3532,7 @@
                 "content": "123456\n78\nabcdefg\nfoobar\n}\n",
                 "cursor": {
                     "line": 4,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "visual"
             }
@@ -3700,9 +3662,9 @@
             },
             "keys": "lvlllygvvvllpgvvvllgvgv",
             "result": {
-                "content": "12312456\nfoo\nbar",
+                "content": "123456\n2345\nbar",
                 "cursor": {
-                    "line": 0,
+                    "line": 2,
                     "ch": 2
                 },
                 "mode": "visual"
@@ -3719,7 +3681,7 @@
             },
             "keys": "lVjjVgvdVyjVpgvd",
             "result": {
-                "content": "foo\nbar",
+                "content": "foo\nand",
                 "cursor": {
                     "line": 1,
                     "ch": 0
@@ -3738,9 +3700,9 @@
             },
             "keys": "<C-v>kh<C-v>vlgvgv<Esc>v<C-v>jdgv",
             "result": {
-                "content": "13456\nfo\nbar",
+                "content": "123456\nfo\nbr",
                 "cursor": {
-                    "line": 1,
+                    "line": 2,
                     "ch": 1
                 },
                 "mode": "visual"
@@ -3757,7 +3719,7 @@
             },
             "keys": "s<Esc>",
             "result": {
-                "content": "c",
+                "content": "ac",
                 "cursor": {
                     "line": 0,
                     "ch": 0
@@ -3779,7 +3741,7 @@
                 "content": "test",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 2
                 },
                 "mode": "normal"
             }
@@ -3795,7 +3757,7 @@
             },
             "keys": "vs<Esc>",
             "result": {
-                "content": "bc",
+                "content": "ac",
                 "cursor": {
                     "line": 0,
                     "ch": 0
@@ -3833,7 +3795,7 @@
             },
             "keys": "vlllovvjjjoOlld",
             "result": {
-                "content": "p",
+                "content": "",
                 "cursor": {
                     "line": 0,
                     "ch": 0
@@ -3855,7 +3817,7 @@
                 "content": "abcd\nefgh\nijkl\nmnop",
                 "cursor": {
                     "line": 3,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "visual"
             }
@@ -3871,9 +3833,9 @@
             },
             "keys": "vllUvllulll.qavjUqj@aVUj.",
             "result": {
-                "content": "abcdeF\nGHIJKL\nMNOPQ\nshort line\nlong line of text",
+                "content": "ABCDEF\nGHIJKL\nMnopq\nSHORT LINE\nLONG LINE OF TEXT",
                 "cursor": {
-                    "line": 2,
+                    "line": 4,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -3890,10 +3852,10 @@
             },
             "keys": "<C-v>kkhU..",
             "result": {
-                "content": "Abcdef\nghijkl\nmnopq\nfoo",
+                "content": "ABCDef\nGHIJkl\nMNOPq\nfoO",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 2,
+                    "ch": 2
                 },
                 "mode": "normal"
             }
@@ -3909,10 +3871,29 @@
             },
             "keys": "vlly3ljvlpyyvlllp",
             "result": {
-                "content": "this is a\nunith\nunithitest for visual paste\nt for visual paste",
+                "content": "this is a\nunithi\nthis is a\n for visual paste",
                 "cursor": {
                     "line": 2,
                     "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_v_paste_from_register",
+            "initial": {
+                "content": "register contents\nare not erased",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "\"aywvp:registers\n",
+            "result": {
+                "content": "register egister contents\nare not erased",
+                "cursor": {
+                    "line": 1,
+                    "ch": 8
                 },
                 "mode": "normal"
             }
@@ -3947,12 +3928,12 @@
             },
             "keys": "<C-v>3jlypv4ly<C-v>3jp",
             "result": {
-                "content": "\u0003jlypv4ly\u0003jphello\nworld\nfoo\nbar",
+                "content": "helheelhelo\nhelheorwold\nhelheoofo\nhelhearba",
                 "cursor": {
                     "line": 0,
-                    "ch": 12
+                    "ch": 4
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -3966,12 +3947,12 @@
             },
             "keys": "<C-v>jjyp",
             "result": {
-                "content": "jjyphello\nfoo\nbar",
+                "content": "hellho\nfoo f\nbar b",
                 "cursor": {
                     "line": 0,
                     "ch": 4
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -3985,12 +3966,12 @@
             },
             "keys": "<C-v>2jxP",
             "result": {
-                "content": "\u0002jxPcut\nand\npaste\nme",
+                "content": "cut\nand\npaste\nme",
                 "cursor": {
                     "line": 0,
-                    "ch": 4
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -4004,12 +3985,12 @@
             },
             "keys": "<C-v>2j\"ay\"ap",
             "result": {
-                "content": "\u0002j\"ay\"apfoobar\nhello\nworld",
+                "content": "foobfar\nhellho\nworlwd",
                 "cursor": {
                     "line": 0,
-                    "ch": 8
+                    "ch": 4
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -4023,12 +4004,12 @@
             },
             "keys": "<C-v>2jlyp",
             "result": {
-                "content": "\u0002jlypcut\nand\npaste\nme",
+                "content": "cut\nand\npaste\nmcue\n an\n pa",
                 "cursor": {
-                    "line": 0,
-                    "ch": 5
+                    "line": 3,
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -4042,10 +4023,10 @@
             },
             "keys": "vjS<Esc>",
             "result": {
-                "content": "vjSaa\nbb\ncc",
+                "content": "\ncc",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -4083,7 +4064,7 @@
                 "content": "match nope match \n nope Match",
                 "cursor": {
                     "line": 0,
-                    "ch": 11
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -4099,10 +4080,10 @@
             },
             "keys": "/match\ngn<Esc>gn<Esc><Esc>gngnd",
             "result": {
-                "content": "atch \n nope Match",
+                "content": "match nope ",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 10
                 },
                 "mode": "normal"
             }
@@ -4139,8 +4120,8 @@
             "result": {
                 "content": "changed nope changed \n nope Match",
                 "cursor": {
-                    "line": 0,
-                    "ch": 6
+                    "line": 1,
+                    "ch": 10
                 },
                 "mode": "normal"
             }
@@ -4196,8 +4177,8 @@
             "result": {
                 "content": "word\n another wordword\n wordwordword\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 1,
+                    "ch": 9
                 },
                 "mode": "normal"
             }
@@ -4272,8 +4253,8 @@
             "result": {
                 "content": "aaa aa \n a aa",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 1,
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -4292,7 +4273,7 @@
                 "content": "aaa aa \n a aa",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 4
                 },
                 "mode": "normal"
             }
@@ -4349,7 +4330,7 @@
                 "content": "match nope match \n nope Match",
                 "cursor": {
                     "line": 0,
-                    "ch": 11
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -4384,10 +4365,10 @@
             },
             "keys": "?match\nngN<Esc>gN<Esc>gNgNd",
             "result": {
-                "content": " nope match \n nope Match",
+                "content": "match nope matc",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 14
                 },
                 "mode": "normal"
             }
@@ -4406,7 +4387,7 @@
                 "content": "changed nope changed \n nope Match",
                 "cursor": {
                     "line": 0,
-                    "ch": 19
+                    "ch": 6
                 },
                 "mode": "normal"
             }
@@ -4424,8 +4405,8 @@
             "result": {
                 "content": "changed nope changed \n nope Match",
                 "cursor": {
-                    "line": 0,
-                    "ch": 19
+                    "line": 1,
+                    "ch": 10
                 },
                 "mode": "normal"
             }
@@ -4444,7 +4425,7 @@
                 "content": "nomatch match nomatch match \nnomatch Match",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 8
                 },
                 "mode": "normal"
             }
@@ -4501,7 +4482,7 @@
                 "content": "nomatch match nomatch match \nnomatch Match",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 8
                 },
                 "mode": "normal"
             }
@@ -4577,7 +4558,7 @@
                 "content": "matches match alsoMatch\nmatchme matching",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 8
                 },
                 "mode": "normal"
             }
@@ -4612,7 +4593,7 @@
             },
             "keys": "qa$alarry.<Esc>acurly.<Esc>qamoe.<Esc>@a.",
             "result": {
-                "content": "larry.curly.moe.larry.curly.curly.",
+                "content": "larrycurly.moe..larry.curly.curly.",
                 "cursor": {
                     "line": 0,
                     "ch": 33
@@ -4849,6 +4830,234 @@
             }
         },
         {
+            "name": "vim_yank_visual_block",
+            "initial": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "<C-v>lj\"ay:registers\n",
+            "result": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_yank_append_line_to_line_register",
+            "initial": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "\"ayyj\"Ayy:registers\n",
+            "result": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_yank_append_word_to_word_register",
+            "initial": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "\"aywj\"Ayw:registers\n",
+            "result": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_yank_append_line_to_word_register",
+            "initial": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "\"aywj\"Ayy:registers\n",
+            "result": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_yank_append_word_to_line_register",
+            "initial": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "\"ayyj\"Ayw:registers\n",
+            "result": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_black_hole_register",
+            "initial": {
+                "content": "foo\nbar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ggyG:registers\n\"_dG:registers\n\"_p",
+            "result": {
+                "content": "",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_macro_register",
+            "initial": {
+                "content": "",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "qaigangnam<Esc>qqbostyle<Esc>q:registers\n",
+            "result": {
+                "content": "gangnam\nstyle",
+                "cursor": {
+                    "line": 1,
+                    "ch": 4
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_._register",
+            "initial": {
+                "content": "",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ifoo<Esc>:registers\n",
+            "result": {
+                "content": "foo",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_:_register",
+            "initial": {
+                "content": "",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": ":bar\n:registers\n",
+            "result": {
+                "content": "",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_registers_html_encoding",
+            "initial": {
+                "content": "<script>throw \"&amp;\"</script>",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "yy:registers\n",
+            "result": {
+                "content": "<script>throw \"&amp;\"</script>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_search_register_escape",
+            "initial": {
+                "content": "",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "/waldo\n/foo<Esc>:registers\n",
+            "result": {
+                "content": "",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_search_register",
+            "initial": {
+                "content": "",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "/foo\n:registers\n",
+            "result": {
+                "content": "",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            }
+        },
+        {
             "name": "vim_search_history",
             "initial": {
                 "content": "",
@@ -4916,10 +5125,10 @@
             },
             "keys": "2dw.axy<Esc>.",
             "result": {
-                "content": "1 2 3 4 5 6",
+                "content": "5 xyxy6",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 5
                 },
                 "mode": "normal"
             }
@@ -4954,9 +5163,9 @@
             },
             "keys": "itest<Esc>.Oxyz<BS>Down<Esc>.",
             "result": {
-                "content": "xyDown\nxyDown\ntestestt",
+                "content": "xDownz\nxyDown\ntestestt",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 5
                 },
                 "mode": "normal"
@@ -4973,10 +5182,10 @@
             },
             "keys": ":map i x\ni:start\ntest<Esc>.:start!\nxyz",
             "result": {
-                "content": "testesttxyz",
+                "content": "testestxyzt",
                 "cursor": {
                     "line": 0,
-                    "ch": 11
+                    "ch": 10
                 },
                 "mode": "insert"
             }
@@ -4992,10 +5201,10 @@
             },
             "keys": "itest<Esc>2.",
             "result": {
-                "content": "itesxyzitestxyzitestt",
+                "content": "t",
                 "cursor": {
                     "line": 0,
-                    "ch": 19
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -5106,10 +5315,10 @@
             },
             "keys": "cwtest<Esc>l2.",
             "result": {
-                "content": "testtestword3",
+                "content": "test test",
                 "cursor": {
                     "line": 0,
-                    "ch": 7
+                    "ch": 8
                 },
                 "mode": "normal"
             }
@@ -5125,10 +5334,10 @@
             },
             "keys": "i<BS><Esc>.",
             "result": {
-                "content": "bcde",
+                "content": "zabd",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -5144,10 +5353,10 @@
             },
             "keys": "i<BS><Esc>2.",
             "result": {
-                "content": "bcde",
+                "content": "zzab",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -5163,9 +5372,9 @@
             },
             "keys": "Vj>.",
             "result": {
-                "content": "\t\t1\n\t\t2\n3\n4",
+                "content": "\t1\n\t2\n\t3\n\t4",
                 "cursor": {
-                    "line": 0,
+                    "line": 2,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -5184,8 +5393,8 @@
             "result": {
                 "content": "abcdef\nabcdefg",
                 "cursor": {
-                    "line": 0,
-                    "ch": 1
+                    "line": 1,
+                    "ch": 6
                 },
                 "mode": "normal"
             }
@@ -5223,7 +5432,7 @@
                 "content": "01x3xx6x8x",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 2
                 },
                 "mode": "normal"
             }
@@ -5261,7 +5470,7 @@
                 "content": "0xx3xx678x",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
                 "mode": "normal"
             }
@@ -5299,7 +5508,7 @@
                 "content": "01x3xx678x",
                 "cursor": {
                     "line": 0,
-                    "ch": 5
+                    "ch": 9
                 },
                 "mode": "normal"
             }
@@ -5318,7 +5527,7 @@
                 "content": "01x3xx678x",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 5
                 },
                 "mode": "normal"
             }
@@ -5337,7 +5546,7 @@
                 "content": "01x3xx67xx",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 7
                 },
                 "mode": "normal"
             }
@@ -5353,10 +5562,10 @@
             },
             "keys": "f4d;ud,",
             "result": {
-                "content": "01x3xx67xx",
+                "content": "01239",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 4
                 },
                 "mode": "normal"
             }
@@ -5372,10 +5581,10 @@
             },
             "keys": "F4d;ud,",
             "result": {
-                "content": "01x3xx67xx",
+                "content": "56789",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -5391,10 +5600,10 @@
             },
             "keys": "t4d;ud,",
             "result": {
-                "content": "01x3xx67xx",
+                "content": "012349",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 5
                 },
                 "mode": "normal"
             }
@@ -5410,10 +5619,10 @@
             },
             "keys": "T4d;ud,",
             "result": {
-                "content": "01x3xx67xx",
+                "content": "456789",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -5429,12 +5638,12 @@
             },
             "keys": "f4c;<Esc>uc,",
             "result": {
-                "content": "01x3xx67xx",
+                "content": "01239",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 4
                 },
-                "mode": "normal"
+                "mode": "insert"
             }
         },
         {
@@ -5448,12 +5657,12 @@
             },
             "keys": "F4c;<Esc>uc,",
             "result": {
-                "content": "01x3xx67xx",
+                "content": "56789",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
-                "mode": "normal"
+                "mode": "insert"
             }
         },
         {
@@ -5467,12 +5676,12 @@
             },
             "keys": "t4c;<Esc>uc,",
             "result": {
-                "content": "01x3xx67xx",
+                "content": "012349",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 5
                 },
-                "mode": "normal"
+                "mode": "insert"
             }
         },
         {
@@ -5486,12 +5695,12 @@
             },
             "keys": "T4c;<Esc>uc,",
             "result": {
-                "content": "01x3xx67xx",
+                "content": "456789",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
-                "mode": "normal"
+                "mode": "insert"
             }
         },
         {
@@ -5505,10 +5714,10 @@
             },
             "keys": "f4y;Puy,P",
             "result": {
-                "content": "0123za456789",
+                "content": "012345678456789",
                 "cursor": {
                     "line": 0,
-                    "ch": 5
+                    "ch": 8
                 },
                 "mode": "normal"
             }
@@ -5543,10 +5752,10 @@
             },
             "keys": "t4y;Puy,p",
             "result": {
-                "content": "012301234456789",
+                "content": "01234556786789",
                 "cursor": {
                     "line": 0,
-                    "ch": 8
+                    "ch": 9
                 },
                 "mode": "normal"
             }
@@ -5603,9 +5812,9 @@
                 "content": "ab.cd.ef.g",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 3
                 },
-                "mode": "normal"
+                "mode": "visual"
             }
         },
         {
@@ -5640,8 +5849,8 @@
             "result": {
                 "content": "  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n  xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n    xx\n",
                 "cursor": {
-                    "line": 10,
-                    "ch": 0
+                    "line": 119,
+                    "ch": 4
                 },
                 "mode": "normal"
             }
@@ -5659,8 +5868,8 @@
             "result": {
                 "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 250,
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -5678,8 +5887,8 @@
             "result": {
                 "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 250,
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -5697,8 +5906,8 @@
             "result": {
                 "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 250,
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -5716,7 +5925,7 @@
             "result": {
                 "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 250,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -5735,7 +5944,7 @@
             "result": {
                 "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 250,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -5754,27 +5963,8 @@
             "result": {
                 "content": "12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n12\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 250,
                     "ch": 0
-                },
-                "mode": "normal"
-            }
-        },
-        {
-            "name": "vim_moveTillCharacter",
-            "initial": {
-                "content": "The quick brown fox \n",
-                "cursor": {
-                    "ch": 0,
-                    "line": 0
-                }
-            },
-            "keys": "/q\ntodto.dtqdtzdN",
-            "result": {
-                "content": "The ox \n",
-                "cursor": {
-                    "line": 0,
-                    "ch": 4
                 },
                 "mode": "normal"
             }
@@ -5811,7 +6001,7 @@
             "result": {
                 "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
                 "cursor": {
-                    "line": 2,
+                    "line": 30,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -5869,7 +6059,7 @@
                 "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -5925,7 +6115,7 @@
             "result": {
                 "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
                 "cursor": {
-                    "line": 17,
+                    "line": 14,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -5944,8 +6134,8 @@
             "result": {
                 "content": "({\n  ({\n  /*comment {\n            */(\n#else                \n  /*       )\n#if        }\n  )}*/\n)}\n{}\n#else {{\n{}\n}\n{\n#endif\n}\n}\n#else",
                 "cursor": {
-                    "line": 8,
-                    "ch": 1
+                    "line": 15,
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -5961,12 +6151,12 @@
             },
             "keys": "i<C-t>",
             "result": {
-                "content": "word1\nword2\nword3 ",
+                "content": "\tword1\nword2\nword3 ",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 3
                 },
-                "mode": "normal"
+                "mode": "insert"
             }
         },
         {
@@ -5980,12 +6170,12 @@
             },
             "keys": "i<C-d>",
             "result": {
-                "content": "  word1\nword2\nword3 ",
+                "content": "word1\nword2\nword3 ",
                 "cursor": {
-                    "line": 2,
+                    "line": 0,
                     "ch": 0
                 },
-                "mode": "normal"
+                "mode": "insert"
             }
         },
         {
@@ -6020,7 +6210,7 @@
             "result": {
                 "content": "a\nb\nc\nd\ne\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -6534,7 +6724,7 @@
                 "content": "one one\n one one\n two one",
                 "cursor": {
                     "line": 2,
-                    "ch": 1
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -6550,12 +6740,12 @@
             },
             "keys": ":norm /<Esc>\"/p\n:norm /x<Cr>\"/p\n:norm /h<Esc>\"/p\n:norm /one<Cr>3li<Right> <Esc>\"/p\n:g/one/normal    cw 1<lt>Esc><Esc>$i$\nrt/<\nxxp:map k j\n:normal kkk\n:normal! kkk\n",
             "result": {
-                "content": "o^ ne one\nx^ \none^ \none on",
+                "content": ":normal kkk\n:map k j\no^xxp ^ ne on$\n:normal! kkk\ne\nx^  ^ \nonrt/<\ne\none one",
                 "cursor": {
-                    "line": 0,
-                    "ch": 5
+                    "line": 4,
+                    "ch": 0
                 },
-                "mode": "normal"
+                "mode": "insert"
             }
         },
         {
@@ -6609,7 +6799,7 @@
             "result": {
                 "content": "\u0000ne\ntwo\nth\u0000ee\nfour\nfive\n",
                 "cursor": {
-                    "line": 4,
+                    "line": 0,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -6645,12 +6835,31 @@
             },
             "keys": ":v/e/s/o/e\n:v/[vw]\n",
             "result": {
-                "content": "one\n two\n three\n two one\n five\n",
+                "content": "one\n twe\n three\n feur\n five\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 5,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_same_line",
+            "initial": {
+                "content": "one one\n one one",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": ":s/one/two/g\n",
+            "result": {
+                "content": "one one\n two two",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "normal"
             }
         },
         {
@@ -6664,10 +6873,10 @@
             },
             "keys": ":s#o/e#two#g\n",
             "result": {
-                "content": "two two\n o/e o/e",
+                "content": "o/e o/e\n two two",
                 "cursor": {
-                    "line": 0,
-                    "ch": 0
+                    "line": 1,
+                    "ch": 1
                 },
                 "mode": "normal"
             }
@@ -6721,7 +6930,7 @@
             },
             "keys": ":.,3s/\\d/0/g\n",
             "result": {
-                "content": "0\n0\n0\n4",
+                "content": "1\n0\n0\n4",
                 "cursor": {
                     "line": 2,
                     "ch": 0
@@ -6740,12 +6949,12 @@
             },
             "keys": ":2,.s/\\d/0/g\n",
             "result": {
-                "content": "1\n2\n3\n4\n5",
+                "content": "1\n0\n0\n0\n5",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
             }
         },
         {
@@ -6759,12 +6968,12 @@
             },
             "keys": ":-1,+1s/\\d/0/g\n",
             "result": {
-                "content": "1\n2\n3\n4\n5",
+                "content": "1\n0\n0\n0\n5",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
             }
         },
         {
@@ -6778,12 +6987,12 @@
             },
             "keys": ":.1,.3s/\\d/0/g\n",
             "result": {
-                "content": "1\n2\n3\n4\n5",
+                "content": "1\n0\n0\n0\n5",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
             }
         },
         {
@@ -6797,12 +7006,12 @@
             },
             "keys": ":.,$s/\\d/0/g\n",
             "result": {
-                "content": "1\n2\n3\n4\n5",
+                "content": "1\n2\n0\n0\n0",
                 "cursor": {
-                    "line": 0,
+                    "line": 4,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
             }
         },
         {
@@ -6816,12 +7025,12 @@
             },
             "keys": ":2,$-2s/\\d/0/g\n",
             "result": {
-                "content": "1\n2\n3\n4\n5",
+                "content": "1\n0\n0\n4\n5",
                 "cursor": {
-                    "line": 0,
+                    "line": 2,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
             }
         },
         {
@@ -6835,12 +7044,12 @@
             },
             "keys": "ma:.,'as/\\d/0/g\n",
             "result": {
-                "content": "1\n2\n3\n4\n5",
+                "content": "0\n0\n0\n4\n5",
                 "cursor": {
-                    "line": 0,
+                    "line": 2,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
             }
         },
         {
@@ -6854,12 +7063,12 @@
             },
             "keys": "ma:'a-1,'a+1s/\\d/0/g\n",
             "result": {
-                "content": "1\n2\n3\n4\n5",
+                "content": "1\n0\n0\n0\n5",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
             }
         },
         {
@@ -6873,12 +7082,12 @@
             },
             "keys": "V2jv:s/\\d/0/g\n",
             "result": {
-                "content": "1\n2\n3\n4\n5",
+                "content": "1\n0\n0\n0\n5",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
             }
         },
         {
@@ -6892,12 +7101,31 @@
             },
             "keys": "/1\n:s//b/g\n",
             "result": {
-                "content": "a11 a12 a13",
+                "content": "abb ab2 ab3",
                 "cursor": {
                     "line": 0,
                     "ch": 0
                 },
-                "mode": "r?"
+                "mode": "normal"
+            }
+        },
+        {
+            "name": "vim_ex_substitute_javascript",
+            "initial": {
+                "content": "a 0 b",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": ":s/\\(\\d\\+\\)/$$ $' $` $& \\1/g\n:s/\\d//g\n",
+            "result": {
+                "content": "a $$ $' $` $  b",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
             }
         },
         {
@@ -6911,9 +7139,9 @@
             },
             "keys": ":s/a/b/g\n:s\n",
             "result": {
-                "content": "b b\na a",
+                "content": "b b\nb a",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -7028,7 +7256,7 @@
                 "content": "match nope match \n nope Match",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 11
                 },
                 "mode": "normal"
             }
@@ -7046,7 +7274,7 @@
             "result": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 0,
+                    "line": 3,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -7142,7 +7370,7 @@
                 "content": " 0 xyz\n 1 abc \n 2 abc",
                 "cursor": {
                     "line": 1,
-                    "ch": 1
+                    "ch": 6
                 },
                 "mode": "c"
             }
@@ -7161,9 +7389,9 @@
                 "content": "abc abc",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 6
                 },
-                "mode": "c"
+                "mode": "normal"
             }
         },
         {
@@ -7180,9 +7408,9 @@
                 "content": "abc abc",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 4
                 },
-                "mode": "c"
+                "mode": "normal"
             }
         },
         {
@@ -7196,12 +7424,12 @@
             },
             "keys": ":map a x\na",
             "result": {
-                "content": "abc",
+                "content": "bc",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -7215,9 +7443,9 @@
             },
             "keys": ":map a x\n:unmap a\na",
             "result": {
-                "content": ":map a x\n:unmap a\naabc",
+                "content": "abc",
                 "cursor": {
-                    "line": 2,
+                    "line": 0,
                     "ch": 1
                 },
                 "mode": "insert"
@@ -7234,9 +7462,9 @@
             },
             "keys": ":unmap a\na",
             "result": {
-                "content": ":unmap a\naabc",
+                "content": "abc",
                 "cursor": {
-                    "line": 1,
+                    "line": 0,
                     "ch": 1
                 },
                 "mode": "insert"
@@ -7253,12 +7481,12 @@
             },
             "keys": ":map ; :\n;",
             "result": {
-                "content": ":map ; :\n;wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 1,
-                    "ch": 1
+                    "line": 0,
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "c"
             }
         },
         {
@@ -7272,12 +7500,12 @@
             },
             "keys": ":map :del x\n:del\n",
             "result": {
-                "content": ":map :del x\n:del\nabc",
+                "content": "bc",
                 "cursor": {
-                    "line": 2,
+                    "line": 0,
                     "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -7291,12 +7519,12 @@
             },
             "keys": ":map :del :w\n:del\n",
             "result": {
-                "content": ":map :del :w\n:del\nwOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 2,
+                    "line": 0,
                     "ch": 0
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -7310,12 +7538,12 @@
             },
             "keys": ":map a :w<CR>\na",
             "result": {
-                "content": ":map a :w\n\nawOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 2,
-                    "ch": 1
+                    "line": 0,
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "c"
             }
         },
         {
@@ -7329,12 +7557,12 @@
             },
             "keys": "bvb",
             "result": {
-                "content": "bvb wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 3
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         },
         {
@@ -7348,12 +7576,12 @@
             },
             "keys": "0wdwu:omap w $\n0wdw",
             "result": {
-                "content": "0wdwu:omap w $\n0wdwhello unfair world",
+                "content": "hello ",
                 "cursor": {
-                    "line": 1,
-                    "ch": 4
+                    "line": 0,
+                    "ch": 5
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -7367,12 +7595,12 @@
             },
             "keys": ":nmap k gj\nkdku:map k gj\ndk<Up>",
             "result": {
-                "content": ":nmap k gj\nkdku:map k gj\ndkhello\nunfair\nworld",
+                "content": "hello\nunfld",
                 "cursor": {
-                    "line": 1,
-                    "ch": 2
+                    "line": 0,
+                    "ch": 3
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -7391,7 +7619,7 @@
                     "line": 0,
                     "ch": 0
                 },
-                "mode": "normal"
+                "mode": "c"
             }
         },
         {
@@ -7427,7 +7655,7 @@
                 "content": "\twOrdnamespace.& (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 0
                 },
                 "mode": "normal"
             }
@@ -7481,9 +7709,9 @@
             },
             "keys": ":noremap ; l\n:map l $\n:map q l\nlq;r1i;<Esc>:mapclear\nlxpl:noremap x \"_x\nxp:mapclear\n",
             "result": {
-                "content": "Ord1\nremap ; l\n:map l $\n:map q l\nlq;r1iear\nlxpl:noremap x \"_x\nxp:mapclear\n",
+                "content": "lxpx:mapclear\np:noremap x \"_x\nl;;ear\nr1ql:map q l\n:map l $\nOrd1\nremap ; l\n",
                 "cursor": {
-                    "line": 7,
+                    "line": 1,
                     "ch": 0
                 },
                 "mode": "insert"
@@ -7500,12 +7728,12 @@
             },
             "keys": "yypaVa",
             "result": {
-                "content": "yypaVaHeY",
+                "content": "HeY",
                 "cursor": {
                     "line": 0,
-                    "ch": 6
+                    "ch": 2
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -7519,45 +7747,7 @@
             },
             "keys": "a<Esc>i",
             "result": {
-                "content": "afoo",
-                "cursor": {
-                    "line": 0,
-                    "ch": 0
-                },
-                "mode": "c"
-            }
-        },
-        {
-            "name": "vim_noremap_map_interaction",
-            "initial": {
-                "content": "wOrd1\nwOrd2",
-                "cursor": {
-                    "ch": 0,
-                    "line": 0
-                }
-            },
-            "keys": ";lm",
-            "result": {
-                "content": "wOrd1\nwOrd2",
-                "cursor": {
-                    "line": 0,
-                    "ch": 0
-                },
-                "mode": "c"
-            }
-        },
-        {
-            "name": "vim_noremap_map_interaction2",
-            "initial": {
-                "content": "wOrd1\nwOrd2",
-                "cursor": {
-                    "ch": 0,
-                    "line": 0
-                }
-            },
-            "keys": "lm",
-            "result": {
-                "content": "wOrd1\nwOrd2",
+                "content": "oo",
                 "cursor": {
                     "line": 0,
                     "ch": 0
@@ -7576,9 +7766,9 @@
             },
             "keys": "gqgqgqjgq}gqGgqgg:set tw=15\nggVgq:6\ngqq",
             "result": {
-                "content": "Ord1\nwOrd2",
+                "content": "wOrd1 wOrd2",
                 "cursor": {
-                    "line": 1,
+                    "line": 0,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -7709,10 +7899,10 @@
             },
             "keys": "\"-pl::map <A-v> i<lt>A-v><Esc>\n::map √ i√G<Esc>\n::unmap √\n::unmap <A-v>\n",
             "result": {
-                "content": "0text\n1-v>\n2\n\n\n3\n4\n3",
+                "content": "0t-v>ext \n1\n2\n\n\n3\n4\n",
                 "cursor": {
-                    "line": 7,
-                    "ch": 0
+                    "line": 1,
+                    "ch": 1
                 },
                 "mode": "visual"
             }
@@ -7731,7 +7921,7 @@
                 "content": "hello world",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 10
                 },
                 "mode": "normal"
             }
@@ -7747,10 +7937,10 @@
             },
             "keys": "dwA<C-r>-",
             "result": {
-                "content": "456 123 ",
+                "content": "456123  ",
                 "cursor": {
                     "line": 0,
-                    "ch": 8
+                    "ch": 7
                 },
                 "mode": "insert"
             }
@@ -7766,12 +7956,12 @@
             },
             "keys": "ee",
             "result": {
-                "content": "ee wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 9
                 },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -7785,31 +7975,12 @@
             },
             "keys": "dd",
             "result": {
-                "content": "dd wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": " word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 5
                 },
-                "mode": "insert"
-            }
-        },
-        {
-            "name": "vim_langmap_qqddq@q",
-            "initial": {
-                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
-                "cursor": {
-                    "ch": 0,
-                    "line": 0
-                }
-            },
-            "keys": "''ee'@'",
-            "result": {
-                "content": "''ee'@' wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
-                "cursor": {
-                    "line": 0,
-                    "ch": 7
-                },
-                "mode": "insert"
+                "mode": "normal"
             }
         },
         {
@@ -7823,31 +7994,12 @@
             },
             "keys": "ud",
             "result": {
-                "content": "ud wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": "",
                 "cursor": {
                     "line": 0,
-                    "ch": 2
+                    "ch": 0
                 },
-                "mode": "insert"
-            }
-        },
-        {
-            "name": "vim_langmap_mark",
-            "initial": {
-                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
-                "cursor": {
-                    "ch": 0,
-                    "line": 0
-                }
-            },
-            "keys": "m'`'-'",
-            "result": {
-                "content": "m'`'-' wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
-                "cursor": {
-                    "line": 0,
-                    "ch": 6
-                },
-                "mode": "insert"
+                "mode": "no"
             }
         },
         {
@@ -7861,9 +8013,9 @@
             },
             "keys": "<C-k>2hnnnjhello<Esc><C-k>2tdJworld",
             "result": {
-                "content": "⑂nnnjhello1234 5678\nrld\nabcdefg",
+                "content": "1234\n\nrld\n5678 abcdefg",
                 "cursor": {
-                    "line": 1,
+                    "line": 2,
                     "ch": 3
                 },
                 "mode": "insert"
@@ -7880,9 +8032,9 @@
             },
             "keys": "<C-v>2hnnnjhello<Esc><C-v>2tdJworld",
             "result": {
-                "content": "\u0002hnnnjhello1234 5678\nrld\nabcdefg",
+                "content": "1234\n5678\nrld\nabcdefg",
                 "cursor": {
-                    "line": 1,
+                    "line": 2,
                     "ch": 3
                 },
                 "mode": "insert"
@@ -7899,12 +8051,12 @@
             },
             "keys": "Vjjj",
             "result": {
-                "content": "Vjjj1234\n\n\n5678\nabcdefg",
+                "content": "1234\n\n\n5678\nabcdefg",
                 "cursor": {
-                    "line": 0,
-                    "ch": 4
+                    "line": 3,
+                    "ch": 0
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         }
     ]

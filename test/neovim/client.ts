@@ -96,6 +96,10 @@ export class NeovimClient {
         return (await this.nvim.call('getreg', [name])) as string;
     }
 
+    async setRegister(name: string, text: string, type: 'c' | 'l'): Promise<void> {
+        await this.nvim.call('setreg', [name, text, type]);
+    }
+
     async getVersion(): Promise<string> {
         const info = (await this.nvim.call('api_info', [])) as {
             version: { major: number; minor: number; patch: number };

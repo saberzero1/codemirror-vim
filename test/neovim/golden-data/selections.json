@@ -1,7 +1,7 @@
 {
     "suite": "selections",
-    "neovim_version": "0.12.2",
-    "recorded_at": "2026-06-23T23:12:40.872Z",
+    "neovim_version": "0.12.3",
+    "recorded_at": "2026-06-24T10:06:14.896Z",
     "cases": [
         {
             "name": "vim_viw_middle_spc",
@@ -33,12 +33,12 @@
             },
             "keys": "vaw",
             "result": {
-                "content": "foo \tbAwr\t baz",
+                "content": "foo \tbAr\t baz",
                 "cursor": {
                     "line": 0,
-                    "ch": 8
+                    "ch": 9
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         },
         {
@@ -52,12 +52,12 @@
             },
             "keys": "viw",
             "result": {
-                "content": "foo \tbviwAr,\t baz",
+                "content": "foo \tbAr,\t baz",
                 "cursor": {
                     "line": 0,
-                    "ch": 9
+                    "ch": 6
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         },
         {
@@ -71,12 +71,12 @@
             },
             "keys": "vaW",
             "result": {
-                "content": "foo \tbvaWAr,\t baz",
+                "content": "foo \tbAr,\t baz",
                 "cursor": {
                     "line": 0,
-                    "ch": 9
+                    "ch": 10
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         },
         {
@@ -90,12 +90,12 @@
             },
             "keys": "viw",
             "result": {
-                "content": "foo \tviwbAr\t baz",
+                "content": "foo \tbAr\t baz",
                 "cursor": {
                     "line": 0,
-                    "ch": 8
+                    "ch": 7
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         },
         {
@@ -109,12 +109,12 @@
             },
             "keys": "viw",
             "result": {
-                "content": "foo \tbAviwr\t baz",
+                "content": "foo \tbAr\t baz",
                 "cursor": {
                     "line": 0,
-                    "ch": 10
+                    "ch": 7
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         },
         {
@@ -128,12 +128,12 @@
             },
             "keys": "viw",
             "result": {
-                "content": "foo \tbAviwr",
+                "content": "foo \tbAr",
                 "cursor": {
                     "line": 0,
-                    "ch": 10
+                    "ch": 7
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         },
         {
@@ -147,12 +147,12 @@
             },
             "keys": "vi{",
             "result": {
-                "content": "a{\n\tbavi{r\n\t}b",
+                "content": "a{\n\tbar\n\t}b",
                 "cursor": {
                     "line": 1,
-                    "ch": 6
+                    "ch": 4
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         },
         {
@@ -166,12 +166,12 @@
             },
             "keys": "va{",
             "result": {
-                "content": "a{\n\tbava{r\n\t}b",
+                "content": "a{\n\tbar\n\t}b",
                 "cursor": {
-                    "line": 1,
-                    "ch": 6
+                    "line": 2,
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         },
         {
@@ -185,12 +185,12 @@
             },
             "keys": "va{",
             "result": {
-                "content": "va{xa{\n\tbar\n\t}b",
+                "content": "xa{\n\tbar\n\t}b",
                 "cursor": {
-                    "line": 0,
-                    "ch": 3
+                    "line": 2,
+                    "ch": 1
                 },
-                "mode": "insert"
+                "mode": "visual"
             }
         }
     ]

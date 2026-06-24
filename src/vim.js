@@ -2245,6 +2245,7 @@ export function initVim(CM) {
       operatorArgs.repeat = repeat;
       operatorArgs.registerName = registerName;
       operatorArgs.linewise = linewise;
+      operatorArgs.cursorCol = oldHead.ch;
       var operatorMoveTo = operators[operator](
         cm, operatorArgs, cmSel.ranges, oldAnchor, newHead);
       if (vim.visualMode) {
@@ -2672,7 +2673,7 @@ export function initVim(CM) {
       if (mirroredPairs[character]) {
         move = true;
         tmp = selectCompanionObject(cm, head, character, inclusive);
-        if (!tmp) {
+        if (!tmp && inclusive) {
           var sc = cm.getSearchCursor(new RegExp("\\" + character, "g"), head)
           if (sc.find()) {
             // @ts-ignore
@@ -2739,15 +2740,21 @@ export function initVim(CM) {
 
     repeatLastCharacterSearch: function(cm, head, motionArgs) {
       var lastSearch = vimGlobalState.lastCharacterSearch;
+      if (!lastSearch.selectedCharacter) return head;
       var repeat = motionArgs.repeat;
-      var forward = motionArgs.forward === lastSearch.forward;
-      var increment = (lastSearch.increment ? 1 : 0) * (forward ? -1 : 1);
-      motionArgs.inclusive = forward ? true : false;
-      var curEnd = moveToCharacter(cm, repeat, forward, lastSearch.selectedCharacter, offsetCursor(head, 0, -increment));
+      var searchForward = motionArgs.forward ? lastSearch.forward : !lastSearch.forward;
+      var isTill = lastSearch.increment !== 0;
+      var postIncrement = isTill ? (searchForward ? -1 : 1) : 0;
+      motionArgs.inclusive = !isTill;
+      if (isTill && motionArgs.forward && repeat > 1) repeat--;
+      var searchFrom = (isTill && motionArgs.forward)
+        ? offsetCursor(head, 0, -postIncrement)
+        : head;
+      var curEnd = moveToCharacter(cm, repeat, searchForward, lastSearch.selectedCharacter, searchFrom);
       if (!curEnd) {
         return head;
       }
-      curEnd.ch += increment;
+      curEnd.ch += postIncrement;
       return curEnd;
     }
   };
@@ -2839,7 +2846,8 @@ export function initVim(CM) {
         cm.replaceRange('', anchor, head);
         finalHead = anchor;
         if (args.linewise) {
-          finalHead = motions.moveToFirstNonWhiteSpaceCharacter(cm, anchor);
+          var col = args.cursorCol != null ? args.cursorCol : 0;
+          finalHead = new Pos(anchor.line, Math.min(col, lineLength(cm, anchor.line)));
         }
       } else {
         text = cm.getSelection();
@@ -3274,7 +3282,11 @@ export function initVim(CM) {
         finalCh = lineLength(cm, curStart.line);
         var text = '';
         var nextStartCh = 0;
+        var trimFrom = finalCh;
         if (!actionArgs.keepSpaces) {
+          var curLine = cm.getLine(curStart.line);
+          var trailingMatch = curLine.search(/\s+$/);
+          trimFrom = trailingMatch !== -1 ? trailingMatch : finalCh;
           var nextLine = cm.getLine(curStart.line + 1);
           nextStartCh = nextLine.search(/\S/);
           if (nextStartCh == -1) {
@@ -3284,7 +3296,7 @@ export function initVim(CM) {
           }
         }
         cm.replaceRange(text, 
-          new Pos(curStart.line, finalCh),
+          new Pos(curStart.line, trimFrom),
           new Pos(curStart.line + 1, nextStartCh));
       }
       var curFinalPos = clipCursorToContent(cm, new Pos(curStart.line, finalCh));
@@ -3351,7 +3363,8 @@ export function initVim(CM) {
           }
           else if (cm.getOption("indentWithTabs")) {
             var quotient = Math.floor(newIndent / tabSize);
-            return Array(quotient + 1).join('\t');
+            var remainder = newIndent % tabSize;
+            return Array(quotient + 1).join('\t') + Array(remainder + 1).join(' ');
           }
           else {
             return Array(newIndent + 1).join(' ');
@@ -4497,12 +4510,12 @@ export function initVim(CM) {
     var cur = head;
     var retval= new Pos(cur.line + motionArgs.repeat - 1, Infinity);
     var end=cm.clipPos(retval);
-    end.ch--;
+    end.ch = Math.max(0, end.ch - 1);
     if (!keepHPos) {
       vim.lastHPos = Infinity;
       vim.lastHSPos = cm.charCoords(end,'div').left;
     }
-    return retval;
+    return vim.visualBlock ? retval : end;
   }
 
   /** 
@@ -6677,15 +6690,19 @@ export function initVim(CM) {
       }
       done = true;
     }
-    /** @arg {(() => void) | undefined} [close] */
-    function stop(close) {
+    /** @arg {(() => void) | undefined} [close] @arg {boolean} [keepCursor] */
+    function stop(close, keepCursor) {
       if (close) { close(); }
       cm.focus();
       if (lastPos) {
-        cm.setCursor(lastPos);
+        if (keepCursor) {
+          cm.setCursor(lastPos);
+        } else {
+          cm.setCursor(lastPos.line, 0);
+        }
         var vim = cm.state.vim;
         vim.exMode = false;
-        vim.lastHPos = vim.lastHSPos = lastPos.ch;
+        vim.lastHPos = vim.lastHSPos = keepCursor ? lastPos.ch : 0;
       }
       if (callback) { callback(); }
       else if (done) {
@@ -6716,12 +6733,13 @@ export function initVim(CM) {
           break;
         case 'l':
           replace();
-          // fall through and exit.
+          stop(close);
+          break;
         case 'q':
         case '<Esc>':
         case '<C-c>':
         case '<C-[>':
-          stop(close);
+          stop(close, true);
           break;
       }
       if (done) { stop(close); }
