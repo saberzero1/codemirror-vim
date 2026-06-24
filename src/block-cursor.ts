@@ -130,13 +130,14 @@ function configChanged(update: ViewUpdate) {
   },
   ".cm-fat-cursor": {
     position: "absolute",
-    background: "#ff9696",
+    background: "var(--interactive-accent, #ff9696)",
+    color: "var(--text-on-accent, inherit)",
     border: "none",
     whiteSpace: "pre",
   },
   "&:not(.cm-focused) .cm-fat-cursor": {
     background: "none",
-    outline: "solid 1px #ff9696",
+    outline: "solid 1px var(--interactive-accent, #ff9696)",
     color: "transparent !important",
   },
 }
