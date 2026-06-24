@@ -1,7 +1,7 @@
 {
     "suite": "vim-general",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T22:56:35.677Z",
+    "recorded_at": "2026-06-24T23:10:16.605Z",
     "cases": [
         {
             "name": "vim_qq@q",
@@ -999,15 +999,7 @@
                     "mode": "insert"
                 },
                 {
-                    "content": "Tsvisest sentence. Test question?\nAgain.Never. Again.Test.\n\nHello. This is more text. No end of sentence symbol\n",
-                    "cursor": {
-                        "line": 0,
-                        "ch": 13
-                    },
-                    "mode": "insert"
-                },
-                {
-                    "content": "Tsvisest sentvasence. Test question?\nAgain.Never. Again.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "content": "Tsest sentencvise. Test question?\nAgain.Never. Again.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                     "cursor": {
                         "line": 0,
                         "ch": 16
@@ -1015,7 +1007,15 @@
                     "mode": "insert"
                 },
                 {
-                    "content": "Tsvisest sentvasence. Test question?\nAgain.Never. Againvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "content": "Tsest sentencvasvise. Test question?\nAgain.Never. Again.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 16
+                    },
+                    "mode": "insert"
+                },
+                {
+                    "content": "Tsest sentencvasvise. Test question?\nAgain.Never. Againvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                     "cursor": {
                         "line": 1,
                         "ch": 21
@@ -1023,7 +1023,7 @@
                     "mode": "insert"
                 },
                 {
-                    "content": "Tsvisest sentvasence. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "content": "Tsest sentencvasvise. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                     "cursor": {
                         "line": 1,
                         "ch": 21
@@ -1031,7 +1031,7 @@
                     "mode": "insert"
                 },
                 {
-                    "content": "Tsvisest sentvvisasence. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "content": "Tsest sentencvvisasvise. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                     "cursor": {
                         "line": 0,
                         "ch": 17
@@ -1039,7 +1039,7 @@
                     "mode": "insert"
                 },
                 {
-                    "content": "disTsvisest sentvvisasence. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "content": "disTsest sentencvvisasvise. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                     "cursor": {
                         "line": 0,
                         "ch": 3
@@ -1047,7 +1047,7 @@
                     "mode": "insert"
                 },
                 {
-                    "content": "udisTsvisest sentvvisasence. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "content": "udisTsest sentencvvisasvise. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                     "cursor": {
                         "line": 0,
                         "ch": 1
@@ -1055,7 +1055,7 @@
                     "mode": "insert"
                 },
                 {
-                    "content": "dasudisTsvisest sentvvisasence. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "content": "dasudisTsest sentencvvisasvise. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                     "cursor": {
                         "line": 0,
                         "ch": 3
@@ -1063,7 +1063,7 @@
                     "mode": "insert"
                 },
                 {
-                    "content": "udasudisTsvisest sentvvisasence. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "content": "udasudisTsest sentencvvisasvise. Test question?\nAgain.Never. Againvasvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                     "cursor": {
                         "line": 0,
                         "ch": 1
@@ -1071,7 +1071,7 @@
                     "mode": "insert"
                 },
                 {
-                    "content": "udasudisTsvisest sentvvisasence. Test question?\nAgain.Never. Againvacassvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
+                    "content": "udasudisTsest sentencvvisasvise. Test question?\nAgain.Never. Againvacassvis.Test.\n\nHello. This is more text. No end of sentence symbol\n",
                     "cursor": {
                         "line": 1,
                         "ch": 22
@@ -2450,7 +2450,7 @@
                 "content": "inserted",
                 "cursor": {
                     "line": 0,
-                    "ch": 8
+                    "ch": 0
                 },
                 "mode": "insert"
             },
@@ -2467,7 +2467,7 @@
                     "content": "inserted",
                     "cursor": {
                         "line": 0,
-                        "ch": 8
+                        "ch": 0
                     },
                     "mode": "insert"
                 }
@@ -5887,7 +5887,7 @@
             "result": {
                 "content": "1\n0\n1\n0",
                 "cursor": {
-                    "line": 0,
+                    "line": 1,
                     "ch": 0
                 },
                 "mode": "normal"
@@ -5928,7 +5928,7 @@
                 {
                     "content": "1\n0\n1\n0",
                     "cursor": {
-                        "line": 0,
+                        "line": 1,
                         "ch": 0
                     },
                     "mode": "normal"
@@ -5993,8 +5993,8 @@
             "result": {
                 "content": " wOrd1 (#%\n\nword3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
-                    "line": 2,
-                    "ch": 3
+                    "line": 7,
+                    "ch": 2
                 },
                 "mode": "normal"
             },
@@ -6082,8 +6082,8 @@
                 {
                     "content": " wOrd1 (#%\n\nword3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                     "cursor": {
-                        "line": 2,
-                        "ch": 3
+                        "line": 7,
+                        "ch": 2
                     },
                     "mode": "normal"
                 }
@@ -6415,7 +6415,7 @@
             },
             "keys": "mtd]`",
             "result": {
-                "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                "content": "pop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {
                     "line": 0,
                     "ch": 0
@@ -6432,7 +6432,7 @@
                     "mode": "normal"
                 },
                 {
-                    "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
+                    "content": "pop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                     "cursor": {
                         "line": 0,
                         "ch": 0
@@ -7375,7 +7375,7 @@
                 "content": "cross",
                 "cursor": {
                     "line": 0,
-                    "ch": 1
+                    "ch": 2
                 },
                 "mode": "visual"
             },
@@ -7384,7 +7384,7 @@
                     "content": "cross",
                     "cursor": {
                         "line": 0,
-                        "ch": 1
+                        "ch": 2
                     },
                     "mode": "visual"
                 }
@@ -8219,8 +8219,8 @@
                 {
                     "content": "123456\nfoo\nbar",
                     "cursor": {
-                        "line": 0,
-                        "ch": 1
+                        "line": 2,
+                        "ch": 2
                     },
                     "mode": "visual"
                 },
@@ -9322,7 +9322,7 @@
                     "content": "changed nope changed \n nope Match",
                     "cursor": {
                         "line": 0,
-                        "ch": 17
+                        "ch": 6
                     },
                     "mode": "normal"
                 },
@@ -10048,7 +10048,7 @@
                     "content": "changed nope changed \n nope Match",
                     "cursor": {
                         "line": 0,
-                        "ch": 6
+                        "ch": 17
                     },
                     "mode": "normal"
                 },
@@ -10625,7 +10625,7 @@
                     "content": "one line of text.",
                     "cursor": {
                         "line": 0,
-                        "ch": 1
+                        "ch": 0
                     },
                     "mode": "normal"
                 },
@@ -10731,7 +10731,7 @@
                     "content": "one line of text.",
                     "cursor": {
                         "line": 0,
-                        "ch": 7
+                        "ch": 2
                     },
                     "mode": "normal"
                 },
@@ -11382,7 +11382,7 @@
                 {
                     "content": "foo\nbar",
                     "cursor": {
-                        "line": 1,
+                        "line": 0,
                         "ch": 0
                     },
                     "mode": "normal"
@@ -13119,7 +13119,7 @@
                     "content": "01x3xx678x",
                     "cursor": {
                         "line": 0,
-                        "ch": 5
+                        "ch": 9
                     },
                     "mode": "normal"
                 },
@@ -14088,7 +14088,7 @@
                 {
                     "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                     "cursor": {
-                        "line": 15,
+                        "line": 4,
                         "ch": 0
                     },
                     "mode": "normal"
@@ -16056,8 +16056,8 @@
                 {
                     "content": "o^ ^ ne on$\ne\nx^  ^ \nonrt/<\ne\none one",
                     "cursor": {
-                        "line": 3,
-                        "ch": 4
+                        "line": 4,
+                        "ch": 0
                     },
                     "mode": "insert"
                 },
@@ -16798,7 +16798,7 @@
             },
             "keys": ":s/a/b/g\n:s\n",
             "result": {
-                "content": "b b\nb a",
+                "content": "b b\na a",
                 "cursor": {
                     "line": 1,
                     "ch": 0
@@ -16815,7 +16815,7 @@
                     "mode": "normal"
                 },
                 {
-                    "content": "b b\nb a",
+                    "content": "b b\na a",
                     "cursor": {
                         "line": 1,
                         "ch": 0

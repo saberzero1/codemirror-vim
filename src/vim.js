@@ -3632,7 +3632,7 @@ export function initVim(CM) {
         var baseStr = match[2] || match[4]
         var digits = match[3] || match[5]
         var increment = actionArgs.increase ? 1 : -1;
-        var base = {'0b': 2, '0': 8, '': 10, '0x': 16}[baseStr.toLowerCase()];
+        var base = {'0b': 2, '0': 10, '': 10, '0x': 16}[baseStr.toLowerCase()];
         var number = parseInt(match[1] + digits, base) + (increment * actionArgs.repeat);
         numberStr = number.toString(base);
         var zeroPadding = baseStr ? new Array(digits.length - numberStr.length + 1 + match[1].length).join('0') : ''

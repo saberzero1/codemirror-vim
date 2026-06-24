@@ -5507,7 +5507,7 @@ testVim('increment_octal', function(cm, vim, helpers) {
   helpers.doKeys('<C-a>');
   eq('007', cm.getValue());
   helpers.doKeys('<C-a>');
-  eq('010', cm.getValue());
+  eq('008', cm.getValue());
   helpers.doKeys('<C-x>');
   eq('007', cm.getValue());
   helpers.doKeys('<C-x>');
