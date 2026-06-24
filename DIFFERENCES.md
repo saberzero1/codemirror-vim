@@ -42,7 +42,31 @@ return type widened to include `Promise<Pos|[Pos,Pos]|null>`.
 Step-based extraction (`extract-definitions.ts`, `collect-snapshots.ts`),
 headless Neovim recording (`record-golden.ts`, `client.ts`), automated
 comparison (`compare.ts`), and deviation registry (`deviations.ts`).
-496/688 tests passing against Neovim 0.12.3.
+
+### Per-step golden comparison (v2)
+
+**Files**: `test/vim_test.js`, `test/neovim/collect-snapshots.ts`,
+`test/neovim/golden.ts`, `test/neovim/record-golden.ts`,
+`test/neovim/compare.ts`
+
+The instrumented `doKeys` in `vim_test.js` now captures `stateAfter`
+(content, cursor, mode) after each key step — 1504 steps at 100% coverage.
+The golden recorder captures Neovim state after each keys step as
+`stepResults[]` on each golden case. The comparison does per-step diffing
+when both golden and definition have step data, falling back to final-state
+comparison otherwise.
+
+462/689 tests passing against Neovim 0.12.3 with per-step comparison
+(more strict than final-state-only, which showed 496/688).
+
+### Cursor color CSS variables
+
+**File**: `src/block-cursor.ts`
+
+Replaced hardcoded `#ff9696` cursor color with CSS variables:
+`var(--interactive-accent, #ff9696)` for background and
+`var(--text-on-accent, inherit)` for text. Obsidian themes apply
+automatically; non-Obsidian consumers get the original fallback colors.
 
 ## Behavioral fixes (Neovim parity)
 
@@ -131,6 +155,21 @@ linewise to end of file from a non-first line.
 
 `]p` with `indentWithTabs` now preserves remainder spaces when the computed
 indent doesn't divide evenly by tabSize.
+
+### Octal increment disabled by default
+
+**File**: `src/vim.js` — `actions.incrementNumberToken`
+
+Numbers with leading zeros (e.g. `007`) are now incremented as decimal
+(007 → 008) instead of octal (007 → 010), matching Neovim's default
+`nrformats` setting which does not include `octal`.
+
+### dw on empty line cursor
+
+**File**: `src/vim.js` — `operators.delete`
+
+After `dw` deletes only a newline and the resulting line is whitespace-only
+with length ≥ 2, cursor is placed at `ch:1` instead of `ch:0`.
 
 ### Other fixes
 
