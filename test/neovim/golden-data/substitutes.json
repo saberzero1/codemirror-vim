@@ -1,7 +1,7 @@
 {
     "suite": "substitutes",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T13:15:25.540Z",
+    "recorded_at": "2026-06-24T23:56:24.820Z",
     "cases": [
         {
             "name": "vim_ex_substitute_capture_pcre",

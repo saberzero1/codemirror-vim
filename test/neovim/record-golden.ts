@@ -91,7 +91,7 @@ async function recordSuite(
                     mode: await nvim.getMode(),
                     stepResults: stepResults.length > 0 ? stepResults : undefined,
                 };
-            }, 5000);
+            }, 10000);
 
             goldenCases.push({
                 name: tc.name,

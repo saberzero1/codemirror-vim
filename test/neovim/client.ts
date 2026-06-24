@@ -42,6 +42,7 @@ export class NeovimClient {
             reader: this.process.stdout!,
             writer: this.process.stdin!,
         });
+        await this.nvim.command('set columns=80 lines=24');
         await this.nvim.command('set noswapfile nobackup');
         await this.nvim.command('set iskeyword=@,48-57,_,192-255');
     }

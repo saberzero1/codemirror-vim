@@ -1,7 +1,7 @@
 {
     "suite": "vim-general",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T23:25:45.678Z",
+    "recorded_at": "2026-06-24T23:58:07.266Z",
     "cases": [
         {
             "name": "vim_qq@q",
