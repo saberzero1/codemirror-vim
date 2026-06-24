@@ -59,6 +59,7 @@ export class NeovimClient {
     async setCursor(line: number, ch: number): Promise<void> {
         const win = await this.nvim.window;
         win.cursor = [line + 1, ch];
+        await this.nvim.command('redraw');
     }
 
     async input(keys: string): Promise<void> {
