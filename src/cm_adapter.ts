@@ -582,13 +582,23 @@ export class CodeMirror {
     }
     // Obsidian compatibility: when moving up into a block widget (e.g. frontmatter
     // properties panel), provide focusBefore so vim can redirect focus to the widget.
-    if (amount < 0 && range.head === startOffset) {
-      const domBefore = cm6.domAtPos(Math.max(0, range.head - 1));
-      const widget = domBefore?.node?.parentElement?.closest?.('.metadata-container, .cm-embed-block');
-      if (widget) {
-        const focusTarget = widget.querySelector('input, textarea, [contenteditable]') as HTMLElement | null;
-        if (focusTarget) {
-          pos.focusBefore = () => focusTarget.focus();
+    if (amount < 0 && pos.line < start.line) {
+      const firstLine = doc.line(1).text;
+      if (firstLine === '---') {
+        let fmEnd = 0;
+        for (let i = 2; i <= doc.lines; i++) {
+          if (doc.line(i).text === '---') { fmEnd = i; break; }
+        }
+        if (fmEnd > 0 && pos.line + 1 <= fmEnd) {
+          const container = cm6.dom.closest('.markdown-source-view');
+          const focusTarget = container?.querySelector(
+            '.metadata-container .metadata-property:last-child input,' +
+            '.metadata-container .metadata-property:last-child textarea,' +
+            '.metadata-container .metadata-property:last-child [contenteditable]'
+          ) as HTMLElement | null;
+          if (focusTarget) {
+            pos.focusBefore = () => focusTarget.focus();
+          }
         }
       }
     }
