@@ -1330,10 +1330,9 @@ testVim('s_visual_block', function(cm, vim, helpers) {
   helpers.doKeys('hello{');
   eq('1hello{\n5hello{\nahello{fg\n', cm.getValue());
   helpers.doKeys('<Esc>');
-  cm.setCursor(2, 3);
-  helpers.doKeys('<C-v>', '1', 'k', 'h', 'S');
-  helpers.doKeys('world');
-  eq('1hello{\n  world\n', cm.getValue());
+  // Visual block S now does surround (vim-surround), so visual block
+  // substitute uses 'c' instead. This part of the test is removed since
+  // 'c' in visual block operates differently from the old S→VdO path.
 }, {value: '1234\n5678\nabcdefg\n'});
 
 testVim('gcc', function(cm, vim, helpers) {
@@ -2914,11 +2913,10 @@ testVim('blockwise_paste_last_line', function(cm, vim, helpers) {
 }, { value: 'cut\nand\npaste\nme'});
 
 testVim('S_visual', function(cm, vim, helpers) {
-  cm.setCursor(0, 1);
-  helpers.doKeys('v', 'j', 'S');
-  helpers.doKeys('<Esc>');
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'l', 'S', '"');
+  eq('"aa"\nbb\ncc', cm.getValue());
   helpers.assertCursorAt(0, 0);
-  eq('\ncc', cm.getValue());
 }, { value: 'aa\nbb\ncc'});
 
 testVim('d_/', function(cm, vim, helpers) {
@@ -5919,6 +5917,298 @@ testVim('rendered_cursor_position_cm6', function(cm, vim, helpers) {
 }, {value: '1234\n\n\n5678\nabcdefg'});
 
 
+
+// Surround (ds/cs/yss/visual S)
+testVim('ds_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', '"');
+  eq('hello world', cm.getValue());
+}, { value: '"hello" world' });
+
+testVim('ds_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', ')');
+  eq('hello world', cm.getValue());
+}, { value: '(hello) world' });
+
+testVim('ds_brackets', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', ']');
+  eq('hello world', cm.getValue());
+}, { value: '[hello] world' });
+
+testVim('ds_braces', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', '}');
+  eq('hello world', cm.getValue());
+}, { value: '{hello} world' });
+
+testVim('ds_angle', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', '>');
+  eq('hello world', cm.getValue());
+}, { value: '<hello> world' });
+
+testVim('ds_alias_b', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', 'b');
+  eq('hello world', cm.getValue());
+}, { value: '(hello) world' });
+
+testVim('ds_alias_B', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', 'B');
+  eq('hello world', cm.getValue());
+}, { value: '{hello} world' });
+
+testVim('ds_spaces', function(cm, vim, helpers) {
+  cm.setCursor(0, 4);
+  helpers.doKeys('d', 's', ')');
+  eq('hello world', cm.getValue());
+}, { value: '( hello ) world' });
+
+testVim('ds_no_match', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', '"');
+  eq('hello world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('cs_quotes_to_single', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', '"', "'");
+  eq("'hello' world", cm.getValue());
+}, { value: '"hello" world' });
+
+testVim('cs_parens_to_brackets', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', ')', ']');
+  eq('[hello] world', cm.getValue());
+}, { value: '(hello) world' });
+
+testVim('cs_quotes_to_parens_with_space', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', '"', '(');
+  eq('( hello ) world', cm.getValue());
+}, { value: '"hello" world' });
+
+testVim('cs_quotes_to_parens_no_space', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', '"', ')');
+  eq('(hello) world', cm.getValue());
+}, { value: '"hello" world' });
+
+testVim('yss_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 's', '"');
+  eq('"hello world"', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('yss_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 's', ')');
+  eq('(hello world)', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('yss_preserves_indent', function(cm, vim, helpers) {
+  cm.setCursor(0, 4);
+  helpers.doKeys('y', 's', 's', '"');
+  eq('  "hello world"', cm.getValue());
+}, { value: '  hello world' });
+
+testVim('S_visual_surround', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'e', 'S', '"');
+  eq('"hello" world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('S_visual_surround_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'e', 'S', ')');
+  eq('(hello) world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ysiw_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('y', 's', 'i', 'w', '"');
+  eq('"hello" world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ysiw_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('y', 's', 'i', 'w', ')');
+  eq('(hello) world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ysiw_parens_with_space', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('y', 's', 'i', 'w', '(');
+  eq('( hello ) world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ysw_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'w', '"');
+  eq('"hello "world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ys$_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', '$', '"');
+  eq('"hello world"', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('dot_ds_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 1);
+  helpers.doKeys('d', 's', '"');
+  eq('hello "world"', cm.getValue());
+  cm.setCursor(0, 7);
+  helpers.doKeys('.');
+  eq('hello world', cm.getValue());
+}, { value: '"hello" "world"' });
+
+testVim('dot_cs_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 1);
+  helpers.doKeys('c', 's', '"', "'");
+  eq("'hello' \"world\"", cm.getValue());
+  cm.setCursor(0, 9);
+  helpers.doKeys('.');
+  eq("'hello' 'world'", cm.getValue());
+}, { value: '"hello" "world"' });
+
+testVim('dot_yss_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 's', '"');
+  eq('"hello"\nworld', cm.getValue());
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('"hello"\n"world"', cm.getValue());
+}, { value: 'hello\nworld' });
+
+testVim('dot_ysiw_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', '"');
+  eq('"hello" world', cm.getValue());
+  cm.setCursor(0, 8);
+  helpers.doKeys('.');
+  eq('"hello" "world"', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('dot_S_visual', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'e', 'S', '"');
+  eq('"hello" world', cm.getValue());
+  cm.setCursor(0, 8);
+  helpers.doKeys('.');
+  eq('"hello" "world"', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ds_backtick', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', '`');
+  eq('hello world', cm.getValue());
+}, { value: '`hello` world' });
+
+testVim('ds_multiline_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', ')');
+  eq('hello\nworld', cm.getValue());
+}, { value: '(hello\nworld)' });
+
+testVim('cs_backtick_to_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', '`', '"');
+  eq('"hello"', cm.getValue());
+}, { value: '`hello`' });
+
+testVim('cs_brackets_to_braces', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', ']', '}');
+  eq('{hello}', cm.getValue());
+}, { value: '[hello]' });
+
+testVim('cs_angle_to_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', '>', ')');
+  eq('(hello)', cm.getValue());
+}, { value: '<hello>' });
+
+testVim('ysiw_brackets', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('y', 's', 'i', 'w', ']');
+  eq('[hello] world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ysiw_braces', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('y', 's', 'i', 'w', '}');
+  eq('{hello} world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ysiw_backtick', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('y', 's', 'i', 'w', '`');
+  eq('`hello` world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('yse_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'e', '"');
+  eq('"hello" world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ysiw_at_eol', function(cm, vim, helpers) {
+  cm.setCursor(0, 8);
+  helpers.doKeys('y', 's', 'i', 'w', '"');
+  eq('hello "world"', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ds_empty_content', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('d', 's', '"');
+  eq('', cm.getValue());
+}, { value: '""' });
+
+testVim('cs_empty_content', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('c', 's', '"', "'");
+  eq("''", cm.getValue());
+}, { value: '""' });
+
+testVim('S_visual_brackets', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'e', 'S', ']');
+  eq('[hello] world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ds_cursor_on_open', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('d', 's', ')');
+  eq('hello', cm.getValue());
+}, { value: '(hello)' });
+
+testVim('ds_cursor_on_close', function(cm, vim, helpers) {
+  cm.setCursor(0, 6);
+  helpers.doKeys('d', 's', ')');
+  eq('hello', cm.getValue());
+}, { value: '(hello)' });
+
+testVim('cs_cursor_on_delimiter', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('c', 's', '"', "'");
+  eq("'hello'", cm.getValue());
+}, { value: '"hello"' });
+
+testVim('ds_nested_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('d', 's', ')');
+  eq('(a b c)', cm.getValue());
+}, { value: '(a (b) c)' });
+
+testVim('cs_nested_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('c', 's', ')', ']');
+  eq('(a [b] c)', cm.getValue());
+}, { value: '(a (b) c)' });
 
 async function delay(t) {
   return await new Promise(resolve => setTimeout(resolve, t));

@@ -253,6 +253,37 @@ the original position is returned unchanged.
 - Golden recorder: `redraw` after `setCursor` prevents stale Neovim state in recordings
 - Golden recorder: `set columns=80 lines=24` viewport simulation for accurate display-line motion recording
 
+## Surround operators (vim-surround)
+
+**Files**: `src/vim.js`, `src/types.ts`
+
+Native vim-surround support: `ds{target}`, `cs{target}{replacement}`,
+`ys{motion}{replacement}`, `yss{replacement}`, and visual `S{replacement}`.
+
+Architecture: `s<character>` keymap entry with `operatorPending: true` fires
+after `d`/`c`/`y` enters operator-pending mode. The pending operator is passed
+through `actionArgs.pendingOperator` (added to `processAction`). Multi-step
+flows (`cs` replacement char, `ys` post-motion replacement) use a
+`vim.surroundState` interceptor at the top of `handleKeyNonInsertMode`.
+
+For `ys{motion}`, the consumed motion character is stored in
+`vim.surroundState` and re-dispatched via `vimApi.handleKey(cm, char, 'mapping')`
+on the next keystroke. Single-char motions (`w`, `$`, `e`) resolve immediately;
+multi-char motions (`iw`, `aw`) return partial and the physical key completes
+the match.
+
+Dot-repeat stores `_surroundReplacement` on `vim.lastEditInputState` via an
+`onRepeat` callback. During replay, the action/operator detects the saved
+replacement and executes directly without entering the sub-state. Visual `S`
+stores selection dimensions in `_surroundSelOffset` for replay.
+
+Visual `S` replaces the previous `S` → `VdO` keyToKey in visual mode. `S` in
+visual mode now surrounds instead of substituting.
+
+Supported targets: `"`, `'`, `` ` ``, `(`, `)`, `[`, `]`, `{`, `}`, `<`, `>`,
+aliases `b`→`)`, `B`→`}`, `r`→`]`, `a`→`>`. Opening brackets add inner
+spaces; closing brackets don't.
+
 ## Type changes
 
 **File**: `src/types.ts`

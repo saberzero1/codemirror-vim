@@ -99,7 +99,6 @@ export function initVim(CM) {
     { keys: 's', type: 'keyToKey', toKeys: 'cl', context: 'normal' },
     { keys: 's', type: 'keyToKey', toKeys: 'c', context: 'visual'},
     { keys: 'S', type: 'keyToKey', toKeys: 'cc', context: 'normal' },
-    { keys: 'S', type: 'keyToKey', toKeys: 'VdO', context: 'visual' },
     { keys: '<Home>', type: 'keyToKey', toKeys: '0' },
     { keys: '<End>', type: 'keyToKey', toKeys: '$' },
     { keys: '<PageUp>', type: 'keyToKey', toKeys: '<C-b>' },
@@ -223,6 +222,9 @@ export function initVim(CM) {
     { keys: 'p', type: 'action', action: 'paste', isEdit: true, actionArgs: { after: true, isEdit: true }},
     { keys: 'P', type: 'action', action: 'paste', isEdit: true, actionArgs: { after: false, isEdit: true }},
     { keys: 'r<character>', type: 'action', action: 'replace', isEdit: true },
+    // Surround commands (vim-surround)
+    { keys: 's<character>', type: 'action', action: 'surroundAction', operatorPending: true, isEdit: true },
+    { keys: 'S<character>', type: 'action', action: 'surroundVisual', context: 'visual', isEdit: true },
     { keys: '@<register>', type: 'action', action: 'replayMacro' },
     { keys: 'q<register>', type: 'action', action: 'enterMacroRecordMode' },
     // Handle Replace-mode as a special case of insert mode.
@@ -1027,6 +1029,11 @@ export function initVim(CM) {
       function handleKeyNonInsertMode() {
         if (handleMacroRecording() || handleEsc()) { return true; }
 
+        if (vim.surroundState) {
+          var surroundResult = handleSurroundSubState(cm, key, vim);
+          if (surroundResult !== false) return surroundResult;
+        }
+
         vim.inputState.keyBuffer.push(key);
         var keys = vim.inputState.keyBuffer.join("");
         if (/^[1-9]\d*$/.test(keys)) { return true; }
@@ -1766,6 +1773,8 @@ export function initVim(CM) {
       actionArgs.repeat = repeat || 1;
       actionArgs.repeatIsExplicit = repeatIsExplicit;
       actionArgs.registerName = inputState.registerName;
+      actionArgs.pendingOperator = inputState.operator;
+      actionArgs.pendingOperatorArgs = inputState.operatorArgs;
       clearInputState(cm);
       vim.lastMotion = null;
       if (command.isEdit) {
@@ -2172,6 +2181,32 @@ export function initVim(CM) {
           newHead = clipCursorToContent(cm, newHead, oldHead);
           cm.setCursor(newHead.line, newHead.ch);
         }
+      }
+      if (operator === 'surround' && newHead) {
+        var surroundAnchor = newAnchor || oldAnchor;
+        var savedReplacement = vim.lastEditInputState && vim.lastEditInputState._surroundReplacement;
+        var sFrom = cursorMin(surroundAnchor, newHead);
+        var sMax = cursorMax(surroundAnchor, newHead);
+        var sTo = newAnchor
+          ? sMax
+          : motionArgs.inclusive
+            ? new Pos(sMax.line, sMax.ch + 1)
+            : sMax;
+        if (savedReplacement) {
+          cm.operation(function() { addSurroundToRange(cm, sFrom, sTo, savedReplacement); });
+        } else {
+          vim.surroundState = {
+            type: 'ys_replacement',
+            from: sFrom,
+            to: sTo,
+            onRepeat: function(replacement) {
+              if (vim.lastEditInputState) {
+                vim.lastEditInputState._surroundReplacement = replacement;
+              }
+            }
+          };
+        }
+        return;
       }
       if (operator) {
         this.applyOperator(cm, vim, operator, operatorArgs, motionArgs, registerName, sel, newAnchor, newHead, oldAnchor, oldHead, repeat);
@@ -3067,6 +3102,209 @@ export function initVim(CM) {
     operators[name] = fn;
   }
 
+  // Surround (vim-surround)
+  var surroundBrackets = {
+    '(': { open: '( ', close: ' )', pair: ')' },
+    ')': { open: '(', close: ')', pair: '(' },
+    '[': { open: '[ ', close: ' ]', pair: ']' },
+    ']': { open: '[', close: ']', pair: '[' },
+    '{': { open: '{ ', close: ' }', pair: '}' },
+    '}': { open: '{', close: '}', pair: '{' },
+    '<': { open: '< ', close: ' >', pair: '>' },
+    '>': { open: '<', close: '>', pair: '<' },
+  };
+  var surroundAliases = { 'b': ')', 'B': '}', 'r': ']', 'a': '>' };
+
+  function normalizeSurroundTarget(ch) {
+    return surroundAliases[ch] || ch;
+  }
+
+  function getSurroundPair(ch) {
+    ch = normalizeSurroundTarget(ch);
+    var bracket = surroundBrackets[ch];
+    if (bracket) return { open: bracket.open, close: bracket.close };
+    return { open: ch, close: ch };
+  }
+
+  function findSurroundingPair(cm, pos, target) {
+    target = normalizeSurroundTarget(target);
+    var bracket = surroundBrackets[target];
+    if (bracket) {
+      return findSurroundingBrackets(cm, pos, target, bracket.pair);
+    }
+    return findSurroundingQuotes(cm, pos, target);
+  }
+
+  function findSurroundingBrackets(cm, pos, close, open) {
+    var cur = copyCursor(pos);
+    var depth = 0;
+    var openPos = null;
+    var closePos = null;
+    var curText = cm.getLine(cur.line);
+    var curChar = curText.charAt(cur.ch);
+    if (curChar === open) {
+      openPos = new Pos(cur.line, cur.ch);
+    } else {
+      for (var line = cur.line; line >= cm.firstLine(); line--) {
+        var text = cm.getLine(line);
+        var startCh = (line === cur.line) ? cur.ch - 1 : text.length - 1;
+        for (var ch = startCh; ch >= 0; ch--) {
+          if (text.charAt(ch) === close) depth++;
+          else if (text.charAt(ch) === open) {
+            if (depth === 0) { openPos = new Pos(line, ch); break; }
+            depth--;
+          }
+        }
+        if (openPos) break;
+      }
+    }
+    if (!openPos) return null;
+    depth = 0;
+    for (var line = openPos.line; line <= cm.lastLine(); line++) {
+      var text = cm.getLine(line);
+      var startCh = (line === openPos.line) ? openPos.ch + 1 : 0;
+      for (var ch = startCh; ch < text.length; ch++) {
+        if (text.charAt(ch) === open) depth++;
+        else if (text.charAt(ch) === close) {
+          if (depth === 0) { closePos = new Pos(line, ch); break; }
+          depth--;
+        }
+      }
+      if (closePos) break;
+    }
+    if (!closePos) return null;
+    return { open: openPos, close: closePos };
+  }
+
+  function findSurroundingQuotes(cm, pos, quote) {
+    var line = cm.getLine(pos.line);
+    var positions = [];
+    for (var i = 0; i < line.length; i++) {
+      if (line.charAt(i) === quote) positions.push(i);
+    }
+    if (positions.length < 2) return null;
+    var best = null;
+    for (var i = 0; i < positions.length - 1; i += 2) {
+      var start = positions[i];
+      var end = positions[i + 1];
+      if (start === undefined || end === undefined) continue;
+      if (pos.ch >= start && pos.ch <= end) {
+        if (!best || (end - start) < (best.close.ch - best.open.ch)) {
+          best = { open: new Pos(pos.line, start), close: new Pos(pos.line, end) };
+        }
+      }
+    }
+    return best;
+  }
+
+  function deleteSurroundPair(cm, found) {
+    var open = found.open;
+    var close = found.close;
+    var lineText = cm.getLine(open.line);
+    var hasOpenSpace = lineText.charAt(open.ch + 1) === ' ';
+    var closeLineText = cm.getLine(close.line);
+    var hasCloseSpace = closeLineText.charAt(close.ch - 1) === ' ';
+    var removeSpaces = hasOpenSpace && hasCloseSpace && open.line === close.line;
+    cm.operation(function() {
+      if (removeSpaces) {
+        cm.replaceRange('', new Pos(close.line, close.ch - 1), new Pos(close.line, close.ch + 1));
+      } else {
+        cm.replaceRange('', close, new Pos(close.line, close.ch + 1));
+      }
+      if (removeSpaces) {
+        cm.replaceRange('', open, new Pos(open.line, open.ch + 2));
+      } else {
+        cm.replaceRange('', open, new Pos(open.line, open.ch + 1));
+      }
+      cm.setCursor(open.line, open.ch);
+    });
+  }
+
+  function changeSurroundPair(cm, found, replacement) {
+    var pair = getSurroundPair(replacement);
+    var open = found.open;
+    var close = found.close;
+    var lineText = cm.getLine(open.line);
+    var hasOpenSpace = lineText.charAt(open.ch + 1) === ' ';
+    var closeLineText = cm.getLine(close.line);
+    var hasCloseSpace = closeLineText.charAt(close.ch - 1) === ' ';
+    var hadSpaces = hasOpenSpace && hasCloseSpace && open.line === close.line;
+    cm.operation(function() {
+      if (hadSpaces) {
+        cm.replaceRange(pair.close, new Pos(close.line, close.ch - 1), new Pos(close.line, close.ch + 1));
+      } else {
+        cm.replaceRange(pair.close, close, new Pos(close.line, close.ch + 1));
+      }
+      if (hadSpaces) {
+        cm.replaceRange(pair.open, open, new Pos(open.line, open.ch + 2));
+      } else {
+        cm.replaceRange(pair.open, open, new Pos(open.line, open.ch + 1));
+      }
+      cm.setCursor(open.line, open.ch);
+    });
+  }
+
+  function addSurroundToRange(cm, from, to, replacement) {
+    var pair = getSurroundPair(replacement);
+    cm.operation(function() {
+      cm.replaceRange(pair.close, to);
+      cm.replaceRange(pair.open, from);
+      cm.setCursor(from.line, from.ch);
+    });
+  }
+
+  function handleSurroundSubState(cm, key, vim) {
+    var state = vim.surroundState;
+    if (!state) return false;
+
+    if (key === '<Esc>' || key === '<C-c>' || key === '<C-[>') {
+      vim.surroundState = null;
+      clearInputState(cm);
+      return true;
+    }
+
+    if (state.type === 'ys_motion') {
+      var motionChar = state.target;
+      vim.surroundState = null;
+      vimApi.handleKey(cm, motionChar, 'mapping');
+      if (vim.surroundState && vim.surroundState.type === 'ys_replacement') {
+        return handleSurroundSubState(cm, key, vim);
+      }
+      return false;
+    }
+
+    var ch = lastChar(key);
+    if (!ch || ch.length > 1) { vim.surroundState = null; return true; }
+
+    vim.surroundState = null;
+    if (state.type === 'change') {
+      var found = findSurroundingPair(cm, cm.getCursor(), state.target);
+      if (found) {
+        cm.operation(function() {
+          changeSurroundPair(cm, found, ch);
+        });
+        if (state.onRepeat) state.onRepeat(ch);
+      }
+    } else if (state.type === 'ys_replacement') {
+      cm.operation(function() {
+        addSurroundToRange(cm, state.from, state.to, ch);
+      });
+      if (state.onRepeat) state.onRepeat(ch);
+    } else if (state.type === 'addLine') {
+      var cursor = cm.getCursor();
+      var lineText = cm.getLine(cursor.line);
+      var trimmed = lineText.replace(/^\s+/, '');
+      var indent = lineText.length - trimmed.length;
+      var from = new Pos(cursor.line, indent);
+      var to = new Pos(cursor.line, lineText.length);
+      cm.operation(function() {
+        addSurroundToRange(cm, from, to, ch);
+      });
+      if (state.onRepeat) state.onRepeat(ch);
+    }
+    return true;
+  }
+
   /** @type {import("./types").vimActions} */
   var actions = {
     jumpListWalk: function(cm, actionArgs, vim) {
@@ -3672,6 +3910,84 @@ export function initVim(CM) {
     },
     exitInsertMode: function(cm, actionArgs) {
       exitInsertMode(cm);
+    },
+    surroundAction: function(cm, actionArgs, vim) {
+      var pendingOp = actionArgs.pendingOperator;
+      var target = actionArgs.selectedCharacter;
+      if (!target) return;
+
+      if (pendingOp === 'delete') {
+        var found = findSurroundingPair(cm, cm.getCursor(), target);
+        if (found) deleteSurroundPair(cm, found);
+      } else if (pendingOp === 'change') {
+        var savedReplacement = vim.lastEditInputState && vim.lastEditInputState._surroundReplacement;
+        if (savedReplacement) {
+          var found = findSurroundingPair(cm, cm.getCursor(), target);
+          if (found) changeSurroundPair(cm, found, savedReplacement);
+        } else {
+          vim.surroundState = {
+            type: 'change',
+            target: target,
+            onRepeat: function(replacement) {
+              if (vim.lastEditInputState) {
+                vim.lastEditInputState._surroundReplacement = replacement;
+              }
+            }
+          };
+        }
+      } else if (pendingOp === 'yank') {
+        if (target !== 's') {
+          vim.inputState.operator = 'surround';
+          vim.inputState.operatorArgs = {};
+          vim.surroundState = { type: 'ys_motion', target: target };
+          return;
+        }
+        if (target === 's') {
+          var savedReplacement = vim.lastEditInputState && vim.lastEditInputState._surroundReplacement;
+          if (savedReplacement) {
+            var cursor = cm.getCursor();
+            var lineText = cm.getLine(cursor.line);
+            var trimmed = lineText.replace(/^\s+/, '');
+            var indent = lineText.length - trimmed.length;
+            addSurroundToRange(cm, new Pos(cursor.line, indent), new Pos(cursor.line, lineText.length), savedReplacement);
+          } else {
+            vim.surroundState = {
+              type: 'addLine',
+              onRepeat: function(replacement) {
+                if (vim.lastEditInputState) {
+                  vim.lastEditInputState._surroundReplacement = replacement;
+                }
+              }
+            };
+          }
+        }
+      }
+    },
+    surroundVisual: function(cm, actionArgs, vim) {
+      var replacement = actionArgs.selectedCharacter;
+      if (!replacement) return;
+      if (vim.visualMode) {
+        var sel = vim.sel;
+        var from = cursorMin(sel.head, sel.anchor);
+        var to = cursorMax(sel.head, sel.anchor);
+        to = new Pos(to.line, to.ch + 1);
+        if (vim.lastEditInputState) {
+          vim.lastEditInputState._surroundSelOffset = {
+            lineDelta: to.line - from.line,
+            chDelta: to.ch - from.ch
+          };
+        }
+        addSurroundToRange(cm, from, to, replacement);
+        exitVisualMode(cm, false);
+      } else {
+        var saved = vim.lastEditInputState && vim.lastEditInputState._surroundSelOffset;
+        if (saved) {
+          var cursor = cm.getCursor();
+          var from = cursor;
+          var to = new Pos(cursor.line + saved.lineDelta, cursor.ch + saved.chDelta);
+          addSurroundToRange(cm, from, to, replacement);
+        }
+      }
     }
   };
 

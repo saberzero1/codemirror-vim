@@ -37,6 +37,13 @@ export type vimState = {
     mode?: string,
     expectLiteralNext?: boolean,
     cursorShapes?: import("./block-cursor").CursorShapeConfig,
+    surroundState?: {
+        type: string,
+        target?: string,
+        from?: Pos,
+        to?: Pos,
+        onRepeat?: (replacement: string) => void,
+    } | null,
 }
 export type Marker = ReturnType<CodeMirror["setBookmark"]>
 export type LineHandle = ReturnType<CodeMirror["getLineHandle"]>
@@ -117,7 +124,9 @@ export type ActionArgsPartial = {
     blockwise?: boolean,
     keepSpaces?: boolean,
     replace?: boolean,
-    keepCursor?: boolean
+    keepCursor?: boolean,
+    pendingOperator?: string | null,
+    pendingOperatorArgs?: OperatorArgs | null,
 }
 export type ActionArgs = ActionArgsPartial & {repeat: number};
 
@@ -310,6 +319,8 @@ export interface InputStateInterface {
     changeQueueList?: (InputStateInterface["changeQueue"])[];
     pushRepeatDigit(n: string): void;
     getRepeat(): number;
+    _surroundReplacement?: string;
+    _surroundSelOffset?: { lineDelta: number, chDelta: number };
 }
 export interface SearchStateInterface {
     setReversed(reversed: boolean): void;
