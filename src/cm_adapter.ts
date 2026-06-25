@@ -564,7 +564,7 @@ export class CodeMirror {
       }
     }
 
-    let pos = posFromIndex(doc, range.head) as Pos&{hitSide?: boolean};
+    let pos = posFromIndex(doc, range.head) as Pos&{hitSide?: boolean, focusBefore?: () => void};
     // set hitside to true if there was no place to move and cursor was clipped to the edge
     // of document. Needed for gj/gk
     if (
@@ -579,6 +579,18 @@ export class CodeMirror {
       )
     ) {
       pos.hitSide = true;
+    }
+    // Obsidian compatibility: when moving up into a block widget (e.g. frontmatter
+    // properties panel), provide focusBefore so vim can redirect focus to the widget.
+    if (amount < 0 && range.head === startOffset) {
+      const domBefore = cm6.domAtPos(Math.max(0, range.head - 1));
+      const widget = domBefore?.node?.parentElement?.closest?.('.metadata-container, .cm-embed-block');
+      if (widget) {
+        const focusTarget = widget.querySelector('input, textarea, [contenteditable]') as HTMLElement | null;
+        if (focusTarget) {
+          pos.focusBefore = () => focusTarget.focus();
+        }
+      }
     }
     return pos;
   };
