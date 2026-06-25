@@ -6210,6 +6210,207 @@ testVim('cs_nested_parens', function(cm, vim, helpers) {
   eq('(a [b] c)', cm.getValue());
 }, { value: '(a (b) c)' });
 
+// Tag surround (dst/cst/ysiw<tag>)
+testVim('dst_basic', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('d', 's', 't');
+  eq('hello', cm.getValue());
+}, { value: '<em>hello</em>', mode: 'xml' });
+
+testVim('cst_to_tag', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('c', 's', 't', '<', 'p', '>');
+  eq('<p>hello</p>', cm.getValue());
+}, { value: '<em>hello</em>', mode: 'xml' });
+
+testVim('cst_to_char', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('c', 's', 't', '"');
+  eq('"hello"', cm.getValue());
+}, { value: '<em>hello</em>', mode: 'xml' });
+
+testVim('ysiw_tag', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', '<', 'e', 'm', '>');
+  eq('<em>hello</em> world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ysiw_tag_with_attrs', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', '<', 'd', 'i', 'v', ' ', 'i', 'd', '=', '"', 'x', '"', '>');
+  eq('<div id="x">hello</div> world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('cs_to_tag', function(cm, vim, helpers) {
+  cm.setCursor(0, 1);
+  helpers.doKeys('c', 's', '"', '<', 'e', 'm', '>');
+  eq('<em>hello</em> world', cm.getValue());
+}, { value: '"hello" world' });
+
+testVim('pendingInput_escape_cancels', function(cm, vim, helpers) {
+  cm.setCursor(0, 1);
+  helpers.doKeys('c', 's', '"', '<', 'e', '<Esc>');
+  eq('"hello" world', cm.getValue());
+}, { value: '"hello" world' });
+
+testVim('pendingInput_backspace', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', '<', 'e', 'x', '<BS>', 'm', '>');
+  eq('<em>hello</em> world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('S_visual_tag', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'e', 'S', '<', 'e', 'm', '>');
+  eq('<em>hello</em> world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('dot_dst', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('d', 's', 't');
+  eq('hello <b>world</b>', cm.getValue());
+  cm.setCursor(0, 9);
+  helpers.doKeys('.');
+  eq('hello world', cm.getValue());
+}, { value: '<em>hello</em> <b>world</b>', mode: 'xml' });
+
+testVim('dot_cst', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('c', 's', 't', '<', 'p', '>');
+  eq('<p>hello</p> <b>world</b>', cm.getValue());
+  cm.setCursor(0, 15);
+  helpers.doKeys('.');
+  eq('<p>hello</p> <p>world</p>', cm.getValue());
+}, { value: '<em>hello</em> <b>world</b>', mode: 'xml' });
+
+testVim('dst_nested_different_tags', function(cm, vim, helpers) {
+  cm.setCursor(0, 12);
+  helpers.doKeys('d', 's', 't');
+  eq('<div>hello</div>', cm.getValue());
+}, { value: '<div><em>hello</em></div>', mode: 'xml' });
+
+testVim('dst_nested_same_name', function(cm, vim, helpers) {
+  cm.setCursor(0, 11);
+  helpers.doKeys('d', 's', 't');
+  eq('<div>hello</div>', cm.getValue());
+}, { value: '<div><div>hello</div></div>', mode: 'xml' });
+
+testVim('dst_self_closing_noop', function(cm, vim, helpers) {
+  cm.setCursor(0, 2);
+  helpers.doKeys('d', 's', 't');
+  eq('<br/>', cm.getValue());
+}, { value: '<br/>' });
+
+testVim('cst_tag_to_tag', function(cm, vim, helpers) {
+  cm.setCursor(0, 7);
+  helpers.doKeys('c', 's', 't', '<', 's', 'p', 'a', 'n', '>');
+  eq('<span>hello</span>', cm.getValue());
+}, { value: '<div>hello</div>', mode: 'xml' });
+
+testVim('ysiw_func', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', 'f', 'p', 'r', 'i', 'n', 't', '<CR>');
+  eq('print(hello) world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ysiw_Func_spaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', 'F', 'p', 'r', 'i', 'n', 't', '<CR>');
+  eq('print( hello ) world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('dot_ysiw_func', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', 'f', 'l', 'e', 'n', '<CR>');
+  eq('len(hello) world', cm.getValue());
+  cm.setCursor(0, 11);
+  helpers.doKeys('.');
+  eq('len(hello) len(world)', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('S_visual_func', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'e', 'S', 'f', 'l', 'e', 'n', '<CR>');
+  eq('len(hello) world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('dot_ysiw_tag', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', '<', 'e', 'm', '>');
+  eq('<em>hello</em> world', cm.getValue());
+  cm.setCursor(0, 15);
+  helpers.doKeys('.');
+  eq('<em>hello</em> <em>world</em>', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('cst_to_tag_cr_accept', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('c', 's', 't', '<', 'p', '<CR>');
+  eq('<p>hello</p>', cm.getValue());
+}, { value: '<em>hello</em>', mode: 'xml' });
+
+// Newline variants (cS/yS/ySS/gS)
+testVim('cS_newline', function(cm, vim, helpers) {
+  cm.setCursor(0, 1);
+  helpers.doKeys('c', 'S', '"', '(');
+  eq('(\n  hello\n)', cm.getValue());
+}, { value: '"hello"' });
+
+testVim('yS_dollar_newline', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 'S', '$', '"');
+  eq('"\n  hello world\n"', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ySS_newline', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 'S', 'S', ')');
+  eq('(\n  hello world\n)', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('ySS_newline_indented', function(cm, vim, helpers) {
+  cm.setCursor(0, 4);
+  helpers.doKeys('y', 'S', 'S', ')');
+  eq('  (\n    hello\n  )', cm.getValue());
+}, { value: '  hello' });
+
+testVim('gS_visual_newline', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'e', 'g', 'S', '"');
+  eq('"\n  hello\n" world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('yS_iw_newline', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 'S', 'i', 'w', ')');
+  eq('(\n  hello\n) world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('2ds_nested_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 4);
+  helpers.doKeys('2', 'd', 's', ')');
+  var result = cm.getValue();
+  eq('a (b) c', result);
+}, { value: '(a (b) c)' });
+
+testVim('3ds_triple_nested', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('3', 'd', 's', ')');
+  eq('a ((b)) c', cm.getValue());
+}, { value: '(a ((b)) c)' });
+
+testVim('2cs_nested_parens', function(cm, vim, helpers) {
+  cm.setCursor(0, 4);
+  helpers.doKeys('2', 'c', 's', ')', ']');
+  eq('[a (b) c]', cm.getValue());
+}, { value: '(a (b) c)' });
+
+testVim('2dst_nested_tags', function(cm, vim, helpers) {
+  cm.setCursor(0, 12);
+  helpers.doKeys('2', 'd', 's', 't');
+  eq('<em>hello</em>', cm.getValue());
+}, { value: '<div><em>hello</em></div>', mode: 'xml' });
+
 async function delay(t) {
   return await new Promise(resolve => setTimeout(resolve, t));
 }

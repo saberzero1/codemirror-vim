@@ -1,6 +1,10 @@
 import { CodeMirror } from "./cm_adapter"
 import {initVim} from "./vim"
 export type Vim = ReturnType<typeof initVim>
+export type SurroundReplacementSpec =
+    | { kind: 'tag', value: string }
+    | { kind: 'func', value: string, spaced: boolean };
+
 export type vimState = {
     onPasteFn?: () => void,
     sel: {head: Pos, anchor: Pos},
@@ -42,7 +46,19 @@ export type vimState = {
         target?: string,
         from?: Pos,
         to?: Pos,
-        onRepeat?: (replacement: string) => void,
+        tagResult?: { open: { from: Pos, to: Pos }, close: { from: Pos, to: Pos } },
+        linewise?: boolean,
+        newline?: boolean,
+        count?: number,
+        onRepeat?: (replacement: string | SurroundReplacementSpec) => void,
+        pendingInput?: {
+            kind: string,
+            buffer: string,
+            prompt: string,
+            acceptOn: Record<string, boolean>,
+            spaced?: boolean,
+            onAccept: (buffer: string) => void,
+        } | null,
     } | null,
 }
 export type Marker = ReturnType<CodeMirror["setBookmark"]>
@@ -89,6 +105,7 @@ export type OperatorArgs = {
     },
     keepCursor?: boolean;
     cursorCol?: number;
+    surroundNewline?: boolean;
 } 
 // version of CodeMirror with vim state checked
 export type CodeMirrorV = CodeMirror & {state: {vim: vimState}}
@@ -319,8 +336,9 @@ export interface InputStateInterface {
     changeQueueList?: (InputStateInterface["changeQueue"])[];
     pushRepeatDigit(n: string): void;
     getRepeat(): number;
-    _surroundReplacement?: string;
+    _surroundReplacement?: string | SurroundReplacementSpec;
     _surroundSelOffset?: { lineDelta: number, chDelta: number };
+    _surroundNewline?: boolean;
 }
 export interface SearchStateInterface {
     setReversed(reversed: boolean): void;

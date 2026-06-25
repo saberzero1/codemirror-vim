@@ -258,7 +258,9 @@ the original position is returned unchanged.
 **Files**: `src/vim.js`, `src/types.ts`
 
 Native vim-surround support: `ds{target}`, `cs{target}{replacement}`,
-`ys{motion}{replacement}`, `yss{replacement}`, and visual `S{replacement}`.
+`ys{motion}{replacement}`, `yss{replacement}`, visual `S{replacement}`,
+tag surround (`dst`, `cst`, `ys<tag>`, `S<tag>`), function wrapping (`f`/`F`),
+newline variants (`cS`, `yS`, `ySS`, `gS`), and count support (`2ds)`, `2cs)`).
 
 Architecture: `s<character>` keymap entry with `operatorPending: true` fires
 after `d`/`c`/`y` enters operator-pending mode. The pending operator is passed
@@ -272,23 +274,68 @@ on the next keystroke. Single-char motions (`w`, `$`, `e`) resolve immediately;
 multi-char motions (`iw`, `aw`) return partial and the physical key completes
 the match.
 
-Dot-repeat stores `_surroundReplacement` on `vim.lastEditInputState` via an
+### Multi-character input (`pendingInput` buffer)
+
+Tags and function wrapping use a `pendingInput` buffer on `vim.surroundState`.
+Trigger detection: `<` in replacement position starts tag collection, `f`/`F`
+starts function name collection. The buffer collects keystrokes until an accept
+key (`>` or `<CR>` for tags, `<CR>` for functions). `<Esc>` cancels, `<BS>`
+deletes the last character. Visual feedback via `vim.status` shows `tag: <...`
+or `func: ...` as the user types.
+
+`startPendingInput` captures the current state fields via closure so `onAccept`
+can dispatch the completed operation. `getSurroundPair` handles both string
+and `SurroundReplacementSpec` objects (`{kind:'tag', value}` or
+`{kind:'func', value, spaced}`) as the single integration point.
+
+### Tag finding
+
+`findSurroundingTag(cm, pos, count)` tries `CM.findEnclosingTag` (syntax tree)
+first, then falls back to a regex scanner (`findOpenTagBackward`,
+`findCloseTagForward`, `findEnclosingTagFallback`) ported from the plugin's
+`src/text-objects/tag.ts`. The regex fallback handles modes without syntax tree
+support (Markdown). Self-closing tags (`<br/>`) return null (no-op). Nested
+same-name tags are handled via depth tracking.
+
+### Newline variants
+
+`S<character>` with `operatorPending: true` fires `surroundActionNewline` for
+`cS`/`yS`/`ySS`. `gS<character>` in visual mode fires `surroundVisualNewline`.
+The `newline` flag propagates through `surroundState` to `addSurroundToRange`
+and `changeSurroundPair`, which insert delimiters on separate lines with the
+content indented one level deeper than the base indentation.
+
+### Count support
+
+`actionArgs.repeat` is passed to `findSurroundingPair` and `findSurroundingTag`.
+For brackets, the Nth-level is found by iterating: find level 1, then search
+from outside it for level 2, etc. Quotes silently treat count as 1.
+
+### Dot-repeat
+
+Stores `_surroundReplacement` on `vim.lastEditInputState` via an
 `onRepeat` callback. During replay, the action/operator detects the saved
 replacement and executes directly without entering the sub-state. Visual `S`
 stores selection dimensions in `_surroundSelOffset` for replay.
+`_surroundNewline` preserves the newline flag across dot-repeat.
 
 Visual `S` replaces the previous `S` → `VdO` keyToKey in visual mode. `S` in
 visual mode now surrounds instead of substituting.
 
 Supported targets: `"`, `'`, `` ` ``, `(`, `)`, `[`, `]`, `{`, `}`, `<`, `>`,
-aliases `b`→`)`, `B`→`}`, `r`→`]`, `a`→`>`. Opening brackets add inner
-spaces; closing brackets don't.
+`t` (tag), aliases `b`→`)`, `B`→`}`, `r`→`]`, `a`→`>`. Opening brackets add
+inner spaces; closing brackets don't. `<` in replacement position triggers tag
+prompting (breaking change — use `>` for no-space angle brackets). `f`/`F` in
+replacement position triggers function wrapping.
 
 ## Type changes
 
 **File**: `src/types.ts`
 
-- `OperatorArgs`: Added `cursorCol?: number`
+- `OperatorArgs`: Added `cursorCol?: number`, `surroundNewline?: boolean`
+- `InputStateInterface`: Added `_surroundReplacement`, `_surroundSelOffset`, `_surroundNewline`
+- `SurroundReplacementSpec`: Union type for tag and function specs
+- `surroundState`: Added `tagResult`, `from`, `to`, `newline`, `count`, `pendingInput`
 - `moveByLines` return: `Pos | null`
 - `moveByWords` return: `Pos | null | undefined`
 - `MotionFn` return: Widened to include `Promise` variants
