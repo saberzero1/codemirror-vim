@@ -309,7 +309,32 @@ content indented one level deeper than the base indentation.
 
 `actionArgs.repeat` is passed to `findSurroundingPair` and `findSurroundingTag`.
 For brackets, the Nth-level is found by iterating: find level 1, then search
-from outside it for level 2, etc. Quotes silently treat count as 1.
+from outside it for level 2, etc.
+
+For quote-type (non-bracket) targets, count repeats the delimiter character:
+`2ysiw*` → `**word**`, `2ds*` on `**word**` → `word`. `findSurroundingQuotes`
+with count > 1 searches for N consecutive quote chars. `deleteSurroundPair` and
+`changeSurroundPair` use a `width` field on the found pair to handle multi-char
+delimiters. In `handleSurroundSubState`, `charRepeat` on the surround state
+multiplies the replacement character before passing it to `getSurroundPair`.
+
+This enables Markdown-specific pairs without custom key assignments:
+`2ysiw*` (bold), `2ysiw~` (strikethrough), `2ysiw=` (highlight),
+`2ysiw$` (math). Follows the `nvim-surround` convention.
+
+### Insert mode surround (`<C-G>s` / `<C-G>S`)
+
+`<C-G>s<character>` in insert mode inserts the open delimiter at cursor.
+The close delimiter is stored on `vim.surroundInsertClose` and appended
+automatically when insert mode exits (in `exitInsertMode`, before cursor
+adjustment). `<C-G>S<character>` does the same with newlines and indentation.
+
+Insert mode partial match buffering was fixed to support this: when the key
+buffer contains a non-char key (e.g. `<C-g>`), subsequent single-char keys
+in a partial match return `true` (consumed) instead of `false` (fall through
+to text insertion). This prevents `s` from being typed as text during the
+`<C-g>s<character>` sequence. Existing `jj`/`jk` escape sequences are
+unaffected (all-char buffers use the timeout path).
 
 ### Dot-repeat
 
@@ -332,10 +357,11 @@ replacement position triggers function wrapping.
 
 **File**: `src/types.ts`
 
-- `OperatorArgs`: Added `cursorCol?: number`, `surroundNewline?: boolean`
+- `OperatorArgs`: Added `cursorCol?: number`, `surroundNewline?: boolean`, `surroundCharRepeat?: number`
 - `InputStateInterface`: Added `_surroundReplacement`, `_surroundSelOffset`, `_surroundNewline`
 - `SurroundReplacementSpec`: Union type for tag and function specs
-- `surroundState`: Added `tagResult`, `from`, `to`, `newline`, `count`, `pendingInput`
+- `vimState`: Added `surroundInsertClose?: string`
+- `surroundState`: Added `tagResult`, `from`, `to`, `newline`, `count`, `charRepeat`, `pendingInput`
 - `moveByLines` return: `Pos | null`
 - `moveByWords` return: `Pos | null | undefined`
 - `MotionFn` return: Widened to include `Promise` variants
