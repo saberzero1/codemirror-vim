@@ -93,6 +93,13 @@ Replaced hardcoded `#ff9696` cursor color with CSS variables:
 `var(--text-on-accent, inherit)` for text. Obsidian themes apply
 automatically; non-Obsidian consumers get the original fallback colors.
 
+The cursor text color is read from the `--text-on-accent` CSS variable
+on the editor element in `measureCursor()`, overriding the syntax-
+highlighted color. This ensures the character under the block cursor is
+always visible regardless of the underlying syntax color (e.g. blue
+headers on a purple accent in light mode). Non-Obsidian environments
+fall back to the syntax color.
+
 ## Behavioral fixes (Neovim parity)
 
 All changes below match verified Neovim behavior. Fork test expectations

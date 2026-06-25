@@ -197,6 +197,8 @@ function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange,
       node = node.parentNode;
     }
     let style = getComputedStyle(node as HTMLElement);
+    let editorStyle = getComputedStyle(view.dom);
+    let cursorTextColor = editorStyle.getPropertyValue('--text-on-accent').trim() || style.color;
     let left = pos.left;
     // TODO remove coordsAtPos when all supported versions of codemirror have coordsForChar api
     let charCoords = (view as any).coordsForChar?.(head);
@@ -217,7 +219,7 @@ function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange,
     }
     let h = (pos.bottom - pos.top);
     return new Piece((left - base.left)/view.scaleX, (pos.top - base.top + h * (1 - hCoeff))/view.scaleY, h * hCoeff/view.scaleY,
-                     style.fontFamily, style.fontSize, style.fontWeight, style.color,
+                     style.fontFamily, style.fontSize, style.fontWeight, cursorTextColor,
                      primary ? "cm-fat-cursor cm-cursor-primary" : "cm-fat-cursor cm-cursor-secondary",
                      letter, hCoeff != 1)
   } else {
