@@ -50,6 +50,7 @@ export type vimState = {
         linewise?: boolean,
         newline?: boolean,
         count?: number,
+        charRepeat?: number,
         onRepeat?: (replacement: string | SurroundReplacementSpec) => void,
         pendingInput?: {
             kind: string,
@@ -106,6 +107,7 @@ export type OperatorArgs = {
     keepCursor?: boolean;
     cursorCol?: number;
     surroundNewline?: boolean;
+    surroundCharRepeat?: number;
 } 
 // version of CodeMirror with vim state checked
 export type CodeMirrorV = CodeMirror & {state: {vim: vimState}}

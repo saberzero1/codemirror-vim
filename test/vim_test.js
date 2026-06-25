@@ -6411,6 +6411,36 @@ testVim('2dst_nested_tags', function(cm, vim, helpers) {
   eq('<em>hello</em>', cm.getValue());
 }, { value: '<div><em>hello</em></div>', mode: 'xml' });
 
+testVim('2ysiw_star_bold', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('2', 'y', 's', 'i', 'w', '*');
+  eq('**hello** world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('2ds_star_unbold', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('2', 'd', 's', '*');
+  eq('hello world', cm.getValue());
+}, { value: '**hello** world' });
+
+testVim('2cs_star_tilde', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('2', 'c', 's', '*', '~');
+  eq('~~hello~~ world', cm.getValue());
+}, { value: '**hello** world' });
+
+testVim('2yss_star_bold_line', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('2', 'y', 's', 's', '*');
+  eq('**hello world**', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('3ysiw_tilde_strikethrough', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('3', 'y', 's', 'i', 'w', '~');
+  eq('~~~hello~~~ world', cm.getValue());
+}, { value: 'hello world' });
+
 async function delay(t) {
   return await new Promise(resolve => setTimeout(resolve, t));
 }
