@@ -165,6 +165,10 @@ const vimPlugin = ViewPlugin.fromClass(
       if (!state.vim || (state.vim.insertMode && !state.overwrite))
         this.view.scrollDOM.classList.remove("cm-vimMode");
       else this.view.scrollDOM.classList.add("cm-vimMode");
+      if (state.vim?.visualMode)
+        this.view.scrollDOM.classList.add("cm-vimVisual");
+      else
+        this.view.scrollDOM.classList.remove("cm-vimVisual");
     }
     updateStatus() {
       let dom = this.cm.state.statusbar;

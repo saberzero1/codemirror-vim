@@ -123,9 +123,11 @@ function configChanged(update: ViewUpdate) {
 }
 
  const themeSpec = {
-  ".cm-vimMode .cm-line": {
+  ".cm-vimMode:not(.cm-vimVisual) .cm-line": {
     "& ::selection": {backgroundColor: "transparent !important"},
     "&::selection": {backgroundColor: "transparent !important"},
+  },
+  ".cm-vimMode .cm-line": {
     caretColor: "transparent !important",
   },
   ".cm-fat-cursor": {
