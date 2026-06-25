@@ -2505,6 +2505,8 @@ export function initVim(CM) {
       var first = cm.firstLine();
       var last = cm.lastLine();
       var posV = cm.findPosV(cur, (motionArgs.forward ? repeat : -repeat), 'line', vim.lastHSPos);
+      // @ts-ignore — Obsidian extends findPosV return with focusBefore for frontmatter widget navigation
+      if (posV.focusBefore) { posV.focusBefore(); return cur; }
       var hasMarkedText = motionArgs.forward ? posV.line > line : posV.line < line;
       if (hasMarkedText) {
         line = posV.line;
