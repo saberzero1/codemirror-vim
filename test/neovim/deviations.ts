@@ -448,12 +448,6 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         fields: ['content', 'cursor'],
     },
     {
-        testPattern: /^vim_jumpToMark_next_action$/,
-        description: 'Per-step: d]` deletes different range than Neovim — mark jump+delete interaction',
-        reason: 'fixable',
-        fields: ['content'],
-    },
-    {
         testPattern: /^vim_changeCase_visual$/,
         description: 'Per-step: visual ~ changes one fewer char than Neovim (exclusive head)',
         reason: 'codemirror-limitation',
@@ -463,18 +457,6 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         testPattern: /^vim_><visualblock$/,
         description: 'Per-step: visual block indent uses spaces instead of tabs',
         reason: 'environment',
-        fields: ['content'],
-    },
-    {
-        testPattern: /^vim_R_visual$/,
-        description: 'Per-step: cursor after visual R on wrong line',
-        reason: 'fixable',
-        fields: ['cursor'],
-    },
-    {
-        testPattern: /^vim_increment_octal$/,
-        description: 'Per-step: octal increment of 007 gives 010 instead of 008',
-        reason: 'fixable',
         fields: ['content'],
     },
     {
@@ -493,36 +475,6 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         testPattern: /^vim_ex_noh_clearSearchHighlight$/,
         description: 'Per-step: ? backward search lands on different match than Neovim',
         reason: 'codemirror-limitation',
-        fields: ['cursor'],
-    },
-    {
-        testPattern: /^vim_macro_(t_search|slash_search)$/,
-        description: 'Per-step: macro replay search cursor differs from Neovim',
-        reason: 'fixable',
-        fields: ['cursor'],
-    },
-    {
-        testPattern: /^vim_yank_append_word_to_word_register$/,
-        description: 'Per-step: cursor after yank append on different line than Neovim',
-        reason: 'fixable',
-        fields: ['cursor'],
-    },
-    {
-        testPattern: /^vim_t,$/,
-        description: 'Per-step: t, (till comma) repeat cursor position differs',
-        reason: 'fixable',
-        fields: ['cursor'],
-    },
-    {
-        testPattern: /^vim_\[\(, \]\)$/,
-        description: 'Per-step: [( bracket motion cursor differs from Neovim',
-        reason: 'fixable',
-        fields: ['cursor'],
-    },
-    {
-        testPattern: /^vim_dw_empty_line_followed_by_whitespace$/,
-        description: 'Per-step: dw on empty line cursor at ch:1 vs Neovim ch:0',
-        reason: 'fixable',
         fields: ['cursor'],
     },
     {
@@ -619,7 +571,7 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         description: 'Multi-step visual mode test with operators (extraction artifact)',
         reason: 'environment',
         fields: ['content', 'cursor'],
-    },
+    }
 ];
 
 export function isKnownDeviation(testName: string): Deviation | null {
