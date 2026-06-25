@@ -5781,6 +5781,90 @@ testVim('option_key_on_mac', function(cm, vim, helpers) {
   is(!vim.insertMode);
 }, { value: 'hello world' })
 
+!isOldCodeMirror && testVim('clipboard_unnamed_yank', async function(cm, vim, helpers) {
+  var mockClipboard = '';
+  var origWriteText = navigator.clipboard.writeText;
+  var origReadText = navigator.clipboard.readText;
+  navigator.clipboard.writeText = function(text) { mockClipboard = text; return Promise.resolve(); };
+  navigator.clipboard.readText = function() { return Promise.resolve(mockClipboard); };
+  try {
+    helpers.doEx('set clipboard=unnamed');
+    eq(CodeMirror.Vim.getOption('clipboard'), 'unnamed');
+
+    helpers.doKeys('y', 'w');
+    eq(mockClipboard, 'hello');
+
+    cm.setCursor(0, 0);
+    helpers.doKeys('d', 'w');
+    eq(mockClipboard, 'hello ');
+    eq('world', cm.getValue());
+
+    cm.setValue('abc def');
+    cm.setCursor(0, 0);
+    helpers.doKeys('y', 'y');
+    is(mockClipboard.indexOf('abc def') >= 0);
+  } finally {
+    navigator.clipboard.writeText = origWriteText;
+    navigator.clipboard.readText = origReadText;
+    helpers.doEx('set clipboard=');
+  }
+}, { value: 'hello world' })
+
+!isOldCodeMirror && testVim('clipboard_unnamed_paste', async function(cm, vim, helpers) {
+  var mockClipboard = 'pasted';
+  var origWriteText = navigator.clipboard.writeText;
+  var origReadText = navigator.clipboard.readText;
+  navigator.clipboard.writeText = function(text) { mockClipboard = text; return Promise.resolve(); };
+  navigator.clipboard.readText = function() { return Promise.resolve(mockClipboard); };
+  try {
+    helpers.doEx('set clipboard=unnamed');
+
+    cm.setCursor(0, 4);
+    helpers.doKeys('p');
+    await delay(0);
+    eq('hellopasted world', cm.getValue());
+  } finally {
+    navigator.clipboard.writeText = origWriteText;
+    navigator.clipboard.readText = origReadText;
+    helpers.doEx('set clipboard=');
+  }
+}, { value: 'hello world' })
+
+!isOldCodeMirror && testVim('clipboard_unnamedplus_yank', async function(cm, vim, helpers) {
+  var mockClipboard = '';
+  var origWriteText = navigator.clipboard.writeText;
+  var origReadText = navigator.clipboard.readText;
+  navigator.clipboard.writeText = function(text) { mockClipboard = text; return Promise.resolve(); };
+  navigator.clipboard.readText = function() { return Promise.resolve(mockClipboard); };
+  try {
+    helpers.doEx('set clipboard=unnamedplus');
+    eq(CodeMirror.Vim.getOption('clipboard'), 'unnamedplus');
+
+    helpers.doKeys('y', 'w');
+    eq(mockClipboard, 'hello');
+  } finally {
+    navigator.clipboard.writeText = origWriteText;
+    navigator.clipboard.readText = origReadText;
+    helpers.doEx('set clipboard=');
+  }
+}, { value: 'hello world' })
+
+!isOldCodeMirror && testVim('clipboard_unnamed_no_sync_without_option', async function(cm, vim, helpers) {
+  var mockClipboard = 'original';
+  var origWriteText = navigator.clipboard.writeText;
+  var origReadText = navigator.clipboard.readText;
+  navigator.clipboard.writeText = function(text) { mockClipboard = text; return Promise.resolve(); };
+  navigator.clipboard.readText = function() { return Promise.resolve(mockClipboard); };
+  try {
+    helpers.doEx('set clipboard=');
+    helpers.doKeys('y', 'w');
+    eq(mockClipboard, 'original');
+  } finally {
+    navigator.clipboard.writeText = origWriteText;
+    navigator.clipboard.readText = origReadText;
+  }
+}, { value: 'hello world' })
+
 testVim('<C-r>_insert_mode', function(cm, vim, helpers) {
   helpers.assertCursorAt(0, 0);
   helpers.doKeys('d', 'w', 'A');
@@ -5916,7 +6000,30 @@ testVim('rendered_cursor_position_cm6', function(cm, vim, helpers) {
 
 }, {value: '1234\n\n\n5678\nabcdefg'});
 
+testVim('rendered_cursor_position_eol_cm6', function(cm, vim, helpers) {
+  if (!cm.cm6) return;
+  function testCursorPosition(line, ch) {
+    cm.refresh();
+    var coords = cm.charCoords({line, ch});
+    var cursorRect = cm.getWrapperElement().querySelector(".cm-fat-cursor").getBoundingClientRect();
+    var contentRect = cm.getInputField().getBoundingClientRect();
+    is(Math.abs(coords.top - (cursorRect.top - contentRect.top)) < 2);
+    is(Math.abs(coords.left - (cursorRect.left - contentRect.left)) < 2);
+  }
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', '$');
+  testCursorPosition(0, 4);
 
+  helpers.doKeys('<Esc>');
+  cm.setCursor(1, 0);
+  helpers.doKeys('v', '$');
+  testCursorPosition(1, 2);
+
+  helpers.doKeys('<Esc>');
+  cm.setCursor(0, 0);
+  helpers.doKeys('V');
+  testCursorPosition(0, 4);
+}, {value: 'hello\nabc\ndefgh'});
 
 // Surround (ds/cs/yss/visual S)
 testVim('ds_quotes', function(cm, vim, helpers) {

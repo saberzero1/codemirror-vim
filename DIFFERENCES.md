@@ -124,6 +124,29 @@ always visible regardless of the underlying syntax color (e.g. blue
 headers on a purple accent in light mode). Non-Obsidian environments
 fall back to the syntax color.
 
+### Visual mode cursor positioning at EOL
+
+**File**: `src/block-cursor.ts`
+
+`measureCursor()` adjusts the cursor position backward by 1 in forward visual
+selections (`anchor < head`) to render the cursor on the last selected
+character. The previous guard (`if (letter != "\n")`) prevented the adjustment
+when the cursor was at a newline character, but this incorrectly left the
+cursor rendered past EOL on non-empty lines. Replaced with
+`if (head > line.from)` — the cursor is only left unadjusted on truly empty
+lines where decrementing would cross to a previous line.
+
+### clipboard=unnamed / clipboard=unnamedplus
+
+**File**: `src/vim.js` — `RegisterController.pushText`, `actions.paste`
+
+When the `clipboard` option is set to `unnamed` or `unnamedplus`, all
+yank/delete/change operations to the unnamed register now also write to
+`navigator.clipboard`. The paste action reads from `navigator.clipboard`
+instead of the internal register when no explicit register is specified and
+the option is set. Explicit `"+y` and `"*y` also sync to the system
+clipboard (the `*` register is now treated equivalently to `+`).
+
 ## Behavioral fixes (Neovim parity)
 
 All changes below match verified Neovim behavior. Fork test expectations

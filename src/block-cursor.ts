@@ -208,9 +208,12 @@ function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange,
       if (vim.visualBlock && !primary)
         return null;
       if (cursor.anchor < cursor.head) {
-        let letter = head < view.state.doc.length && view.state.sliceDoc(head, head + 1);
-        if (letter != "\n")
+        let line = view.state.doc.lineAt(head);
+        // Decrement head to display cursor on the last selected char,
+        // but not on empty lines where head is already at line start.
+        if (head > line.from) {
           head--;
+        }
       }
       if (shape === 'underline') hCoeff = 0.15;
     }

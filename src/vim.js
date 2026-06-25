@@ -1544,6 +1544,13 @@ export function initVim(CM) {
         }
         // Make sure the unnamed register is set to what just happened
         this.unnamedRegister.setText(text, linewise, blockwise);
+        // clipboard=unnamed/unnamedplus: sync unnamed register to system clipboard
+        var clipOption = getOption('clipboard');
+        if (clipOption === 'unnamed' || clipOption === 'unnamedplus') {
+          if (!this.registers['+']) this.registers['+'] = new Register();
+          this.registers['+'].setText(text, linewise, blockwise);
+          navigator.clipboard.writeText(text);
+        }
         return;
       }
 
@@ -1554,7 +1561,7 @@ export function initVim(CM) {
       } else {
         register.setText(text, linewise, blockwise);
       }
-      if (registerName === '+') {
+      if (registerName === '+' || registerName === '*') {
         navigator.clipboard.writeText(text);
       }
       // The unnamed register always has the same value as the last used
@@ -3959,7 +3966,10 @@ export function initVim(CM) {
     paste: function(cm, actionArgs, vim) {
       var register = vimGlobalState.registerController.getRegister(
           actionArgs.registerName);
-      if (actionArgs.registerName === '+') {
+      var clipOption = getOption('clipboard');
+      var useSystemClipboard = actionArgs.registerName === '+' || actionArgs.registerName === '*' ||
+          (!actionArgs.registerName && (clipOption === 'unnamed' || clipOption === 'unnamedplus'));
+      if (useSystemClipboard) {
         navigator.clipboard.readText().then((value) => {
           this.continuePaste(cm, actionArgs, vim, value, register);
         })
