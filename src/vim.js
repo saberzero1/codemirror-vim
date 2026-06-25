@@ -4500,6 +4500,7 @@ export function initVim(CM) {
       var pair = getSurroundPair(ch);
       var cursor = cm.getCursor();
       cm.replaceRange(pair.open, cursor);
+      cm.setCursor(cursor.line, cursor.ch + pair.open.length);
       vim.surroundInsertClose = pair.close;
     },
     surroundInsertNewline: function(cm, actionArgs, vim) {
