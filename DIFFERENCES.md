@@ -56,8 +56,33 @@ The golden recorder captures Neovim state after each keys step as
 when both golden and definition have step data, falling back to final-state
 comparison otherwise.
 
-462/689 tests passing against Neovim 0.12.3 with per-step comparison
-(more strict than final-state-only, which showed 496/688).
+468 pass / 0 diff / 221 known against Neovim 0.12.3 with per-step comparison
+(more strict than final-state-only). The 221 known deviations are tracked in
+`deviations.ts`: ~30 visual cursor off-by-one (CM6 exclusive head), ~80
+multi-step extraction artifacts, ~30 PCRE regex, ~35 environment/config,
+~25 CM6 API limitations, ~20 other.
+
+### Visual mode selection class toggle
+
+**File**: `src/index.ts`
+
+The ViewPlugin toggles a `.cm-vimVisual` CSS class on the editor's `scrollDOM`
+when visual mode is active. This allows the `::selection { transparent }` rule
+in `block-cursor.ts` to be scoped to `.cm-vimMode:not(.cm-vimVisual)`, so that
+visual mode shows the browser's native selection highlight instead of hiding it
+behind the block cursor overlay.
+
+### Properties navigation (focusBefore adapter)
+
+**File**: `src/cm_adapter.ts`
+
+The `findPosV` adapter detects when `moveVertically` lands the cursor inside
+the YAML frontmatter region (line 0, ch 0 with no actual movement). When this
+happens, it attaches a `focusBefore` callback to the result position. The
+callback queries the DOM for Obsidian's metadata container
+(`.metadata-container`) and focuses the "Add property" button
+(`.metadata-add-button`), implementing the same `focusBefore` protocol that
+Obsidian's built-in vim mode uses.
 
 ### Cursor color CSS variables
 
@@ -164,6 +189,14 @@ Numbers with leading zeros (e.g. `007`) are now incremented as decimal
 (007 → 008) instead of octal (007 → 010), matching Neovim's default
 `nrformats` setting which does not include `octal`.
 
+### Empty :s flag preservation
+
+**File**: `src/vim.js` — `doReplace`
+
+`:s` with no arguments now preserves the `/g` flag from the previous
+substitution, matching Neovim's behavior where `:s` repeats the last
+substitution with its original flags.
+
 ### dw on empty line cursor
 
 **File**: `src/vim.js` — `operators.delete`
@@ -177,6 +210,8 @@ with length ≥ 2, cursor is placed at `ch:1` instead of `ch:0`.
 - `onChange`: Accept CM6-style input origins (`"input.type"`) for insert recording
 - `findNext`: Skip current match during wrap-around after incremental search
 - Golden recorder `escapeKeysForNeovim`: Convert literal `\n` to `<CR>` so ex commands execute
+- Golden recorder: `redraw` after `setCursor` prevents stale Neovim state in recordings
+- Golden recorder: `set columns=80 lines=24` viewport simulation for accurate display-line motion recording
 
 ## Type changes
 
