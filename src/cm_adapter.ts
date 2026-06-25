@@ -591,10 +591,16 @@ export class CodeMirror {
         }
         if (fmEnd > 0 && pos.line + 1 <= fmEnd) {
           const container = cm6.dom.closest('.markdown-source-view');
-          const focusTarget = container?.querySelector(
-            '.metadata-container .metadata-property:last-child input,' +
-            '.metadata-container .metadata-property:last-child textarea,' +
-            '.metadata-container .metadata-property:last-child [contenteditable]'
+          const properties = container?.querySelectorAll(
+            '.metadata-container .metadata-property'
+          );
+          const lastProp = properties && properties.length > 0
+            ? properties[properties.length - 1]
+            : null;
+          const focusTarget = lastProp?.querySelector(
+            '.metadata-property-value input,' +
+            '.metadata-property-value textarea,' +
+            '.metadata-property-value [contenteditable]'
           ) as HTMLElement | null;
           if (focusTarget) {
             pos.focusBefore = () => focusTarget.focus();
