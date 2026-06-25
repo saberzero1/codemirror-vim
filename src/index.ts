@@ -64,6 +64,9 @@ const vimPlugin = ViewPlugin.fromClass(
 
       this.view.cm = this.cm;
       this.cm.state.vimPlugin = this;
+      if (initialCursorShapes && this.cm.state.vim) {
+        this.cm.state.vim.cursorShapes = initialCursorShapes;
+      }
 
       this.blockCursor = new BlockCursorPlugin(view, cm);
       this.updateClass();
@@ -162,7 +165,9 @@ const vimPlugin = ViewPlugin.fromClass(
     }
     updateClass() {
       const state = this.cm.state;
-      if (!state.vim || (state.vim.insertMode && !state.overwrite))
+      let insertWithNonBarCursor = state.vim?.insertMode && !state.overwrite
+        && state.vim.cursorShapes?.insert && state.vim.cursorShapes.insert !== 'bar';
+      if (!state.vim || (state.vim.insertMode && !state.overwrite && !insertWithNonBarCursor))
         this.view.scrollDOM.classList.remove("cm-vimMode");
       else this.view.scrollDOM.classList.add("cm-vimMode");
       if (state.vim?.visualMode)
@@ -464,7 +469,10 @@ function statusPanel(view: EditorView): Panel {
   return { dom };
 }
 
-export function vim(options: { status?: boolean } = {}): Extension {
+export function vim(options: { status?: boolean; cursorShapes?: import("./block-cursor").CursorShapeConfig } = {}): Extension {
+  if (options.cursorShapes) {
+    initialCursorShapes = options.cursorShapes;
+  }
   return [
     vimStyle,
     vimPlugin,
@@ -473,7 +481,10 @@ export function vim(options: { status?: boolean } = {}): Extension {
   ];
 }
 
+let initialCursorShapes: import("./block-cursor").CursorShapeConfig | undefined;
+
 export { CodeMirror, Vim };
+export type { CursorShape, CursorShapeConfig } from "./block-cursor";
 
 export function getCM(view: EditorView): CodeMirror | null {
   return (view as EditorViewExtended).cm || null;

@@ -36,6 +36,7 @@ export type vimState = {
     exMode?: boolean,
     mode?: string,
     expectLiteralNext?: boolean,
+    cursorShapes?: import("./block-cursor").CursorShapeConfig,
 }
 export type Marker = ReturnType<CodeMirror["setBookmark"]>
 export type LineHandle = ReturnType<CodeMirror["getLineHandle"]>

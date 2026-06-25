@@ -11,6 +11,16 @@ let getDrawSelectionConfig = View.getDrawSelectionConfig || function() {
   }
 }();
 
+export type CursorShape = 'block' | 'bar' | 'underline' | 'hollow';
+
+export interface CursorShapeConfig {
+  normal?: CursorShape;
+  insert?: CursorShape;
+  visual?: CursorShape;
+  replace?: CursorShape;
+  operatorPending?: CursorShape;
+}
+
 type Measure = {cursors: Piece[]}
 
 class Piece {
@@ -22,7 +32,8 @@ class Piece {
               readonly color: string,
               readonly className: string,
               readonly letter: string,
-              readonly partial: boolean) {}
+              readonly partial: boolean,
+              readonly cursorShape: CursorShape = 'block') {}
 
   draw() {
     let elt = document.createElement("div")
@@ -39,7 +50,14 @@ class Piece {
     elt.style.fontFamily = this.fontFamily;
     elt.style.fontSize = this.fontSize;
     elt.style.fontWeight = this.fontWeight;
-    elt.style.color = this.partial ? "transparent" : this.color;
+
+    if (this.cursorShape === 'bar') {
+      elt.style.color = "transparent";
+    } else if (this.cursorShape === 'hollow') {
+      elt.style.color = this.partial ? "transparent" : "inherit";
+    } else {
+      elt.style.color = this.partial ? "transparent" : this.color;
+    }
 
     elt.className = this.className;
     elt.textContent = this.letter;
@@ -50,7 +68,8 @@ class Piece {
         this.fontFamily == p.fontFamily && this.fontSize == p.fontSize &&
         this.fontWeight == p.fontWeight && this.color == p.color &&
         this.className == p.className &&
-        this.letter == p.letter;
+        this.letter == p.letter &&
+        this.cursorShape == p.cursorShape;
   }
 }
 
@@ -137,6 +156,18 @@ function configChanged(update: ViewUpdate) {
     border: "none",
     whiteSpace: "pre",
   },
+  ".cm-fat-cursor.cm-cursor-bar": {
+    width: "2px !important",
+    background: "var(--interactive-accent, #ff9696)",
+  },
+  ".cm-fat-cursor.cm-cursor-underline": {
+    background: "transparent",
+    borderBottom: "2px solid var(--interactive-accent, #ff9696)",
+  },
+  ".cm-fat-cursor.cm-cursor-hollow": {
+    background: "transparent",
+    outline: "solid 1px var(--interactive-accent, #ff9696)",
+  },
   "&:not(.cm-focused) .cm-fat-cursor": {
     background: "none",
     outline: "solid 1px var(--interactive-accent, #ff9696)",
@@ -152,22 +183,37 @@ function getBase(view: EditorView) {
   return {left: left - view.scrollDOM.scrollLeft * view.scaleX, top: rect.top - view.scrollDOM.scrollTop * view.scaleY}
 }
 
+function resolveShape(cm: CodeMirror): CursorShape {
+  let vim = cm.state.vim;
+  if (!vim) return 'block';
+  let shapes: CursorShapeConfig = vim.cursorShapes || {};
+  if (vim.insertMode && !cm.state.overwrite) return shapes.insert ?? 'bar';
+  if (cm.state.overwrite) return shapes.replace ?? 'underline';
+  if (vim.visualMode) return shapes.visual ?? 'block';
+  if (vim.status) return shapes.operatorPending ?? 'underline';
+  return shapes.normal ?? 'block';
+}
+
 function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange, primary: boolean): Piece | null {
   let head = cursor.head;
   let fatCursor = false;
   let hCoeff = 1;
   let vim = cm.state.vim;
-  if (vim && (!vim.insertMode || cm.state.overwrite)) {
-    fatCursor = true;
-    if (vim.visualBlock && !primary)
-      return null;
-    if (cursor.anchor < cursor.head) {
-      let letter = head < view.state.doc.length && view.state.sliceDoc(head, head + 1);
-      if (letter != "\n")
-        head--;
+  let shape: CursorShape = 'block';
+  if (vim) {
+    shape = resolveShape(cm);
+    let showCursor = !vim.insertMode || cm.state.overwrite || shape !== 'bar';
+    if (showCursor) {
+      fatCursor = true;
+      if (vim.visualBlock && !primary)
+        return null;
+      if (cursor.anchor < cursor.head) {
+        let letter = head < view.state.doc.length && view.state.sliceDoc(head, head + 1);
+        if (letter != "\n")
+          head--;
+      }
+      if (shape === 'underline') hCoeff = 0.15;
     }
-    if (cm.state.overwrite) hCoeff = 0.2;
-    else if (vim.status) hCoeff = 0.5;
   }
 
   if (fatCursor) {
@@ -218,10 +264,11 @@ function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange,
       letter += view.state.sliceDoc(head + 1, head + 2);
     }
     let h = (pos.bottom - pos.top);
+    let shapeClass = shape !== 'block' ? ` cm-cursor-${shape}` : '';
+    let cls = (primary ? "cm-fat-cursor cm-cursor-primary" : "cm-fat-cursor cm-cursor-secondary") + shapeClass;
     return new Piece((left - base.left)/view.scaleX, (pos.top - base.top + h * (1 - hCoeff))/view.scaleY, h * hCoeff/view.scaleY,
                      style.fontFamily, style.fontSize, style.fontWeight, cursorTextColor,
-                     primary ? "cm-fat-cursor cm-cursor-primary" : "cm-fat-cursor cm-cursor-secondary",
-                     letter, hCoeff != 1)
+                     cls, letter, hCoeff != 1, shape)
   } else {
     return null;
   }
