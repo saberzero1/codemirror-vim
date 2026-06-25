@@ -6441,6 +6441,8 @@ testVim('3ysiw_tilde_strikethrough', function(cm, vim, helpers) {
   eq('~~~hello~~~ world', cm.getValue());
 }, { value: 'hello world' });
 
+
+
 async function delay(t) {
   return await new Promise(resolve => setTimeout(resolve, t));
 }

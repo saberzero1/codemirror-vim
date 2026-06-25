@@ -41,6 +41,7 @@ export type vimState = {
     mode?: string,
     expectLiteralNext?: boolean,
     cursorShapes?: import("./block-cursor").CursorShapeConfig,
+    surroundInsertClose?: string,
     surroundState?: {
         type: string,
         target?: string,

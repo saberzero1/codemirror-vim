@@ -106,6 +106,8 @@ export function initVim(CM) {
     { keys: '<CR>', type: 'keyToKey', toKeys: 'j^', context: 'normal' },
     { keys: '<Ins>', type: 'keyToKey', toKeys: 'i', context: 'normal'},
     { keys: '<Ins>', type: 'action', action: 'toggleOverwrite', context: 'insert' },
+    { keys: '<C-g>s<character>', type: 'action', action: 'surroundInsert', context: 'insert' },
+    { keys: '<C-g>S<character>', type: 'action', action: 'surroundInsertNewline', context: 'insert' },
     // Motions
     { keys: 'H', type: 'motion', motion: 'moveToTopLine', motionArgs: { linewise: true, toJumplist: true }},
     { keys: 'M', type: 'motion', motion: 'moveToMiddleLine', motionArgs: { linewise: true, toJumplist: true }},
@@ -4489,6 +4491,28 @@ export function initVim(CM) {
           addSurroundToRange(cm, from, to, savedRepl, true);
         }
       }
+    },
+    surroundInsert: function(cm, actionArgs, vim) {
+      var ch = actionArgs.selectedCharacter;
+      if (!ch) return;
+      var pair = getSurroundPair(ch);
+      var cursor = cm.getCursor();
+      cm.replaceRange(pair.open, cursor);
+      vim.surroundInsertClose = pair.close;
+    },
+    surroundInsertNewline: function(cm, actionArgs, vim) {
+      var ch = actionArgs.selectedCharacter;
+      if (!ch) return;
+      var pair = getSurroundPair(ch);
+      var nlOpen = pair.open.trimEnd();
+      var nlClose = pair.close.trimStart();
+      var cursor = cm.getCursor();
+      var lineText = cm.getLine(cursor.line);
+      var indentMatch = lineText.match(/^(\s*)/);
+      var baseIndent = indentMatch ? indentMatch[1] : '';
+      var innerIndent = baseIndent + '  ';
+      cm.replaceRange(nlOpen + '\n' + innerIndent, cursor);
+      vim.surroundInsertClose = '\n' + baseIndent + nlClose;
     }
   };
 
@@ -7651,6 +7675,11 @@ export function initVim(CM) {
       vim.lastEditInputState.repeatOverride = vim.insertModeRepeat;
     }
     delete vim.insertModeRepeat;
+    if (vim.surroundInsertClose) {
+      var closeText = vim.surroundInsertClose;
+      delete vim.surroundInsertClose;
+      cm.replaceRange(closeText, cm.getCursor());
+    }
     vim.insertMode = false;
     if (!keepCursor) {
       cm.setCursor(cm.getCursor().line, cm.getCursor().ch-1);
