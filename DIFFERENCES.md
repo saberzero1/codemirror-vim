@@ -204,6 +204,15 @@ substitution with its original flags.
 After `dw` deletes only a newline and the resulting line is whitespace-only
 with length ≥ 2, cursor is placed at `ch:1` instead of `ch:0`.
 
+### Sentence motion at end of document
+
+**File**: `src/vim.js` — `findSentence` → `forward()`
+
+`)` at the end of the last sentence no longer moves the cursor backward.
+When the forward scan reaches the end of the document and the computed
+fallback position is at or before the starting cursor on the same line,
+the original position is returned unchanged.
+
 ### Other fixes
 
 - `operators.indent`: Cursor at column 0 after `>>` / `<<` (was first non-blank)

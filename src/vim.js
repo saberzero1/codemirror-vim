@@ -4940,10 +4940,6 @@ export function initVim(CM) {
         nextChar(cm, curr);
       }
 
-      /*
-        Set the position to the last non whitespace character on the last
-        valid line in the case that we reach the end of the document.
-      */
       var line = cm.getLine(last_valid.ln);
       last_valid.pos = 0;
       for(var i = line.length - 1; i >= 0; --i) {
@@ -4953,6 +4949,9 @@ export function initVim(CM) {
         }
       }
 
+      if (last_valid.ln === ln && last_valid.pos <= pos) {
+        return { ln: ln, pos: pos };
+      }
       return last_valid;
 
     }
