@@ -993,11 +993,12 @@ export function initVim(CM) {
         if (match.type == 'none') { clearInputState(cm); return false; }
         else if (match.type == 'partial') {
           if (match.expectLiteralNext) vim.expectLiteralNext = true;
+          var hasNonCharKey = vim.inputState.keyBuffer.some(function(k) { return k.length > 1; });
           if (lastInsertModeKeyTimer) { window.clearTimeout(lastInsertModeKeyTimer); }
-          lastInsertModeKeyTimer = keysAreChars && window.setTimeout(
+          lastInsertModeKeyTimer = keysAreChars && !hasNonCharKey && window.setTimeout(
             function() { if (vim.insertMode && vim.inputState.keyBuffer.length) { clearInputState(cm); } },
             getOption('insertModeEscKeysTimeout'));
-          if (keysAreChars) {
+          if (keysAreChars && !hasNonCharKey) {
             var selections = cm.listSelections();
             if (!changeQueue || changeQueue.removed.length != selections.length)
               changeQueue = vim.inputState.changeQueue = new ChangeQueue;
@@ -1009,6 +1010,7 @@ export function initVim(CM) {
               changeQueue.removed[i] = (changeQueue.removed[i] || "") + text;
             }
           }
+          if (hasNonCharKey) return true;
           return !keysAreChars;
         }
         else if (match.type == 'full') {
