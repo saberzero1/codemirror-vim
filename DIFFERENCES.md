@@ -84,6 +84,30 @@ callback queries the DOM for Obsidian's metadata container
 (`.metadata-add-button`), implementing the same `focusBefore` protocol that
 Obsidian's built-in vim mode uses.
 
+### Widget-aware vertical navigation
+
+**File**: `src/cm_adapter.ts`
+
+The `findPosV` adapter detects when `moveVertically` jumps over multiple
+document lines in a single visual-line step — indicating it skipped a replaced
+widget decoration (e.g. rendered MathJax `$$` blocks in Obsidian's live
+preview). When this happens, the cursor is placed on the adjacent document
+line (N+1 going down, N−1 going up) instead of at the widget boundary,
+allowing step-by-step navigation through the widget's source text. Folded
+ranges are excluded from correction via `foldedRanges()` since folds
+legitimately collapse multiple lines into one visual line.
+
+### Per-mode cursor shapes
+
+**File**: `src/block-cursor.ts`
+
+The block cursor plugin supports configurable cursor shapes per Vim mode:
+block, bar, underline, or hollow. Shape configuration is stored on
+`cm.state.vim.cursorShapes` and resolved per-mode in `resolveShape()`.
+The `DrawSelectionConfig` width adapts dynamically to the resolved shape.
+Defaults match Neovim's `guicursor`: block for normal/visual, bar for
+insert, underline for replace/operator-pending.
+
 ### Cursor color CSS variables
 
 **File**: `src/block-cursor.ts`

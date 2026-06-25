@@ -1,5 +1,5 @@
 import { EditorSelection, Text, MapMode, ChangeDesc } from "@codemirror/state"
-import { StringStream, matchBrackets, indentUnit, ensureSyntaxTree, foldCode } from "@codemirror/language"
+import { StringStream, matchBrackets, indentUnit, ensureSyntaxTree, foldCode, foldedRanges } from "@codemirror/language"
 import { EditorView, runScopeHandlers, ViewUpdate } from "@codemirror/view"
 import { RegExpCursor, setSearchQuery, SearchQuery } from "@codemirror/search"
 import {
@@ -556,11 +556,31 @@ export class CodeMirror {
     let range = EditorSelection.cursor(startOffset, 1, undefined, goalColumn);
     let count = Math.round(Math.abs(amount))
     for (let i = 0; i < count; i++) {
+      let prev = range;
       if (unit == 'page') {
         range = cm6.moveVertically(range, amount > 0, pixels);
       }
       else if (unit == 'line') {
         range = cm6.moveVertically(range, amount > 0);
+        // When moveVertically jumps over multiple document lines in a single
+        // visual-line step, it skipped a replaced widget decoration (e.g.
+        // rendered MathJax in live preview). Step one document line instead
+        // so the cursor enters the widget's source range.
+        // Folds are excluded — they legitimately collapse multiple lines.
+        let prevLine = doc.lineAt(prev.head);
+        let nextLine = doc.lineAt(range.head);
+        let lineJump = Math.abs(nextLine.number - prevLine.number);
+        if (lineJump > 1 && !this._rangeHasFold(prev.head, range.head)) {
+          let targetLineNum = amount > 0
+            ? prevLine.number + 1
+            : prevLine.number - 1;
+          if (targetLineNum >= 1 && targetLineNum <= doc.lines) {
+            let targetLine = doc.line(targetLineNum);
+            let prevCh = prev.head - prevLine.from;
+            let ch = Math.min(prevCh, targetLine.length);
+            range = EditorSelection.cursor(targetLine.from + ch, 1, undefined, goalColumn);
+          }
+        }
       }
     }
 
@@ -602,6 +622,15 @@ export class CodeMirror {
       }
     }
     return pos;
+  };
+  _rangeHasFold(from: number, to: number): boolean {
+    if (from > to) { let tmp = from; from = to; to = tmp; }
+    let hasFold = false;
+    try {
+      let folded = foldedRanges(this.cm6.state);
+      folded.between(from, to, () => { hasFold = true; return false; });
+    } catch (_) {}
+    return hasFold;
   };
   charCoords(pos: Pos, mode: "div" | "local") {
     var rect = this.cm6.contentDOM.getBoundingClientRect();
