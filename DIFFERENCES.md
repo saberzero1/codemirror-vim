@@ -25,6 +25,34 @@ Added `getInputState(cm)`, `getLastEditInfo(cm)`, `getSearchState(cm)`,
 `getJumpList()`, and `getMacroState()` to the `vimApi` object for state
 introspection during testing.
 
+### Keymap introspection API
+
+**Files**: `src/vim.js`, `src/types.ts`
+
+Added `getKeymap(context?)` and `getCompletions(prefix, context?)` to the
+`vimApi` object for querying registered key bindings at runtime.
+
+`getKeymap(context?)` returns a snapshot of the full keymap (default +
+user-defined mappings). Each entry is a plain-object copy containing `keys`,
+`type`, and any type-specific fields (`operator`, `motion`, `action`,
+`toKeys`, etc.). When `context` is provided (`'normal'`, `'visual'`,
+`'insert'`, or `'operatorPending'`), entries that explicitly belong to a
+different context are excluded; entries without a context field (valid in all
+contexts) are always included.
+
+`getCompletions(prefix, context?)` returns keymap entries whose `keys` start
+with the given prefix, augmented with a `suffix` field containing the
+remaining characters after the prefix. This enables which-key-style UIs that
+show available continuations after a partial key sequence (e.g.
+`getCompletions('g', 'normal')` returns entries for `gg`, `gj`, `gk`, `g~`,
+etc. with their respective suffixes).
+
+Both methods return defensive copies — callers cannot mutate the internal
+keymap. User-defined mappings (via `:map`, `:noremap`, `Vim.map()`) are
+included alongside default bindings.
+
+Types `KeymapEntry` and `KeymapCompletion` added to `src/types.ts`.
+
 ### Async motion dispatch
 
 **Files**: `src/vim.js`, `src/types.ts`
@@ -130,11 +158,12 @@ fall back to the syntax color.
 
 `measureCursor()` adjusts the cursor position backward by 1 in forward visual
 selections (`anchor < head`) to render the cursor on the last selected
-character. The previous guard (`if (letter != "\n")`) prevented the adjustment
-when the cursor was at a newline character, but this incorrectly left the
-cursor rendered past EOL on non-empty lines. Replaced with
-`if (head > line.from)` — the cursor is only left unadjusted on truly empty
-lines where decrementing would cross to a previous line.
+character. The original `letter != "\n"` guard (commit `8e8ea52`, empty-line
+fix) prevented the adjustment at EOL on non-empty lines, causing the block
+cursor to render past the visible line content in charwise visual mode.
+The fix uses the vim state (`vim.visualLine`, `vim.visualBlock`) to only
+apply the EOL decrement in charwise visual mode — linewise and blockwise
+visual skip the adjustment, preserving their existing rendering.
 
 ### clipboard=unnamed / clipboard=unnamedplus
 
