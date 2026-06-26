@@ -5792,7 +5792,7 @@ testVim('option_key_on_mac', function(cm, vim, helpers) {
     eq(CodeMirror.Vim.getOption('clipboard'), 'unnamed');
 
     helpers.doKeys('y', 'w');
-    eq(mockClipboard, 'hello');
+    eq(mockClipboard, 'hello ');
 
     cm.setCursor(0, 0);
     helpers.doKeys('d', 'w');
@@ -5841,7 +5841,7 @@ testVim('option_key_on_mac', function(cm, vim, helpers) {
     eq(CodeMirror.Vim.getOption('clipboard'), 'unnamedplus');
 
     helpers.doKeys('y', 'w');
-    eq(mockClipboard, 'hello');
+    eq(mockClipboard, 'hello ');
   } finally {
     navigator.clipboard.writeText = origWriteText;
     navigator.clipboard.readText = origReadText;

@@ -6000,6 +6000,8 @@ export function initVim(CM) {
     };
   }
 
+  defineOption('clipboard', '', 'string', ['clip']);
+
   // Search functions
   defineOption('pcre', true, 'boolean');
   
