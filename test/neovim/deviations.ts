@@ -37,20 +37,7 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         fields: ['cursor'],
     },
 
-    {
-        testPattern: /^vim_\$$/,
-        description: 'Duplicate test name collision in comparison (normal $ vs visual v$)',
-        reason: 'environment',
-        fields: ['cursor'],
-    },
 
-
-    {
-        testPattern: /^vim_di[\[{\}\]<>]_middle_spc$/,
-        description: 'Duplicate test names cause golden comparison to match wrong entry',
-        reason: 'environment',
-        fields: ['content'],
-    },
     {
         testPattern: /^vim_(l_repeat|w_multiple_newlines_with_space|gg|\$_repeat)$/,
         description: 'Recording artifact: Neovim state not isolated between cases',
@@ -136,7 +123,7 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         fields: ['cursor'],
     },
     {
-        testPattern: 'vim_rendered_cursor_position_cm6',
+        testPattern: /^vim_rendered_cursor_position.*cm6$/,
         description: 'CM6-specific cursor rendering test',
         reason: 'environment',
         fields: ['content', 'cursor'],
@@ -571,7 +558,33 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
         description: 'Multi-step visual mode test with operators (extraction artifact)',
         reason: 'environment',
         fields: ['content', 'cursor'],
-    }
+    },
+
+    {
+        testPattern: /^vim_(ds_|cs_|cS_|ys[isSY]|yS_|ySS_|S_visual|dot_(ds|cs|ys|S_)|2ds_|3ds_|2cs_|2ys|3ys|2yss|3ysiw|dst_|cst_)/,
+        description: 'Surround operator: fork-only feature not present in Neovim',
+        reason: 'environment',
+        fields: ['content', 'cursor'],
+    },
+    {
+        testPattern: /^vim_async_motion_/,
+        description: 'Async motion dispatch: fork-only feature not present in Neovim',
+        reason: 'environment',
+        fields: ['content', 'cursor'],
+    },
+    {
+        testPattern: /^vim_clipboard_unnamed/,
+        description: 'Clipboard unnamed mode differs between CM6 and Neovim',
+        reason: 'environment',
+        fields: ['content', 'cursor'],
+    },
+    {
+        testPattern: /^vim_pendingInput_/,
+        description: 'Pending input buffer tests are CM6-specific',
+        reason: 'environment',
+        fields: ['content', 'cursor'],
+    },
+
 ];
 
 export function isKnownDeviation(testName: string): Deviation | null {

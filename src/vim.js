@@ -2775,7 +2775,6 @@ export function initVim(CM) {
         }
       }
       if (ch < lineText.length) {
-        // Only include angle brackets in analysis if they are being matched.
         var re = (symbol === '<' || symbol === '>') ? /[(){}[\]<>]/ : /[(){}[\]]/;
         var matched = cm.findMatchingBracket(new Pos(line, ch), {bracketRegex: re});
         return matched.to;
@@ -6067,6 +6066,12 @@ export function initVim(CM) {
     // include the symbols
     if (inclusive) {
       --start; ++end;
+      // Neovim's a" also consumes adjacent whitespace: trailing first, then leading.
+      if (end < chars.length && /\s/.test(chars[end])) {
+        while (end < chars.length && /\s/.test(chars[end])) { end++; }
+      } else if (start > 0 && /\s/.test(chars[start - 1])) {
+        while (start > 0 && /\s/.test(chars[start - 1])) { start--; }
+      }
     }
 
     return {
@@ -7344,6 +7349,8 @@ export function initVim(CM) {
         return;
       }
       var index = 0;
+      var lineCountBefore = cm.lineCount();
+      var lastLineNum = 0;
       var nextCommand = function() {
         if (index < matchedLines.length) {
           var lineHandle = matchedLines[index++];
@@ -7352,12 +7359,19 @@ export function initVim(CM) {
             nextCommand();
             return;
           }
+          lastLineNum = lineNum;
           var command = (lineNum + 1) + cmd;
           exCommandDispatcher.processCommand(cm, command, {
             callback: nextCommand
           });
-        } else if (cm.releaseLineHandles) {
-          cm.releaseLineHandles();
+        } else {
+          if (cm.releaseLineHandles) {
+            cm.releaseLineHandles();
+          }
+          if (cm.lineCount() < lineCountBefore) {
+            var finalLine = Math.min(lastLineNum, cm.lastLine());
+            cm.setCursor(new Pos(finalLine, 0));
+          }
         }
       };
       nextCommand();
@@ -7419,8 +7433,6 @@ export function initVim(CM) {
       }
       if (tokens && tokens.length) {
         vimGlobalState.lastSubstituteGlobal = global;
-      } else {
-        global = vimGlobalState.lastSubstituteGlobal;
       }
       if (regexPart) {
         try {
@@ -7520,6 +7532,7 @@ export function initVim(CM) {
       var lineEnd = isNaN(params.selectionLineEnd) ? line : params.selectionLineEnd;
       cm.setCursor(new Pos(line, 0));
       actions.joinLines(cm, {repeat: lineEnd - line}, cm.state.vim);
+      cm.setCursor(new Pos(line, 0));
     },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     delmarks: function(cm, params) {

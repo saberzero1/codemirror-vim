@@ -610,7 +610,7 @@
     "expectedContent": "ab"
   },
   {
-    "name": "vim_di{_middle_spc",
+    "name": "vim_di{_middle_spc_indented_close",
     "content": "a{\n\tbar\n\t}b",
     "cursor": {
       "line": 1,
@@ -620,7 +620,7 @@
     "expectedContent": "a{\n\t}b"
   },
   {
-    "name": "vim_di}_middle_spc",
+    "name": "vim_di}_middle_spc_indented_close",
     "content": "a{\n\tbar\n\t}b",
     "cursor": {
       "line": 1,
@@ -630,7 +630,7 @@
     "expectedContent": "a{\n\t}b"
   },
   {
-    "name": "vim_da{_middle_spc",
+    "name": "vim_da{_middle_spc_indented_close",
     "content": "a{\n\tbar\n\t}b",
     "cursor": {
       "line": 1,
@@ -640,7 +640,7 @@
     "expectedContent": "ab"
   },
   {
-    "name": "vim_da}_middle_spc",
+    "name": "vim_da}_middle_spc_indented_close",
     "content": "a{\n\tbar\n\t}b",
     "cursor": {
       "line": 1,

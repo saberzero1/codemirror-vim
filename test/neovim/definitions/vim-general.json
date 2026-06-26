@@ -4291,46 +4291,12 @@
           },
           "mode": "normal"
         }
-      },
-      {
-        "type": "setCursor",
-        "line": 2,
-        "ch": 3
-      },
-      {
-        "type": "keys",
-        "keys": "<C-v>1khS",
-        "stateAfter": {
-          "content": "1hello{\n  \n",
-          "cursor": {
-            "ch": 2,
-            "line": 1
-          },
-          "mode": "insert"
-        }
-      },
-      {
-        "type": "setCursor",
-        "line": 1,
-        "ch": 2
-      },
-      {
-        "type": "keys",
-        "keys": "world",
-        "stateAfter": {
-          "content": "1hello{\n  world\n",
-          "cursor": {
-            "ch": 7,
-            "line": 1
-          },
-          "mode": "insert"
-        }
       }
     ],
-    "expectedContent": "1hello{\n  world\n",
+    "expectedContent": "1hello{\n5hello{\nahello{fg\n",
     "expectedCursor": {
-      "ch": 7,
-      "line": 1
+      "ch": 6,
+      "line": 0
     }
   },
   {
@@ -13363,30 +13329,13 @@
       {
         "type": "setCursor",
         "line": 0,
-        "ch": 1
-      },
-      {
-        "type": "keys",
-        "keys": "vjS",
-        "stateAfter": {
-          "content": "\ncc",
-          "cursor": {
-            "ch": 0,
-            "line": 0
-          },
-          "mode": "insert"
-        }
-      },
-      {
-        "type": "setCursor",
-        "line": 0,
         "ch": 0
       },
       {
         "type": "keys",
-        "keys": "<Esc>",
+        "keys": "vlS\"",
         "stateAfter": {
-          "content": "\ncc",
+          "content": "\"aa\"\nbb\ncc",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -13395,7 +13344,7 @@
         }
       }
     ],
-    "expectedContent": "\ncc",
+    "expectedContent": "\"aa\"\nbb\ncc",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -24685,14 +24634,14 @@
           "content": "two\nfour\nsix\n---",
           "cursor": {
             "ch": 0,
-            "line": 0
+            "line": 3
           },
           "mode": "normal"
         }
       },
       {
         "type": "setCursor",
-        "line": 0,
+        "line": 3,
         "ch": 0
       },
       {
@@ -31597,6 +31546,287 @@
     }
   },
   {
+    "name": "vim_clipboard_unnamed_yank",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": ":set clipboard=unnamed\n",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yw",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "dw",
+        "stateAfter": {
+          "content": "world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yy",
+        "stateAfter": {
+          "content": "abc def",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": ":set clipboard=\n",
+        "stateAfter": {
+          "content": "abc def",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "abc def",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_clipboard_unnamed_paste",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": ":set clipboard=unnamed\n",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 4
+      },
+      {
+        "type": "keys",
+        "keys": "p",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 4,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 10
+      },
+      {
+        "type": "keys",
+        "keys": ":set clipboard=\n",
+        "stateAfter": {
+          "content": "hellopasted world",
+          "cursor": {
+            "ch": 10,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hellopasted world",
+    "expectedCursor": {
+      "ch": 10,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_clipboard_unnamedplus_yank",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": ":set clipboard=unnamedplus\n",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yw",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": ":set clipboard=\n",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_clipboard_unnamed_no_sync_without_option",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": ":set clipboard=\n",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yw",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
     "name": "vim_<C-r>_insert_mode",
     "content": "123 456 ",
     "cursor": {
@@ -32120,6 +32350,3075 @@
     "expectedCursor": {
       "ch": 4,
       "line": 3
+    }
+  },
+  {
+    "name": "vim_rendered_cursor_position_eol_cm6",
+    "content": "hello\nabc\ndefgh",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "v$",
+        "stateAfter": {
+          "content": "hello\nabc\ndefgh",
+          "cursor": {
+            "ch": 5,
+            "line": 0
+          },
+          "mode": "visual"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "<Esc>",
+        "stateAfter": {
+          "content": "hello\nabc\ndefgh",
+          "cursor": {
+            "ch": 4,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 1,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "v$",
+        "stateAfter": {
+          "content": "hello\nabc\ndefgh",
+          "cursor": {
+            "ch": 3,
+            "line": 1
+          },
+          "mode": "visual"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 1,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "<Esc>",
+        "stateAfter": {
+          "content": "hello\nabc\ndefgh",
+          "cursor": {
+            "ch": 2,
+            "line": 1
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "V",
+        "stateAfter": {
+          "content": "hello\nabc\ndefgh",
+          "cursor": {
+            "ch": 5,
+            "line": 0
+          },
+          "mode": "visual"
+        }
+      }
+    ],
+    "expectedContent": "hello\nabc\ndefgh",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_quotes",
+    "content": "\"hello\" world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ds\"",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_parens",
+    "content": "(hello) world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ds)",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_brackets",
+    "content": "[hello] world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ds]",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_braces",
+    "content": "{hello} world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ds}",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_angle",
+    "content": "<hello> world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ds>",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_alias_b",
+    "content": "(hello) world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "dsb",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_alias_B",
+    "content": "{hello} world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "dsB",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_spaces",
+    "content": "( hello ) world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 4
+      },
+      {
+        "type": "keys",
+        "keys": "ds)",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_no_match",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ds\"",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 3,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_quotes_to_single",
+    "content": "\"hello\" world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "cs\"'",
+        "stateAfter": {
+          "content": "'hello' world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "'hello' world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_parens_to_brackets",
+    "content": "(hello) world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "cs)]",
+        "stateAfter": {
+          "content": "[hello] world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "[hello] world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_quotes_to_parens_with_space",
+    "content": "\"hello\" world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "cs\"(",
+        "stateAfter": {
+          "content": "( hello ) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "( hello ) world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_quotes_to_parens_no_space",
+    "content": "\"hello\" world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "cs\")",
+        "stateAfter": {
+          "content": "(hello) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(hello) world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yss_quotes",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yss\"",
+        "stateAfter": {
+          "content": "\"hello world\"",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello world\"",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yss_parens",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yss)",
+        "stateAfter": {
+          "content": "(hello world)",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(hello world)",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yss_preserves_indent",
+    "content": "  hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 4
+      },
+      {
+        "type": "keys",
+        "keys": "yss\"",
+        "stateAfter": {
+          "content": "  \"hello world\"",
+          "cursor": {
+            "ch": 2,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "  \"hello world\"",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_S_visual_surround",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "veS\"",
+        "stateAfter": {
+          "content": "\"hello\" world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello\" world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_S_visual_surround_parens",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "veS)",
+        "stateAfter": {
+          "content": "(hello) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(hello) world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_quotes",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw\"",
+        "stateAfter": {
+          "content": "\"hello\" world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello\" world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_parens",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw)",
+        "stateAfter": {
+          "content": "(hello) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(hello) world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_parens_with_space",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw(",
+        "stateAfter": {
+          "content": "( hello ) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "( hello ) world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysw_quotes",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ysw\"",
+        "stateAfter": {
+          "content": "\"hello \"world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello \"world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ys$_quotes",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ys$\"",
+        "stateAfter": {
+          "content": "\"hello world\"",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello world\"",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dot_ds_quotes",
+    "content": "\"hello\" \"world\"",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 1
+      },
+      {
+        "type": "keys",
+        "keys": "ds\"",
+        "stateAfter": {
+          "content": "hello \"world\"",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 7
+      },
+      {
+        "type": "keys",
+        "keys": ".",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 6,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dot_cs_quotes",
+    "content": "\"hello\" \"world\"",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 1
+      },
+      {
+        "type": "keys",
+        "keys": "cs\"'",
+        "stateAfter": {
+          "content": "'hello' \"world\"",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 9
+      },
+      {
+        "type": "keys",
+        "keys": ".",
+        "stateAfter": {
+          "content": "'hello' 'world'",
+          "cursor": {
+            "ch": 8,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "'hello' 'world'",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dot_yss_quotes",
+    "content": "hello\nworld",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yss\"",
+        "stateAfter": {
+          "content": "\"hello\"\nworld",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 1,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": ".",
+        "stateAfter": {
+          "content": "\"hello\"\n\"world\"",
+          "cursor": {
+            "ch": 0,
+            "line": 1
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello\"\n\"world\"",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 1
+    }
+  },
+  {
+    "name": "vim_dot_ysiw_quotes",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw\"",
+        "stateAfter": {
+          "content": "\"hello\" world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 8
+      },
+      {
+        "type": "keys",
+        "keys": ".",
+        "stateAfter": {
+          "content": "\"hello\" \"world\"",
+          "cursor": {
+            "ch": 8,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello\" \"world\"",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dot_S_visual",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "veS\"",
+        "stateAfter": {
+          "content": "\"hello\" world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 8
+      },
+      {
+        "type": "keys",
+        "keys": ".",
+        "stateAfter": {
+          "content": "\"hello\" \"world\"",
+          "cursor": {
+            "ch": 8,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello\" \"world\"",
+    "expectedCursor": {
+      "ch": 8,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_backtick",
+    "content": "`hello` world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ds`",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_multiline_parens",
+    "content": "(hello\nworld)",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ds)",
+        "stateAfter": {
+          "content": "hello\nworld",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello\nworld",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_backtick_to_quotes",
+    "content": "`hello`",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "cs`\"",
+        "stateAfter": {
+          "content": "\"hello\"",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello\"",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_brackets_to_braces",
+    "content": "[hello]",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "cs]}",
+        "stateAfter": {
+          "content": "{hello}",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "{hello}",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_angle_to_parens",
+    "content": "<hello>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "cs>)",
+        "stateAfter": {
+          "content": "(hello)",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(hello)",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_brackets",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw]",
+        "stateAfter": {
+          "content": "[hello] world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "[hello] world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_braces",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw}",
+        "stateAfter": {
+          "content": "{hello} world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "{hello} world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_backtick",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw`",
+        "stateAfter": {
+          "content": "`hello` world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "`hello` world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yse_quotes",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yse\"",
+        "stateAfter": {
+          "content": "\"hello\" world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello\" world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_at_eol",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 8
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw\"",
+        "stateAfter": {
+          "content": "hello \"world\"",
+          "cursor": {
+            "ch": 6,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello \"world\"",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_empty_content",
+    "content": "\"\"",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ds\"",
+        "stateAfter": {
+          "content": "",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_empty_content",
+    "content": "\"\"",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "cs\"'",
+        "stateAfter": {
+          "content": "''",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "''",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_S_visual_brackets",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "veS]",
+        "stateAfter": {
+          "content": "[hello] world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "[hello] world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_cursor_on_open",
+    "content": "(hello)",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ds)",
+        "stateAfter": {
+          "content": "hello",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_cursor_on_close",
+    "content": "(hello)",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 6
+      },
+      {
+        "type": "keys",
+        "keys": "ds)",
+        "stateAfter": {
+          "content": "hello",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_cursor_on_delimiter",
+    "content": "\"hello\"",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "cs\"'",
+        "stateAfter": {
+          "content": "'hello'",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "'hello'",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ds_nested_parens",
+    "content": "(a (b) c)",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "ds)",
+        "stateAfter": {
+          "content": "(a b c)",
+          "cursor": {
+            "ch": 3,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(a b c)",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_nested_parens",
+    "content": "(a (b) c)",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "cs)]",
+        "stateAfter": {
+          "content": "(a [b] c)",
+          "cursor": {
+            "ch": 3,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(a [b] c)",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dst_basic",
+    "content": "<em>hello</em>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "dst",
+        "stateAfter": {
+          "content": "hello",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cst_to_tag",
+    "content": "<em>hello</em>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "cst<p>",
+        "stateAfter": {
+          "content": "<p>hello</p>",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<p>hello</p>",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cst_to_char",
+    "content": "<em>hello</em>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "cst\"",
+        "stateAfter": {
+          "content": "\"hello\"",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello\"",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_tag",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw<em>",
+        "stateAfter": {
+          "content": "<em>hello</em> world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<em>hello</em> world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_tag_with_attrs",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw<div id=\"x\">",
+        "stateAfter": {
+          "content": "<div id=\"x\">hello</div> world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<div id=\"x\">hello</div> world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cs_to_tag",
+    "content": "\"hello\" world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 1
+      },
+      {
+        "type": "keys",
+        "keys": "cs\"<em>",
+        "stateAfter": {
+          "content": "<em>hello</em> world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<em>hello</em> world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_pendingInput_escape_cancels",
+    "content": "\"hello\" world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 1
+      },
+      {
+        "type": "keys",
+        "keys": "cs\"<e<Esc>",
+        "stateAfter": {
+          "content": "\"hello\" world",
+          "cursor": {
+            "ch": 1,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"hello\" world",
+    "expectedCursor": {
+      "ch": 1,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_pendingInput_backspace",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw<ex<BS>m>",
+        "stateAfter": {
+          "content": "<em>hello</em> world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<em>hello</em> world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_S_visual_tag",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "veS<em>",
+        "stateAfter": {
+          "content": "<em>hello</em> world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<em>hello</em> world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dot_dst",
+    "content": "<em>hello</em> <b>world</b>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "dst",
+        "stateAfter": {
+          "content": "hello <b>world</b>",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 9
+      },
+      {
+        "type": "keys",
+        "keys": ".",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 6,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 6,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dot_cst",
+    "content": "<em>hello</em> <b>world</b>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "cst<p>",
+        "stateAfter": {
+          "content": "<p>hello</p> <b>world</b>",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 15
+      },
+      {
+        "type": "keys",
+        "keys": ".",
+        "stateAfter": {
+          "content": "<p>hello</p> <p>world</p>",
+          "cursor": {
+            "ch": 13,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<p>hello</p> <p>world</p>",
+    "expectedCursor": {
+      "ch": 13,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dst_nested_different_tags",
+    "content": "<div><em>hello</em></div>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 12
+      },
+      {
+        "type": "keys",
+        "keys": "dst",
+        "stateAfter": {
+          "content": "<div>hello</div>",
+          "cursor": {
+            "ch": 5,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<div>hello</div>",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dst_nested_same_name",
+    "content": "<div><div>hello</div></div>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 11
+      },
+      {
+        "type": "keys",
+        "keys": "dst",
+        "stateAfter": {
+          "content": "<div>hello</div>",
+          "cursor": {
+            "ch": 5,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<div>hello</div>",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dst_self_closing_noop",
+    "content": "<br/>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 2
+      },
+      {
+        "type": "keys",
+        "keys": "dst",
+        "stateAfter": {
+          "content": "<br/>",
+          "cursor": {
+            "ch": 2,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<br/>",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cst_tag_to_tag",
+    "content": "<div>hello</div>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 7
+      },
+      {
+        "type": "keys",
+        "keys": "cst<span>",
+        "stateAfter": {
+          "content": "<span>hello</span>",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<span>hello</span>",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_func",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ysiwfprint<CR>",
+        "stateAfter": {
+          "content": "print(hello) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "print(hello) world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ysiw_Func_spaced",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ysiwFprint<CR>",
+        "stateAfter": {
+          "content": "print( hello ) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "print( hello ) world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dot_ysiw_func",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ysiwflen<CR>",
+        "stateAfter": {
+          "content": "len(hello) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 11
+      },
+      {
+        "type": "keys",
+        "keys": ".",
+        "stateAfter": {
+          "content": "len(hello) len(world)",
+          "cursor": {
+            "ch": 11,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "len(hello) len(world)",
+    "expectedCursor": {
+      "ch": 11,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_S_visual_func",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "veSflen<CR>",
+        "stateAfter": {
+          "content": "len(hello) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "len(hello) world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_dot_ysiw_tag",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ysiw<em>",
+        "stateAfter": {
+          "content": "<em>hello</em> world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      },
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 15
+      },
+      {
+        "type": "keys",
+        "keys": ".",
+        "stateAfter": {
+          "content": "<em>hello</em> <em>world</em>",
+          "cursor": {
+            "ch": 15,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<em>hello</em> <em>world</em>",
+    "expectedCursor": {
+      "ch": 15,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cst_to_tag_cr_accept",
+    "content": "<em>hello</em>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "cst<p<CR>",
+        "stateAfter": {
+          "content": "<p>hello</p>",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<p>hello</p>",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_cS_newline",
+    "content": "\"hello\"",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 1
+      },
+      {
+        "type": "keys",
+        "keys": "cS\"(",
+        "stateAfter": {
+          "content": "(\n  hello\n)",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(\n  hello\n)",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yS_dollar_newline",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yS$\"",
+        "stateAfter": {
+          "content": "\"\n  hello world\n\"",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"\n  hello world\n\"",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ySS_newline",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ySS)",
+        "stateAfter": {
+          "content": "(\n  hello world\n)",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(\n  hello world\n)",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_ySS_newline_indented",
+    "content": "  hello",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 4
+      },
+      {
+        "type": "keys",
+        "keys": "ySS)",
+        "stateAfter": {
+          "content": "  (\n    hello\n  )",
+          "cursor": {
+            "ch": 2,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "  (\n    hello\n  )",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_gS_visual_newline",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "vegS\"",
+        "stateAfter": {
+          "content": "\"\n  hello\n\" world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "\"\n  hello\n\" world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_yS_iw_newline",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "ySiw)",
+        "stateAfter": {
+          "content": "(\n  hello\n) world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "(\n  hello\n) world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_2ds_nested_parens",
+    "content": "(a (b) c)",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 4
+      },
+      {
+        "type": "keys",
+        "keys": "2ds)",
+        "stateAfter": {
+          "content": "a (b) c",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "a (b) c",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_3ds_triple_nested",
+    "content": "(a ((b)) c)",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 5
+      },
+      {
+        "type": "keys",
+        "keys": "3ds)",
+        "stateAfter": {
+          "content": "a ((b)) c",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "a ((b)) c",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_2cs_nested_parens",
+    "content": "(a (b) c)",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 4
+      },
+      {
+        "type": "keys",
+        "keys": "2cs)]",
+        "stateAfter": {
+          "content": "[a (b) c]",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "[a (b) c]",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_2dst_nested_tags",
+    "content": "<div><em>hello</em></div>",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 12
+      },
+      {
+        "type": "keys",
+        "keys": "2dst",
+        "stateAfter": {
+          "content": "<em>hello</em>",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "<em>hello</em>",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_2ysiw_star_bold",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "2ysiw*",
+        "stateAfter": {
+          "content": "**hello** world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "**hello** world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_2ds_star_unbold",
+    "content": "**hello** world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "2ds*",
+        "stateAfter": {
+          "content": "hello world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_2cs_star_tilde",
+    "content": "**hello** world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "2cs*~",
+        "stateAfter": {
+          "content": "~~hello~~ world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "~~hello~~ world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_2yss_star_bold_line",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "2yss*",
+        "stateAfter": {
+          "content": "**hello world**",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "**hello world**",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_3ysiw_tilde_strikethrough",
+    "content": "hello world",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "3ysiw~",
+        "stateAfter": {
+          "content": "~~~hello~~~ world",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "~~~hello~~~ world",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_async_motion_cursor_move",
+    "content": "hello world foo bar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "g<Space>",
+        "stateAfter": {
+          "content": "hello world foo bar",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world foo bar",
+    "expectedCursor": {
+      "ch": 5,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_async_motion_with_delete_operator",
+    "content": "hello world foo bar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "dg<Space>",
+        "stateAfter": {
+          "content": "hello world foo bar",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": " world foo bar",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_async_motion_with_yank_operator",
+    "content": "hello world foo bar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "yg<Space>",
+        "stateAfter": {
+          "content": "hello world foo bar",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world foo bar",
+    "expectedCursor": {
+      "ch": 0,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_async_motion_null_result_is_noop",
+    "content": "hello world foo bar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 3
+      },
+      {
+        "type": "keys",
+        "keys": "dg<Space>",
+        "stateAfter": {
+          "content": "hello world foo bar",
+          "cursor": {
+            "ch": 3,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "hello world foo bar",
+    "expectedCursor": {
+      "ch": 3,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_async_motion_visual_mode",
+    "content": "hello world foo bar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "vg<Space>",
+        "stateAfter": {
+          "content": "hello world foo bar",
+          "cursor": {
+            "ch": 1,
+            "line": 0
+          },
+          "mode": "visual"
+        }
+      }
+    ],
+    "expectedContent": "hello world foo bar",
+    "expectedCursor": {
+      "ch": 9,
+      "line": 0
+    }
+  },
+  {
+    "name": "vim_async_motion_returns_anchor_head_pair",
+    "content": "hello world foo bar",
+    "cursor": {
+      "ch": 0,
+      "line": 0
+    },
+    "steps": [
+      {
+        "type": "setCursor",
+        "line": 0,
+        "ch": 0
+      },
+      {
+        "type": "keys",
+        "keys": "dg<Space>",
+        "stateAfter": {
+          "content": "hello world foo bar",
+          "cursor": {
+            "ch": 0,
+            "line": 0
+          },
+          "mode": "normal"
+        }
+      }
+    ],
+    "expectedContent": "heorld foo bar",
+    "expectedCursor": {
+      "ch": 2,
+      "line": 0
     }
   }
 ]

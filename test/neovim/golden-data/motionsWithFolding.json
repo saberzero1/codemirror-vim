@@ -1,7 +1,7 @@
 {
     "suite": "motionsWithFolding",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T23:56:24.732Z",
+    "recorded_at": "2026-06-26T16:18:53.355Z",
     "cases": [
         {
             "name": "vim_j_with_folding",

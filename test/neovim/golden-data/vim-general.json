@@ -1,7 +1,7 @@
 {
     "suite": "vim-general",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T23:58:07.266Z",
+    "recorded_at": "2026-06-26T16:25:48.392Z",
     "cases": [
         {
             "name": "vim_qq@q",
@@ -3064,14 +3064,14 @@
                     "line": 0
                 }
             },
-            "keys": "<C-v>2jlllshello{<Esc><C-v>1khSworld",
+            "keys": "<C-v>2jlllshello{<Esc>",
             "result": {
-                "content": "hello{1\nworld\n",
+                "content": "hello{1\n5ello{1\naello{1fg\n",
                 "cursor": {
-                    "line": 1,
+                    "line": 0,
                     "ch": 5
                 },
-                "mode": "insert"
+                "mode": "normal"
             },
             "stepResults": [
                 {
@@ -3097,22 +3097,6 @@
                         "ch": 5
                     },
                     "mode": "normal"
-                },
-                {
-                    "content": "hello{1\n\n",
-                    "cursor": {
-                        "line": 1,
-                        "ch": 0
-                    },
-                    "mode": "insert"
-                },
-                {
-                    "content": "hello{1\nworld\n",
-                    "cursor": {
-                        "line": 1,
-                        "ch": 5
-                    },
-                    "mode": "insert"
                 }
             ]
         },
@@ -9019,31 +9003,23 @@
                     "line": 0
                 }
             },
-            "keys": "vjS<Esc>",
+            "keys": "vlS\"",
             "result": {
-                "content": "\ncc",
+                "content": "\"\nbb\ncc",
                 "cursor": {
                     "line": 0,
-                    "ch": 0
+                    "ch": 1
                 },
-                "mode": "normal"
+                "mode": "insert"
             },
             "stepResults": [
                 {
-                    "content": "\ncc",
+                    "content": "\"\nbb\ncc",
                     "cursor": {
                         "line": 0,
-                        "ch": 0
+                        "ch": 1
                     },
                     "mode": "insert"
-                },
-                {
-                    "content": "\ncc",
-                    "cursor": {
-                        "line": 0,
-                        "ch": 0
-                    },
-                    "mode": "normal"
                 }
             ]
         },
@@ -11220,51 +11196,6 @@
                     "cursor": {
                         "line": 0,
                         "ch": 4
-                    },
-                    "mode": "normal"
-                }
-            ]
-        },
-        {
-            "name": "vim_yank_register",
-            "initial": {
-                "content": "foo\nbar",
-                "cursor": {
-                    "ch": 0,
-                    "line": 0
-                }
-            },
-            "keys": "\"ayyj\"byy:registers\n",
-            "result": {
-                "content": "foo\nbar",
-                "cursor": {
-                    "line": 1,
-                    "ch": 0
-                },
-                "mode": "normal"
-            },
-            "stepResults": [
-                {
-                    "content": "foo\nbar",
-                    "cursor": {
-                        "line": 0,
-                        "ch": 0
-                    },
-                    "mode": "normal"
-                },
-                {
-                    "content": "foo\nbar",
-                    "cursor": {
-                        "line": 1,
-                        "ch": 0
-                    },
-                    "mode": "normal"
-                },
-                {
-                    "content": "foo\nbar",
-                    "cursor": {
-                        "line": 1,
-                        "ch": 0
                     },
                     "mode": "normal"
                 }
@@ -20198,6 +20129,194 @@
             ]
         },
         {
+            "name": "vim_clipboard_unnamed_yank",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": ":set clipboard=unnamed\nywdwyy:set clipboard=\n",
+            "result": {
+                "content": "world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_clipboard_unnamed_paste",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": ":set clipboard=unnamed\np:set clipboard=\n",
+            "result": {
+                "content": "hello world\nworld",
+                "cursor": {
+                    "line": 0,
+                    "ch": 10
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "hello world\nworld",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "hello world\nworld",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 10
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_clipboard_unnamedplus_yank",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": ":set clipboard=unnamedplus\nyw:set clipboard=\n",
+            "result": {
+                "content": "hello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_clipboard_unnamed_no_sync_without_option",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": ":set clipboard=\nyw",
+            "result": {
+                "content": "hello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
             "name": "vim_<C-r>_insert_mode",
             "initial": {
                 "content": "123 456 ",
@@ -20343,7 +20462,7 @@
                 {
                     "content": "1234\n5678\nabcdefg",
                     "cursor": {
-                        "line": 2,
+                        "line": 1,
                         "ch": 0
                     },
                     "mode": "normal"
@@ -20374,67 +20493,6 @@
                 },
                 {
                     "content": "1234\n\nrld\n5678 abcdefg",
-                    "cursor": {
-                        "line": 2,
-                        "ch": 3
-                    },
-                    "mode": "insert"
-                }
-            ]
-        },
-        {
-            "name": "vim_langmap_visual_block_no_ctrl_remap",
-            "initial": {
-                "content": "1234\n5678\nabcdefg",
-                "cursor": {
-                    "ch": 0,
-                    "line": 0
-                }
-            },
-            "keys": "<C-v>2hnnnjhello<Esc><C-v>2tdJworld",
-            "result": {
-                "content": "1234\n5678\nrld\nabcdefg",
-                "cursor": {
-                    "line": 2,
-                    "ch": 3
-                },
-                "mode": "insert"
-            },
-            "stepResults": [
-                {
-                    "content": "1234\n5678\nabcdefg",
-                    "cursor": {
-                        "line": 2,
-                        "ch": 0
-                    },
-                    "mode": "visual"
-                },
-                {
-                    "content": "1234\n5678\nabcdefg",
-                    "cursor": {
-                        "line": 0,
-                        "ch": 1
-                    },
-                    "mode": "visual"
-                },
-                {
-                    "content": "1234\n5678\nabcdefg",
-                    "cursor": {
-                        "line": 0,
-                        "ch": 3
-                    },
-                    "mode": "normal"
-                },
-                {
-                    "content": "1234\n5678\nabcdefg",
-                    "cursor": {
-                        "line": 2,
-                        "ch": 3
-                    },
-                    "mode": "normal"
-                },
-                {
-                    "content": "1234\n5678\nrld\nabcdefg",
                     "cursor": {
                         "line": 2,
                         "ch": 3
@@ -20493,6 +20551,1971 @@
                         "ch": 0
                     },
                     "mode": "visual"
+                }
+            ]
+        },
+        {
+            "name": "vim_rendered_cursor_position_eol_cm6",
+            "initial": {
+                "content": "hello\nabc\ndefgh",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "v$<Esc>v$<Esc>V",
+            "result": {
+                "content": "hello\nabc\ndefgh",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "visual"
+            },
+            "stepResults": [
+                {
+                    "content": "hello\nabc\ndefgh",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "visual"
+                },
+                {
+                    "content": "hello\nabc\ndefgh",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 4
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "hello\nabc\ndefgh",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 3
+                    },
+                    "mode": "visual"
+                },
+                {
+                    "content": "hello\nabc\ndefgh",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 2
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "hello\nabc\ndefgh",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "visual"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_parens",
+            "initial": {
+                "content": "(hello) world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ds)",
+            "result": {
+                "content": "(hello) world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 12
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "(hello) world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 12
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_braces",
+            "initial": {
+                "content": "{hello} world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ds}",
+            "result": {
+                "content": "{hello} world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 12
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "{hello} world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 12
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_angle",
+            "initial": {
+                "content": "<hello> world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ds>",
+            "result": {
+                "content": "<hello> world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "no"
+            },
+            "stepResults": [
+                {
+                    "content": "<hello> world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 3
+                    },
+                    "mode": "no"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_alias_b",
+            "initial": {
+                "content": "(hello) world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "dsb",
+            "result": {
+                "content": "(hello) world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "(hello) world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_alias_B",
+            "initial": {
+                "content": "{hello} world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "dsB",
+            "result": {
+                "content": "{hello} world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "{hello} world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_spaces",
+            "initial": {
+                "content": "( hello ) world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ds)",
+            "result": {
+                "content": "( hello ) world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 14
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "( hello ) world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 14
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_cs_quotes_to_single",
+            "initial": {
+                "content": "\"hello\" world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs\"'",
+            "result": {
+                "content": "\"hello\" world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "\"hello\" world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 3
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_cs_quotes_to_parens_with_space",
+            "initial": {
+                "content": "\"hello\" world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs\"(",
+            "result": {
+                "content": "\"hello\" world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "\"hello\" world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 3
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_cs_quotes_to_parens_no_space",
+            "initial": {
+                "content": "\"hello\" world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs\")",
+            "result": {
+                "content": "\"hello\" world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "\"hello\" world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 3
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_yss_quotes",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "yss\"",
+            "result": {
+                "content": "\"ello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "\"ello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_yss_parens",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "yss)",
+            "result": {
+                "content": ")ello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": ")ello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_yss_preserves_indent",
+            "initial": {
+                "content": "  hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "yss\"",
+            "result": {
+                "content": "  he\"lo world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "  he\"lo world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_S_visual_surround",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "veS\"",
+            "result": {
+                "content": "\"",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "\"",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_S_visual_surround_parens",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "veS)",
+            "result": {
+                "content": ")",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": ")",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_quotes",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw\"",
+            "result": {
+                "content": "helw\"lo world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "helw\"lo world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_parens",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw)",
+            "result": {
+                "content": "helw)lo world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "helw)lo world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_parens_with_space",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw(",
+            "result": {
+                "content": "helw(lo world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "helw(lo world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_dot_cs_quotes",
+            "initial": {
+                "content": "\"hello\" \"world\"",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs\"'.",
+            "result": {
+                "content": "\"hello\" \"world\"",
+                "cursor": {
+                    "line": 0,
+                    "ch": 9
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "\"hello\" \"world\"",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "normal"
+                },
+                {
+                    "content": "\"hello\" \"world\"",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 9
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_dot_yss_quotes",
+            "initial": {
+                "content": "hello\nworld",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "yss\".",
+            "result": {
+                "content": "\"ello\n.world",
+                "cursor": {
+                    "line": 1,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "\"ello\nworld",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                },
+                {
+                    "content": "\"ello\n.world",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_dot_ysiw_quotes",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw\".",
+            "result": {
+                "content": "w\"hello .world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 9
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "w\"hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 2
+                    },
+                    "mode": "insert"
+                },
+                {
+                    "content": "w\"hello .world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 9
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_dot_S_visual",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "veS\".",
+            "result": {
+                "content": ".\"",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "\"",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                },
+                {
+                    "content": ".\"",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_multiline_parens",
+            "initial": {
+                "content": "(hello\nworld)",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ds)",
+            "result": {
+                "content": "(hello\nworld)",
+                "cursor": {
+                    "line": 1,
+                    "ch": 5
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "(hello\nworld)",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 5
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_cs_backtick_to_quotes",
+            "initial": {
+                "content": "`hello`",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs`\"",
+            "result": {
+                "content": "`hello`",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "`hello`",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_cs_brackets_to_braces",
+            "initial": {
+                "content": "[hello]",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs]}",
+            "result": {
+                "content": "[hello]",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "[hello]",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 3
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_cs_angle_to_parens",
+            "initial": {
+                "content": "<hello>",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs>)",
+            "result": {
+                "content": "\t<hello>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "\t<hello>",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_brackets",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw]",
+            "result": {
+                "content": "helw]lo world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "helw]lo world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_braces",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw}",
+            "result": {
+                "content": "helw}lo world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "helw}lo world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_backtick",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw`",
+            "result": {
+                "content": "helw`lo world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "helw`lo world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_at_eol",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw\"",
+            "result": {
+                "content": "hello wow\"rld",
+                "cursor": {
+                    "line": 0,
+                    "ch": 10
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "hello wow\"rld",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 10
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_cs_empty_content",
+            "initial": {
+                "content": "\"\"",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs\"'",
+            "result": {
+                "content": "\"\"",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "\"\"",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_S_visual_brackets",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "veS]",
+            "result": {
+                "content": "]",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "]",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_cursor_on_open",
+            "initial": {
+                "content": "(hello)",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ds)",
+            "result": {
+                "content": "(hello)",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "(hello)",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 6
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_cursor_on_close",
+            "initial": {
+                "content": "(hello)",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ds)",
+            "result": {
+                "content": "(hello)",
+                "cursor": {
+                    "line": 0,
+                    "ch": 6
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "(hello)",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 6
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_cs_cursor_on_delimiter",
+            "initial": {
+                "content": "\"hello\"",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs\"'",
+            "result": {
+                "content": "\"hello\"",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "\"hello\"",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_ds_nested_parens",
+            "initial": {
+                "content": "(a (b) c)",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ds)",
+            "result": {
+                "content": "(a (b) c)",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "(a (b) c)",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 8
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_cst_to_char",
+            "initial": {
+                "content": "<em>hello</em>",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cst\"",
+            "result": {
+                "content": "<em>hello</em>",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "<em>hello</em>",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_tag",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw<em>",
+            "result": {
+                "content": "whello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "whello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_tag_with_attrs",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw<div id=\"x\">",
+            "result": {
+                "content": "w<div id=\"x\">hello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 13
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "w<div id=\"x\">hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 13
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_pendingInput_escape_cancels",
+            "initial": {
+                "content": "\"hello\" world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cs\"<e<Esc>",
+            "result": {
+                "content": "\"hello\" world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "\"hello\" world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_pendingInput_backspace",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw<ex<BS>m>",
+            "result": {
+                "content": "w<em>hello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "w<em>hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_S_visual_tag",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "veS<em>",
+            "result": {
+                "content": "",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_func",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiwfprint<CR>",
+            "result": {
+                "content": "wfprint\nhello world",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "wfprint\nhello world",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 0
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ysiw_Func_spaced",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiwFprint<CR>",
+            "result": {
+                "content": "wFprint\nhello world",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "wFprint\nhello world",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 0
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_dot_ysiw_func",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiwflen<CR>.",
+            "result": {
+                "content": "wfle.n\nhello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 5
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "wflen\nhello world",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 0
+                    },
+                    "mode": "insert"
+                },
+                {
+                    "content": "wfle.n\nhello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 5
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_S_visual_func",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "veSflen<CR>",
+            "result": {
+                "content": "flen\n",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "flen\n",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 0
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_dot_ysiw_tag",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ysiw<em>.",
+            "result": {
+                "content": "whello worl.d",
+                "cursor": {
+                    "line": 0,
+                    "ch": 12
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "whello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                },
+                {
+                    "content": "whello worl.d",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 12
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_cst_to_tag_cr_accept",
+            "initial": {
+                "content": "<em>hello</em>",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cst<p<CR>",
+            "result": {
+                "content": "<em>hello</em>\nhello world",
+                "cursor": {
+                    "line": 1,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "<em>hello</em>\nhello world",
+                    "cursor": {
+                        "line": 1,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_cS_newline",
+            "initial": {
+                "content": "\"hello\"",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "cS\"(",
+            "result": {
+                "content": "\"hello\"",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "\"hello\"",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_ySS_newline",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ySS)",
+            "result": {
+                "content": ")",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": ")",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_ySS_newline_indented",
+            "initial": {
+                "content": "  hello",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ySS)",
+            "result": {
+                "content": "  )",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "  )",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 3
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_yS_iw_newline",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "ySiw)",
+            "result": {
+                "content": "w)hello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "w)hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 2
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_2ds_nested_parens",
+            "initial": {
+                "content": "(a (b) c)",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "2ds)",
+            "result": {
+                "content": "(a (b) c)",
+                "cursor": {
+                    "line": 0,
+                    "ch": 8
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "(a (b) c)",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 8
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_3ds_triple_nested",
+            "initial": {
+                "content": "(a ((b)) c)",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "3ds)",
+            "result": {
+                "content": "(a ((b)) c)",
+                "cursor": {
+                    "line": 0,
+                    "ch": 10
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "(a ((b)) c)",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 10
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_2ysiw_star_bold",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "2ysiw*",
+            "result": {
+                "content": "w*hello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "w*hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 2
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_2ds_star_unbold",
+            "initial": {
+                "content": "**hello** world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "2ds*",
+            "result": {
+                "content": "**hello** world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "**hello** world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 2
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_2cs_star_tilde",
+            "initial": {
+                "content": "**hello** world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "2cs*~",
+            "result": {
+                "content": "**Hello** world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "**Hello** world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 3
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_2yss_star_bold_line",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "2yss*",
+            "result": {
+                "content": "*ello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 1
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "*ello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 1
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_3ysiw_tilde_strikethrough",
+            "initial": {
+                "content": "hello world",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "3ysiw~",
+            "result": {
+                "content": "w~hello world",
+                "cursor": {
+                    "line": 0,
+                    "ch": 2
+                },
+                "mode": "insert"
+            },
+            "stepResults": [
+                {
+                    "content": "w~hello world",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 2
+                    },
+                    "mode": "insert"
+                }
+            ]
+        },
+        {
+            "name": "vim_async_motion_cursor_move",
+            "initial": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "g<Space>",
+            "result": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world foo bar",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_async_motion_with_delete_operator",
+            "initial": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "dg<Space>",
+            "result": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world foo bar",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_async_motion_with_yank_operator",
+            "initial": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "yg<Space>",
+            "result": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world foo bar",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_async_motion_null_result_is_noop",
+            "initial": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "dg<Space>",
+            "result": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "line": 0,
+                    "ch": 3
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world foo bar",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 3
+                    },
+                    "mode": "normal"
+                }
+            ]
+        },
+        {
+            "name": "vim_async_motion_visual_mode",
+            "initial": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "vg<Space>",
+            "result": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "visual"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world foo bar",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "visual"
+                }
+            ]
+        },
+        {
+            "name": "vim_async_motion_returns_anchor_head_pair",
+            "initial": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "ch": 0,
+                    "line": 0
+                }
+            },
+            "keys": "dg<Space>",
+            "result": {
+                "content": "hello world foo bar",
+                "cursor": {
+                    "line": 0,
+                    "ch": 0
+                },
+                "mode": "normal"
+            },
+            "stepResults": [
+                {
+                    "content": "hello world foo bar",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 0
+                    },
+                    "mode": "normal"
                 }
             ]
         }

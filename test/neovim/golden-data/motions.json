@@ -1,7 +1,7 @@
 {
     "suite": "motions",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T23:56:24.730Z",
+    "recorded_at": "2026-06-26T16:18:53.354Z",
     "cases": [
         {
             "name": "vim_|",
@@ -954,7 +954,7 @@
             }
         },
         {
-            "name": "vim_$",
+            "name": "vim_v$",
             "initial": {
                 "content": " wOrd1 (#%\n word3] \naopop pop 0 1 2 3 4\n (a) [b] {c} \nint getchar(void) {\n  static char buf[BUFSIZ];\n  static char *bufp = buf;\n  if (n == 0) {  /* buffer is empty */\n    n = read(0, buf, sizeof buf);\n    bufp = buf;\n  }\n\n  return (--n >= 0) ? (unsigned char) *bufp++ : EOF;\n \n}\n",
                 "cursor": {

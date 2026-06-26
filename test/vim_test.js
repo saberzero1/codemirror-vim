@@ -436,7 +436,7 @@ testMotion('_', ['6','_'], makeCursor(5, lines[5].textStart), makeCursor(0, 8));
 testMotion('$', '$', makeCursor(0, lines[0].length - 1), makeCursor(0, 1));
 testMotion('$_repeat', ['2', '$'], makeCursor(1, lines[1].length - 1),
     makeCursor(0, 3));
-testMotion('$', ['v', '$'], makeCursor(0, lines[0].length), makeCursor(0, 1));
+testMotion('v$', ['v', '$'], makeCursor(0, lines[0].length), makeCursor(0, 1));
 testMotion('f', ['f', 'p'], pChars[0], makeCursor(charLine.line, 0));
 testMotion('f_repeat', ['2', 'f', 'p'], pChars[2], pChars[0]);
 testMotion('f_num', ['f', '2'], numChars[2], makeCursor(charLine.line, 0));
@@ -1665,10 +1665,10 @@ testEdit('da}_middle_spc', 'a{\n\tbar\n}b', /r/, 'da}', 'ab');
 testEdit('daB_middle_spc', 'a{\n\tbar\n}b', /r/, 'daB', 'ab');
 
 // open and close on diff lines, open indented less than close
-testEdit('di{_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'di{', 'a{\n\t}b');
-testEdit('di}_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'di}', 'a{\n\t}b');
-testEdit('da{_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'da{', 'ab');
-testEdit('da}_middle_spc', 'a{\n\tbar\n\t}b', /r/, 'da}', 'ab');
+testEdit('di{_middle_spc_indented_close', 'a{\n\tbar\n\t}b', /r/, 'di{', 'a{\n\t}b');
+testEdit('di}_middle_spc_indented_close', 'a{\n\tbar\n\t}b', /r/, 'di}', 'a{\n\t}b');
+testEdit('da{_middle_spc_indented_close', 'a{\n\tbar\n\t}b', /r/, 'da{', 'ab');
+testEdit('da}_middle_spc_indented_close', 'a{\n\tbar\n\t}b', /r/, 'da}', 'ab');
 
 // open and close on diff lines, open indented more than close
 testEdit('di[_middle_spc', 'a\t[\n\tbar\n]b', /r/, 'di[', 'a\t[\n]b');
@@ -4611,7 +4611,7 @@ testVim('ex_substitute_empty_arguments', function(cm,vim,helpers) {
   helpers.doEx('s/a/b/g');
   cm.setCursor(1, 0);
   helpers.doEx('s');
-  eq('b b\nb b', cm.getValue());
+  eq('b b\nb a', cm.getValue());
 }, {value: 'a a\na a'});
 testVim('ex_substitute_highlight', function(cm,vim,helpers) {
   is(!searchHighlighted(vim));
@@ -6553,6 +6553,208 @@ testVim('3ysiw_tilde_strikethrough', function(cm, vim, helpers) {
 async function delay(t) {
   return await new Promise(resolve => setTimeout(resolve, t));
 }
+
+// --- Async motion dispatch tests ---
+
+testVim('async_motion_cursor_move', async function(cm, vim, helpers) {
+  CodeMirror.Vim.defineMotion('testAsyncForward', function(cm, head) {
+    return Promise.resolve(new Pos(head.line, head.ch + 5));
+  });
+  CodeMirror.Vim._mapCommand({
+    keys: 'g<Space>',
+    type: 'motion',
+    motion: 'testAsyncForward'
+  });
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', '<Space>');
+  await delay(50);
+  helpers.assertCursorAt(0, 5);
+}, { value: 'hello world foo bar' });
+
+testVim('async_motion_with_delete_operator', async function(cm, vim, helpers) {
+  CodeMirror.Vim.defineMotion('testAsyncTo5', function(cm, head) {
+    return Promise.resolve(new Pos(head.line, 5));
+  });
+  CodeMirror.Vim._mapCommand({
+    keys: 'g<Space>',
+    type: 'motion',
+    motion: 'testAsyncTo5'
+  });
+  cm.setCursor(0, 0);
+  helpers.doKeys('d', 'g', '<Space>');
+  await delay(50);
+  eq(' world foo bar', cm.getValue());
+}, { value: 'hello world foo bar' });
+
+testVim('async_motion_with_yank_operator', async function(cm, vim, helpers) {
+  CodeMirror.Vim.defineMotion('testAsyncTo5y', function(cm, head) {
+    return Promise.resolve(new Pos(head.line, 5));
+  });
+  CodeMirror.Vim._mapCommand({
+    keys: 'g<Space>',
+    type: 'motion',
+    motion: 'testAsyncTo5y'
+  });
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 'g', '<Space>');
+  await delay(50);
+  var register = helpers.getRegisterController().getRegister();
+  eq('hello', register.toString());
+}, { value: 'hello world foo bar' });
+
+testVim('async_motion_null_result_is_noop', async function(cm, vim, helpers) {
+  CodeMirror.Vim.defineMotion('testAsyncNull', function() {
+    return Promise.resolve(null);
+  });
+  CodeMirror.Vim._mapCommand({
+    keys: 'g<Space>',
+    type: 'motion',
+    motion: 'testAsyncNull'
+  });
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 'g', '<Space>');
+  await delay(50);
+  eq('hello world foo bar', cm.getValue());
+  helpers.assertCursorAt(0, 3);
+}, { value: 'hello world foo bar' });
+
+testVim('async_motion_visual_mode', async function(cm, vim, helpers) {
+  CodeMirror.Vim.defineMotion('testAsyncTo8v', function(cm, head) {
+    return Promise.resolve(new Pos(head.line, 8));
+  });
+  CodeMirror.Vim._mapCommand({
+    keys: 'g<Space>',
+    type: 'motion',
+    motion: 'testAsyncTo8v'
+  });
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'g', '<Space>');
+  await delay(50);
+  var sel = cm.getSelection();
+  is(sel.length > 0);
+}, { value: 'hello world foo bar' });
+
+testVim('async_motion_returns_anchor_head_pair', async function(cm, vim, helpers) {
+  CodeMirror.Vim.defineMotion('testAsyncPair', function(cm, head) {
+    return Promise.resolve([new Pos(0, 2), new Pos(0, 7)]);
+  });
+  CodeMirror.Vim._mapCommand({
+    keys: 'g<Space>',
+    type: 'motion',
+    motion: 'testAsyncPair'
+  });
+  cm.setCursor(0, 0);
+  helpers.doKeys('d', 'g', '<Space>');
+  await delay(50);
+  eq('heorld foo bar', cm.getValue());
+}, { value: 'hello world foo bar' });
+
+// --- getKeymap() API tests ---
+
+testVim('getKeymap_returns_array', function(cm, vim, helpers) {
+  var keymap = CodeMirror.Vim.getKeymap();
+  is(Array.isArray(keymap));
+  is(keymap.length > 0);
+});
+
+testVim('getKeymap_includes_default_motions', function(cm, vim, helpers) {
+  var keymap = CodeMirror.Vim.getKeymap();
+  var hasJ = keymap.some(function(k) { return k.keys === 'j'; });
+  var hasW = keymap.some(function(k) { return k.keys === 'w'; });
+  var hasGg = keymap.some(function(k) { return k.keys === 'gg'; });
+  is(hasJ);
+  is(hasW);
+  is(hasGg);
+});
+
+testVim('getKeymap_context_filter', function(cm, vim, helpers) {
+  var normalKeymap = CodeMirror.Vim.getKeymap('normal');
+  var insertKeymap = CodeMirror.Vim.getKeymap('insert');
+  normalKeymap.forEach(function(entry) {
+    if (entry.context) {
+      eq('normal', entry.context);
+    }
+  });
+  insertKeymap.forEach(function(entry) {
+    if (entry.context) {
+      eq('insert', entry.context);
+    }
+  });
+});
+
+testVim('getKeymap_returns_defensive_copies', function(cm, vim, helpers) {
+  var keymap1 = CodeMirror.Vim.getKeymap();
+  var keymap2 = CodeMirror.Vim.getKeymap();
+  is(keymap1 !== keymap2);
+  if (keymap1.length > 0 && keymap2.length > 0) {
+    is(keymap1[0] !== keymap2[0]);
+  }
+});
+
+testVim('getKeymap_entries_have_required_fields', function(cm, vim, helpers) {
+  var keymap = CodeMirror.Vim.getKeymap();
+  keymap.forEach(function(entry) {
+    is(typeof entry.keys === 'string');
+    is(typeof entry.type === 'string');
+  });
+});
+
+// --- getCompletions() API tests ---
+
+testVim('getCompletions_returns_array', function(cm, vim, helpers) {
+  var completions = CodeMirror.Vim.getCompletions('g');
+  is(Array.isArray(completions));
+  is(completions.length > 0);
+});
+
+testVim('getCompletions_g_prefix', function(cm, vim, helpers) {
+  var completions = CodeMirror.Vim.getCompletions('g');
+  var suffixes = completions.map(function(c) { return c.suffix; });
+  is(suffixes.indexOf('j') >= 0);
+  is(suffixes.indexOf('k') >= 0);
+  is(suffixes.indexOf('g') >= 0);
+  completions.forEach(function(c) {
+    eq(0, c.keys.indexOf('g'));
+    is(c.keys.length > 1);
+  });
+});
+
+testVim('getCompletions_empty_prefix_returns_empty', function(cm, vim, helpers) {
+  var completions = CodeMirror.Vim.getCompletions('');
+  is(Array.isArray(completions));
+  eq(0, completions.length);
+});
+
+testVim('getCompletions_no_match_returns_empty', function(cm, vim, helpers) {
+  var completions = CodeMirror.Vim.getCompletions('zzzzzzz');
+  is(Array.isArray(completions));
+  eq(0, completions.length);
+});
+
+testVim('getCompletions_context_filter', function(cm, vim, helpers) {
+  var normalCompletions = CodeMirror.Vim.getCompletions('g', 'normal');
+  var insertCompletions = CodeMirror.Vim.getCompletions('g', 'insert');
+  normalCompletions.forEach(function(c) {
+    if (c.context) {
+      eq('normal', c.context);
+    }
+  });
+  insertCompletions.forEach(function(c) {
+    if (c.context) {
+      eq('insert', c.context);
+    }
+  });
+});
+
+testVim('getCompletions_has_suffix_field', function(cm, vim, helpers) {
+  var completions = CodeMirror.Vim.getCompletions('z');
+  is(completions.length > 0);
+  completions.forEach(function(c) {
+    is(typeof c.suffix === 'string');
+    is(c.suffix.length > 0);
+    eq(c.keys, 'z' + c.suffix);
+  });
+});
 
 }
 

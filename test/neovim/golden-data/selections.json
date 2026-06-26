@@ -1,7 +1,7 @@
 {
     "suite": "selections",
     "neovim_version": "0.12.3",
-    "recorded_at": "2026-06-24T23:56:24.740Z",
+    "recorded_at": "2026-06-26T16:18:53.363Z",
     "cases": [
         {
             "name": "vim_viw_middle_spc",

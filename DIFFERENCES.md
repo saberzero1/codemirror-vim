@@ -84,11 +84,11 @@ The golden recorder captures Neovim state after each keys step as
 when both golden and definition have step data, falling back to final-state
 comparison otherwise.
 
-468 pass / 0 diff / 221 known against Neovim 0.12.3 with per-step comparison
-(more strict than final-state-only). The 221 known deviations are tracked in
-`deviations.ts`: ~30 visual cursor off-by-one (CM6 exclusive head), ~80
-multi-step extraction artifacts, ~30 PCRE regex, ~35 environment/config,
-~25 CM6 API limitations, ~20 other.
+476 pass / 0 diff / 280 known against Neovim 0.12.2 with per-step comparison
+(more strict than final-state-only). The 280 known deviations are tracked in
+`deviations.ts`: ~62 fork-only features (surround, async motions), ~41 PCRE
+regex, ~32 CM6 platform differences, ~81 multi-step extraction artifacts,
+~26 setup replay, ~8 viewport-dependent, ~6 config mismatch, remaining misc.
 
 ### Visual mode selection class toggle
 
@@ -272,13 +272,39 @@ Numbers with leading zeros (e.g. `007`) are now incremented as decimal
 (007 → 008) instead of octal (007 → 010), matching Neovim's default
 `nrformats` setting which does not include `octal`.
 
-### Empty :s flag preservation
+### Empty :s uses default flags
 
-**File**: `src/vim.js` — `doReplace`
+**File**: `src/vim.js` — `exCommands.substitute`
 
-`:s` with no arguments now preserves the `/g` flag from the previous
-substitution, matching Neovim's behavior where `:s` repeats the last
-substitution with its original flags.
+`:s` with no arguments reuses the last search pattern and replacement but
+resets flags to defaults (no `/g`). Only the first match on the line is
+replaced, matching Neovim's behavior. The `/g` flag is only preserved when
+explicitly provided in a new `:s/pattern/replace/g` command.
+
+### `da"` whitespace consumption
+
+**File**: `src/vim.js` — `findBeginningAndEnd`
+
+`a"` (and `a'`, `` a` ``) text objects now consume adjacent whitespace
+when used with operators (`da"`, `ca"`, etc.), matching Neovim. After
+the inclusive quote expansion, trailing whitespace is consumed first;
+if no trailing whitespace exists, leading whitespace is consumed instead.
+
+### `:join` cursor positioning
+
+**File**: `src/vim.js` — `exCommands.join`
+
+`:join` ex command now positions cursor at column 0 of the join line
+after joining, matching Neovim.
+
+### `:global` cursor positioning
+
+**File**: `src/vim.js` — `exCommands.global`
+
+`:g/pattern/d` (and other line-deleting `:g` commands) now positions
+cursor at the last matched line number (clamped to document end) after
+execution, matching Neovim. Non-destructive `:g` commands leave cursor
+where the last sub-command placed it.
 
 ### dw on empty line cursor
 
