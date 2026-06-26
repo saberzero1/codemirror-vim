@@ -1123,7 +1123,82 @@ export function initVim(CM) {
     defineRegister: defineRegister,
 
     exitVisualMode: exitVisualMode,
-    exitInsertMode: exitInsertMode
+    exitInsertMode: exitInsertMode,
+
+    /**
+     * Return a snapshot of the full keymap (default + user mappings),
+     * optionally filtered by context.
+     *
+     * @param {string} [context] - 'normal' | 'visual' | 'insert' |
+     *   'operatorPending'. When omitted, returns all entries.
+     * @returns {Array<{keys: string, type: string, context?: string,
+     *   operator?: string, motion?: string, action?: string,
+     *   operatorArgs?: Object, motionArgs?: Object, actionArgs?: Object,
+     *   toKeys?: string, isEdit?: boolean}>}
+     */
+    getKeymap: function(context) {
+      var result = [];
+      for (var i = 0; i < defaultKeymap.length; i++) {
+        var entry = defaultKeymap[i];
+        if (context && entry.context && entry.context !== context) continue;
+        /** @type {any} */
+        var copy = { keys: entry.keys, type: entry.type };
+        if (entry.context)              copy.context          = entry.context;
+        if ('operator' in entry)        copy.operator         = entry.operator;
+        if ('operatorArgs' in entry)    copy.operatorArgs     = entry.operatorArgs;
+        if ('motion' in entry)          copy.motion           = entry.motion;
+        if ('motionArgs' in entry)      copy.motionArgs       = entry.motionArgs;
+        if ('action' in entry)          copy.action           = entry.action;
+        if ('actionArgs' in entry)      copy.actionArgs       = entry.actionArgs;
+        if ('toKeys' in entry)          copy.toKeys           = entry.toKeys;
+        if (entry.isEdit)               copy.isEdit           = entry.isEdit;
+        if ('searchArgs' in entry)      copy.searchArgs       = entry.searchArgs;
+        if (entry.operatorPending)      copy.operatorPending  = entry.operatorPending;
+        result.push(copy);
+      }
+      return result;
+    },
+
+    /**
+     * Given a partial key sequence and a context, return the keymap entries
+     * whose `keys` start with that prefix — i.e. the valid continuations.
+     *
+     * Each returned entry is augmented with a `suffix` field: the remaining
+     * key characters after the prefix.
+     *
+     * @param {string} prefix - Partial key sequence typed so far (e.g. 'd',
+     *   'g', 'z', '<C-w>').
+     * @param {string} [context] - 'normal' | 'visual' | 'insert' |
+     *   'operatorPending'. When omitted, matches all contexts.
+     * @returns {Array<{keys: string, suffix: string, type: string,
+     *   context?: string, operator?: string, motion?: string,
+     *   action?: string, toKeys?: string}>}
+     */
+    getCompletions: function(prefix, context) {
+      var result = [];
+      if (!prefix) return result;
+      for (var i = 0; i < defaultKeymap.length; i++) {
+        var entry = defaultKeymap[i];
+        if (context && entry.context && entry.context !== context) continue;
+
+        var keys = entry.keys;
+        if (keys.length <= prefix.length) continue;
+        if (keys.indexOf(prefix) !== 0) continue;
+
+        var suffix = keys.slice(prefix.length);
+        /** @type {any} */
+        var copy = { keys: keys, suffix: suffix, type: entry.type };
+        if (entry.context)              copy.context          = entry.context;
+        if ('operator' in entry)        copy.operator         = entry.operator;
+        if ('motion' in entry)          copy.motion           = entry.motion;
+        if ('action' in entry)          copy.action           = entry.action;
+        if ('toKeys' in entry)          copy.toKeys           = entry.toKeys;
+        if ('searchArgs' in entry)      copy.searchArgs       = entry.searchArgs;
+        if (entry.operatorPending)      copy.operatorPending  = entry.operatorPending;
+        result.push(copy);
+      }
+      return result;
+    }
   };
 
   var keyToKeyStack = [];

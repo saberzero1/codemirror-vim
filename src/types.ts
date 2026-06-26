@@ -323,6 +323,26 @@ export type vimKey =
 
 export type vimKeyMap = vimKey[];
 
+export type KeymapEntry = {
+    keys: string;
+    type: string;
+    context?: string;
+    operator?: string;
+    operatorArgs?: OperatorArgs;
+    motion?: string;
+    motionArgs?: MotionArgsPartial;
+    action?: string;
+    actionArgs?: ActionArgsPartial;
+    toKeys?: string;
+    isEdit?: boolean;
+    searchArgs?: SearchArgs;
+    operatorPending?: boolean;
+};
+
+export type KeymapCompletion = KeymapEntry & {
+    suffix: string;
+};
+
 export interface InputStateInterface {
     prefixRepeat: string[];
     motionRepeat: string[];
