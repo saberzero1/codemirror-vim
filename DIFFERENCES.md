@@ -25,6 +25,17 @@ Added `getInputState(cm)`, `getLastEditInfo(cm)`, `getSearchState(cm)`,
 `getJumpList()`, and `getMacroState()` to the `vimApi` object for state
 introspection during testing.
 
+### `enterInsertMode` API exposure
+
+**File**: `src/vim.js`
+
+Added `enterInsertMode(cm)` to the `vimApi` object. Obsidian's built-in
+`vim.js` exposes this method (a thin wrapper around `actions.enterInsertMode`)
+but upstream `@replit/codemirror-vim` does not. Ecosystem plugins
+(obsidian-outliner, obsidian-lineage) call `Vim.enterInsertMode(cm)` directly
+to transition the editor into insert mode after custom actions. Without this
+export, those calls would throw `TypeError` when using the bundled fork.
+
 ### Keymap introspection API
 
 **Files**: `src/vim.js`, `src/types.ts`

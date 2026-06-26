@@ -1123,6 +1123,7 @@ export function initVim(CM) {
     defineRegister: defineRegister,
 
     exitVisualMode: exitVisualMode,
+    enterInsertMode: enterInsertMode,
     exitInsertMode: exitInsertMode,
 
     /**
@@ -7796,6 +7797,11 @@ export function initVim(CM) {
     if (macroModeState.isRecording) {
       logInsertModeChange(macroModeState);
     }
+  }
+
+  /** @arg {CodeMirrorV} cm */
+  function enterInsertMode(cm) {
+    actions.enterInsertMode(cm, {}, cm.state.vim);
   }
 
   /** @arg {vimKey} command*/

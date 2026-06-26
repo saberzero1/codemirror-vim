@@ -4971,6 +4971,13 @@ testVim('ex_set_string', function(cm, vim, helpers) {
   eq('d', CodeMirror.Vim.getOption('testopt', cm, {scope: 'global'}));
   eq('d', CodeMirror.Vim.getOption('testopt'));
 });
+testVim('api_enterInsertMode', function(cm, vim, helpers) {
+  is(!vim.insertMode);
+  CodeMirror.Vim.enterInsertMode(cm);
+  is(vim.insertMode);
+  helpers.doKeys('<Esc>');
+  is(!vim.insertMode);
+});
 testVim('ex_set_callback', function(cm, vim, helpers) {
   var global;
 
