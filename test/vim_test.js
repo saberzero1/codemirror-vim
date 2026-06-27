@@ -6032,6 +6032,23 @@ testVim('rendered_cursor_position_eol_cm6', function(cm, vim, helpers) {
   testCursorPosition(0, 4);
 }, {value: 'hello\nabc\ndefgh'});
 
+testVim('exit_visual_mode_cursor_clipping', function(cm, vim, helpers) {
+  // vlll on 'abc': l past last char should clip, Escape should land on 'c'
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'l', 'l', 'l', '<Esc>');
+  eqCursorPos(cm.getCursor(), new Pos(0, 2));
+
+  // vll on 'abc': Escape should also land on 'c'
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'l', 'l', '<Esc>');
+  eqCursorPos(cm.getCursor(), new Pos(0, 2));
+
+  // v$ then Escape on multi-line: should land on last char of line
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', '$', '<Esc>');
+  eqCursorPos(cm.getCursor(), new Pos(0, 2));
+}, {value: 'abc\ndef'});
+
 // Surround (ds/cs/yss/visual S)
 testVim('ds_quotes', function(cm, vim, helpers) {
   cm.setCursor(0, 3);

@@ -181,7 +181,7 @@ fall back to the syntax color.
 
 ### Visual mode cursor positioning at EOL
 
-**File**: `src/block-cursor.ts`
+**Files**: `src/block-cursor.ts`, `src/vim.js`
 
 `measureCursor()` adjusts the cursor position backward by 1 in forward visual
 selections (`anchor < head`) to render the cursor on the last selected
@@ -191,6 +191,21 @@ cursor to render past the visible line content in charwise visual mode.
 The fix uses the vim state (`vim.visualLine`, `vim.visualBlock`) to only
 apply the EOL decrement in charwise visual mode — linewise and blockwise
 visual skip the adjustment, preserving their existing rendering.
+
+The `letter != "\n"` comparison also used loose equality (`!=`), which caused
+incorrect branch selection when `head >= doc.length`: the short-circuit
+produced `false`, and `false != "\n"` evaluated to `false` due to JS type
+coercion (both coerce to `0`). Fixed by producing `""` instead of `false`
+and using strict inequality (`!==`).
+
+`exitVisualMode()` in `src/vim.js` called `clipCursorToContent()` while
+`vim.visualMode` was still `true`. In visual mode, `clipCursorToContent`
+allows `ch = text.length` (the linebreak position). After clearing
+`vim.visualMode` on the next line, the cursor was already set one position
+past the last character — visible as a displaced cursor after pressing
+Escape at end-of-line. Fixed by clearing the visual flags before calling
+`setCursor`, while preserving the `updateLastSelection` call order (which
+reads the flags to save the last selection type).
 
 ### clipboard=unnamed / clipboard=unnamedplus
 

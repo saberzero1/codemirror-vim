@@ -5031,13 +5031,18 @@ export function initVim(CM) {
    */
   function exitVisualMode(cm, moveHead) {
     var vim = cm.state.vim;
-    if (moveHead !== false) {
-      cm.setCursor(clipCursorToContent(cm, vim.sel.head));
-    }
+    // Save last selection before clearing visual flags (it reads them).
     updateLastSelection(cm, vim);
+    // Clear visual flags BEFORE setCursor so that clipCursorToContent
+    // uses normal-mode bounds (excludes the linebreak position).
+    // Without this, the cursor can land one position past the last
+    // character when exiting visual mode at end-of-line.
     vim.visualMode = false;
     vim.visualLine = false;
     vim.visualBlock = false;
+    if (moveHead !== false) {
+      cm.setCursor(clipCursorToContent(cm, vim.sel.head));
+    }
     if (!vim.insertMode) CM.signal(cm, "vim-mode-change", {mode: "normal"});
   }
 
