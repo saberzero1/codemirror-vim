@@ -2692,6 +2692,8 @@ export function initVim(CM) {
       var repeat = Math.round(motionArgs.repeat);
       for (var i = 0; i < repeat; i++) {
         var res=cm.findPosV(cur,(motionArgs.forward ? 1 : -1),'line',vim.lastHSPos);
+        // @ts-ignore — Obsidian extends findPosV return with focusBefore for frontmatter widget navigation
+        if (res.focusBefore) { res.focusBefore(); return cur; }
         if (res.hitSide) break;
         cur = res;
       }

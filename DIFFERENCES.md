@@ -144,13 +144,25 @@ Obsidian's built-in vim mode uses.
 **File**: `src/cm_adapter.ts`
 
 The `findPosV` adapter detects when `moveVertically` jumps over multiple
-document lines in a single visual-line step — indicating it skipped a replaced
-widget decoration (e.g. rendered MathJax `$$` blocks in Obsidian's live
-preview). When this happens, the cursor is placed on the adjacent document
-line (N+1 going down, N−1 going up) instead of at the widget boundary,
-allowing step-by-step navigation through the widget's source text. Folded
-ranges are excluded from correction via `foldedRanges()` since folds
-legitimately collapse multiple lines into one visual line.
+document lines in a single visual-line step. When the skipped range contains
+a replaced widget decoration (checked via `_rangeHasReplacedWidget`, which
+scans `EditorView.decorations` for point decorations with `dec.point === true`),
+the cursor is placed on the adjacent document line (N+1 going down, N−1 going
+up) instead of at the widget boundary, allowing step-by-step navigation through
+the widget's source text (e.g. rendered MathJax `$$` blocks in Obsidian's live
+preview).
+
+Folded ranges are excluded via `foldedRanges()` since folds legitimately
+collapse multiple lines. Tall-but-unreplaced lines (e.g. headings with larger
+font sizes) are also excluded — they span multiple visual lines due to CSS
+styling, not replaced content. Mark and line decorations (`dec.point === false`)
+are not considered replaced widgets.
+
+A `posAtCoords` fallback handles cases where `moveVertically` correctly moves
+one document line but misresolves the goalColumn on a line with altered font
+metrics. When the cursor lands at column 0 despite a non-zero goalColumn, the
+fallback uses `lineBlockAt` and `posAtCoords` to find the correct character
+position matching the pixel-based goalColumn on the target line.
 
 ### Per-mode cursor shapes
 

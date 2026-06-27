@@ -1,6 +1,6 @@
 import { EditorSelection, Text, MapMode, ChangeDesc } from "@codemirror/state"
 import { StringStream, matchBrackets, indentUnit, ensureSyntaxTree, foldCode, foldedRanges } from "@codemirror/language"
-import { EditorView, runScopeHandlers, ViewUpdate } from "@codemirror/view"
+import { EditorView, runScopeHandlers, ViewUpdate, Decoration } from "@codemirror/view"
 import { RegExpCursor, setSearchQuery, SearchQuery } from "@codemirror/search"
 import {
   insertNewlineAndIndent, indentMore, indentLess, indentSelection, cursorCharLeft,
@@ -562,15 +562,14 @@ export class CodeMirror {
       }
       else if (unit == 'line') {
         range = cm6.moveVertically(range, amount > 0);
-        // When moveVertically jumps over multiple document lines in a single
-        // visual-line step, it skipped a replaced widget decoration (e.g.
-        // rendered MathJax in live preview). Step one document line instead
-        // so the cursor enters the widget's source range.
-        // Folds are excluded — they legitimately collapse multiple lines.
         let prevLine = doc.lineAt(prev.head);
         let nextLine = doc.lineAt(range.head);
         let lineJump = Math.abs(nextLine.number - prevLine.number);
-        if (lineJump > 1 && !this._rangeHasFold(prev.head, range.head)) {
+        if (lineJump > 1
+            && !this._rangeHasFold(prev.head, range.head)
+            && this._rangeHasReplacedWidget(prev.head, range.head)) {
+          // moveVertically jumped over a replaced widget (e.g. MathJax).
+          // Step one document line instead to enter the widget's source.
           let targetLineNum = amount > 0
             ? prevLine.number + 1
             : prevLine.number - 1;
@@ -579,6 +578,19 @@ export class CodeMirror {
             let prevCh = prev.head - prevLine.from;
             let ch = Math.min(prevCh, targetLine.length);
             range = EditorSelection.cursor(targetLine.from + ch, 1, undefined, goalColumn);
+          }
+        } else if (goalColumn != null && goalColumn > 0
+            && range.head === nextLine.from
+            && nextLine.number !== prevLine.number
+            && nextLine.length > 0) {
+          let rect = cm6.contentDOM.getBoundingClientRect();
+          let lineBlock = cm6.lineBlockAt(nextLine.from);
+          let resolved = cm6.posAtCoords({
+            x: goalColumn + rect.left,
+            y: lineBlock.top + rect.top + 1
+          });
+          if (resolved != null && resolved >= nextLine.from && resolved <= nextLine.to) {
+            range = EditorSelection.cursor(resolved, 1, undefined, goalColumn);
           }
         }
       }
@@ -631,6 +643,25 @@ export class CodeMirror {
       folded.between(from, to, () => { hasFold = true; return false; });
     } catch (_) {}
     return hasFold;
+  };
+  _rangeHasReplacedWidget(from: number, to: number): boolean {
+    if (from > to) { let tmp = from; from = to; to = tmp; }
+    try {
+      const facetValue = this.cm6.state.facet(EditorView.decorations);
+      for (const source of facetValue) {
+        const set = typeof source === 'function' ? source(this.cm6) : source;
+        if (!set || !set.between) continue;
+        let found = false;
+        set.between(from, to, (_a: number, _b: number, dec: Decoration) => {
+          if ((dec as any).point) {
+            found = true;
+            return false;
+          }
+        });
+        if (found) return true;
+      }
+    } catch (_) {}
+    return false;
   };
   charCoords(pos: Pos, mode: "div" | "local") {
     var rect = this.cm6.contentDOM.getBoundingClientRect();
