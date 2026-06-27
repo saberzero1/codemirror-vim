@@ -614,14 +614,18 @@ export class CodeMirror {
     }
     // Obsidian compatibility: when moving up into a block widget (e.g. frontmatter
     // properties panel), provide focusBefore so vim can redirect focus to the widget.
-    if (amount < 0 && pos.line < start.line) {
+    // Two cases: (1) cursor moved into frontmatter lines, (2) cursor couldn't move
+    // up because it's already adjacent to the frontmatter widget boundary.
+    if (amount < 0 && pos.line <= start.line) {
       const firstLine = doc.line(1).text;
       if (firstLine === '---') {
         let fmEnd = 0;
         for (let i = 2; i <= doc.lines; i++) {
           if (doc.line(i).text === '---') { fmEnd = i; break; }
         }
-        if (fmEnd > 0 && pos.line + 1 <= fmEnd) {
+        const movedIntoFrontmatter = fmEnd > 0 && pos.line + 1 <= fmEnd;
+        const stuckAtBoundary = fmEnd > 0 && pos.line === start.line && start.line + 1 === fmEnd + 1;
+        if (movedIntoFrontmatter || stuckAtBoundary) {
           const container = cm6.dom.closest('.markdown-source-view');
           const focusTarget = (
             container?.querySelector('.metadata-container .metadata-add-button') ??

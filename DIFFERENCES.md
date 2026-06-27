@@ -132,12 +132,22 @@ behind the block cursor overlay.
 **File**: `src/cm_adapter.ts`
 
 The `findPosV` adapter detects when `moveVertically` lands the cursor inside
-the YAML frontmatter region (line 0, ch 0 with no actual movement). When this
-happens, it attaches a `focusBefore` callback to the result position. The
-callback queries the DOM for Obsidian's metadata container
+the YAML frontmatter region or when the cursor is stuck at the boundary of
+the frontmatter properties widget. Two cases trigger `focusBefore`:
+
+1. **Moved into frontmatter**: `moveVertically` lands the cursor on a line
+   inside the `---` fences (`pos.line + 1 <= fmEnd`).
+2. **Stuck at boundary**: `moveVertically` can't move up because the
+   properties widget replaces the frontmatter lines, so the cursor stays on
+   the first content line right after the closing `---`
+   (`pos.line === start.line && start.line + 1 === fmEnd + 1`).
+
+In both cases, a `focusBefore` callback is attached to the result position.
+The callback queries the DOM for Obsidian's metadata container
 (`.metadata-container`) and focuses the "Add property" button
 (`.metadata-add-button`), implementing the same `focusBefore` protocol that
-Obsidian's built-in vim mode uses.
+Obsidian's built-in vim mode uses. Both `k` (`moveByLines`) and `gk`
+(`moveByDisplayLines`) check for `focusBefore` on the `findPosV` result.
 
 ### Widget-aware vertical navigation
 
