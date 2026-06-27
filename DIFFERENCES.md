@@ -349,6 +349,20 @@ When the forward scan reaches the end of the document and the computed
 fallback position is at or before the starting cursor on the same line,
 the original position is returned unchanged.
 
+### Idle key deprioritization for multi-key sequences
+
+**File**: `src/vim.js` — `commandDispatcher.matchCommand`
+
+`matchCommand` now returns `partial` instead of `full` when the only full
+match is an `idle` type entry and more-specific partial matches exist.
+The default keymap marks `<C-w>` as `idle` in normal mode (no-op) to
+prevent the insert-mode delete-word behavior from leaking. This blocked
+multi-key `<C-w>X` commands registered via `mapCommand` (e.g.
+`<C-w>v`, `<C-w>h`) because the idle full match consumed the prefix
+before the second keystroke arrived. With this fix, `<C-w>` defers to
+partial matches when sub-commands are registered, while still firing as
+idle when no sub-commands exist (preventing browser-level interception).
+
 ### Other fixes
 
 - `operators.indent`: Cursor at column 0 after `>>` / `<<` (was first non-blank)

@@ -1744,6 +1744,17 @@ export function initVim(CM) {
         }
         return {type: 'none'};
       }
+      // When the only full match is an idle placeholder and more-specific
+      // partial matches exist (e.g. <C-w>v, <C-w>h registered via
+      // mapCommand), defer to the partials so the multi-key sequence can
+      // complete.  The idle entry still fires when no partials exist,
+      // preventing the keystroke from propagating to the browser.
+      if (bestMatch.type === 'idle' && matches.partial.length) {
+        return {
+          type: 'partial',
+          expectLiteralNext: matches.partial.length == 1 && matches.partial[0].keys.slice(-11) == '<character>'
+        };
+      }
       if (bestMatch.keys.slice(-11) == '<character>' || bestMatch.keys.slice(-10) == '<register>') {
         var character = lastChar(keys);
         if (!character || character.length > 1) return {type: 'clear'};
