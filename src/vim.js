@@ -1119,6 +1119,17 @@ export function initVim(CM) {
     defineOperator: defineOperator,
     mapCommand: mapCommand,
     _mapCommand: _mapCommand,
+    removeMapCommand: function(keys) {
+      var found = false;
+      for (var i = defaultKeymap.length - 1; i >= 0; i--) {
+        if (defaultKeymap[i].keys == keys) {
+          defaultKeymap.splice(i, 1);
+          removeUsedKeys(keys);
+          found = true;
+        }
+      }
+      return found;
+    },
 
     defineRegister: defineRegister,
 

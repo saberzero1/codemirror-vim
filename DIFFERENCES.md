@@ -64,6 +64,22 @@ included alongside default bindings.
 
 Types `KeymapEntry` and `KeymapCompletion` added to `src/types.ts`.
 
+### `removeMapCommand` API
+
+**File**: `src/vim.js`
+
+Added `removeMapCommand(keys)` to the `vimApi` object. Removes all entries
+from the default keymap whose `keys` field matches the given string, and
+decrements the `usedKeys` counters accordingly. Returns `true` if at least
+one entry was removed, `false` otherwise.
+
+`Vim.unmap()` cannot remove entries created by `Vim.mapCommand()` because
+`unmap` checks the `context` field during iteration and `mapCommand` entries
+have no context. `removeMapCommand` provides a clean removal path for
+plugin-registered keymap entries (EasyMotion motions, leader-prefixed
+commands, etc.) that need to be cleaned up when the leader key changes or
+features are toggled.
+
 ### Async motion dispatch
 
 **Files**: `src/vim.js`, `src/types.ts`
