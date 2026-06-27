@@ -3443,7 +3443,7 @@ export function initVim(CM) {
       cm.operation(function() {
         cm.replaceRange(pair.close, to);
         cm.replaceRange(pair.open, from);
-        cm.setCursor(from.line, from.ch);
+        cm.setCursor(from.line, from.ch + pair.open.length);
       });
     }
   }

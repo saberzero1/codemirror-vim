@@ -466,6 +466,22 @@ stores selection dimensions in `_surroundSelOffset` for replay.
 Visual `S` replaces the previous `S` → `VdO` keyToKey in visual mode. `S` in
 visual mode now surrounds instead of substituting.
 
+### Cursor positioning after add-surround
+
+`addSurroundToRange` now positions the cursor on the first character of the
+inner text (`from.ch + pair.open.length`) instead of on the opening delimiter
+(`from.ch`). This fixes dot-repeat for visual surround: the replay
+reconstructs the selection range as `[cursor, cursor + savedOffset]`, so the
+cursor must start inside the delimiters for the offset to cover the original
+text. Without this fix, `viw S]` on `test` produces `[test]` with cursor on
+`[`; pressing `.` then surrounds `[tes` instead of `test`, yielding
+`[[tes]t]` instead of the expected `[[test]]`.
+
+The newline branch (`gS`, `yS`, `ySS`) is not affected — it replaces the
+entire range in a single `replaceRange` call and the cursor lands on the
+opening delimiter line, which is correct for multi-line output where the
+inner text starts on the next line.
+
 Supported targets: `"`, `'`, `` ` ``, `(`, `)`, `[`, `]`, `{`, `}`, `<`, `>`,
 `t` (tag), aliases `b`→`)`, `B`→`}`, `r`→`]`, `a`→`>`. Opening brackets add
 inner spaces; closing brackets don't. `<` in replacement position triggers tag
