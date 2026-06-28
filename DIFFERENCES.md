@@ -148,7 +148,10 @@ for recovery. Three API changes protect against accidental keymap corruption:
    skips entries with `_isDefault === true` unless called with
    `{ includeDefaults: true }` in the options argument. This prevents
    accidental removal of built-in keys like `j`, `gg`, `G` during plugin
-   lifecycle churn.
+   lifecycle churn. The public `Vim.unmap(lhs, ctx, options)` bridge
+   forwards the `options` parameter to `exCommandDispatcher.unmap()` so
+   callers can remove default bindings when needed (e.g. unmapping `,` to
+   allow multi-key sequences like `,,w` to accumulate as a prefix).
 
 2. **`Vim.resetKeymap()`**: New API method that rebuilds the `defaultKeymap`
    array from the frozen snapshot. User-defined mappings are preserved;

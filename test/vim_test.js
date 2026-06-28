@@ -6823,9 +6823,42 @@ testVim('unmap_gg_preserves_default', function(cm, vim, helpers) {
   helpers.assertCursorAt(0, 0);
 }, { value: 'line one\nline two\nline three' });
 
+testVim('unmap_without_includeDefaults_preserves_default_key', function(cm, vim, helpers) {
+  CodeMirror.Vim.unmap(',');
+  var keymap = CodeMirror.Vim.getKeymap();
+  var hasComma = keymap.some(function(k) { return k.keys === ','; });
+  is(hasComma);
+});
+
+testVim('unmap_includeDefaults_removes_default_key', function(cm, vim, helpers) {
+  var keymap = CodeMirror.Vim.getKeymap();
+  var hadComma = keymap.some(function(k) { return k.keys === ','; });
+  is(hadComma);
+  CodeMirror.Vim.unmap(',', undefined, { includeDefaults: true });
+  keymap = CodeMirror.Vim.getKeymap();
+  var hasComma = keymap.some(function(k) { return k.keys === ','; });
+  is(!hasComma);
+  CodeMirror.Vim.resetKeymap();
+});
+
+testVim('unmap_includeDefaults_enables_multikey_prefix', function(cm, vim, helpers) {
+  CodeMirror.Vim.unmap(',', undefined, { includeDefaults: true });
+  var triggered = false;
+  CodeMirror.Vim.defineAction('testCommaWord', function() {
+    triggered = true;
+  });
+  CodeMirror.Vim.mapCommand(',,w', 'action', 'testCommaWord', {});
+  helpers.doKeys(',', ',', 'w');
+  is(triggered);
+  CodeMirror.Vim.resetKeymap();
+});
+
 testVim('resetKeymap_restores_defaults_after_force_unmap', function(cm, vim, helpers) {
   CodeMirror.Vim.unmap('j', undefined, { includeDefaults: true });
   CodeMirror.Vim.unmap('gg', undefined, { includeDefaults: true });
+  var midKeymap = CodeMirror.Vim.getKeymap();
+  is(!midKeymap.some(function(k) { return k.keys === 'j'; }));
+  is(!midKeymap.some(function(k) { return k.keys === 'gg'; }));
   CodeMirror.Vim.resetKeymap();
   var afterReset = CodeMirror.Vim.getKeymap();
   var hasJ = afterReset.some(function(k) { return k.keys === 'j'; });

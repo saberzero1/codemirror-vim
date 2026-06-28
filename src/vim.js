@@ -934,9 +934,9 @@ export function initVim(CM) {
       // Add user defined key bindings.
       exCommandDispatcher.map(lhs, rhs, ctx);
     },
-    /**@type {(lhs: string, ctx: string) => any} */
-    unmap: function(lhs, ctx) {
-      return exCommandDispatcher.unmap(lhs, ctx);
+    /**@type {(lhs: string, ctx: string, options?: {includeDefaults?: boolean}) => any} */
+    unmap: function(lhs, ctx, options) {
+      return exCommandDispatcher.unmap(lhs, ctx, options);
     },
     // Non-recursive map function.
     // NOTE: This will not create mappings to key maps that aren't present
