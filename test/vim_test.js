@@ -6751,6 +6751,135 @@ testVim('async_motion_returns_anchor_head_pair', async function(cm, vim, helpers
   eq('heorld foo bar', cm.getValue());
 }, { value: 'hello world foo bar' });
 
+// --- Async motion generation tracking tests ---
+
+testVim('async_motion_superseded_by_sync_command', async function(cm, vim, helpers) {
+  var asyncResolved = false;
+  CodeMirror.Vim.defineMotion('testSlowMotion', function(cm, head) {
+    return new Promise(function(resolve) {
+      setTimeout(function() {
+        asyncResolved = true;
+        resolve(new Pos(head.line, head.ch + 10));
+      }, 100);
+    });
+  });
+  CodeMirror.Vim._mapCommand({
+    keys: 'g<Space>',
+    type: 'motion',
+    motion: 'testSlowMotion'
+  });
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', '<Space>');
+  helpers.doKeys('l');
+  await delay(200);
+  is(asyncResolved);
+  helpers.assertCursorAt(0, 1);
+}, { value: 'hello world foo bar' });
+
+testVim('async_delete_superseded_by_sync_command', async function(cm, vim, helpers) {
+  CodeMirror.Vim.defineMotion('testSlowDel', function(cm, head) {
+    return new Promise(function(resolve) {
+      setTimeout(function() {
+        resolve(new Pos(head.line, head.ch + 5));
+      }, 100);
+    });
+  });
+  CodeMirror.Vim._mapCommand({
+    keys: 'g<Space>',
+    type: 'motion',
+    motion: 'testSlowDel'
+  });
+  cm.setCursor(0, 0);
+  helpers.doKeys('d', 'g', '<Space>');
+  helpers.doKeys('l');
+  await delay(200);
+  eq('hello world foo bar', cm.getValue());
+}, { value: 'hello world foo bar' });
+
+// --- Keymap protection tests ---
+
+testVim('unmap_skips_default_keys', function(cm, vim, helpers) {
+  CodeMirror.Vim.unmap('j');
+  cm.setCursor(0, 0);
+  helpers.doKeys('j');
+  helpers.assertCursorAt(1, 0);
+}, { value: 'line one\nline two' });
+
+testVim('unmap_removes_user_mapping_preserves_default', function(cm, vim, helpers) {
+  CodeMirror.Vim.map('j', 'k');
+  cm.setCursor(1, 0);
+  helpers.doKeys('j');
+  helpers.assertCursorAt(0, 0);
+  CodeMirror.Vim.unmap('j');
+  cm.setCursor(0, 0);
+  helpers.doKeys('j');
+  helpers.assertCursorAt(1, 0);
+}, { value: 'line one\nline two' });
+
+testVim('unmap_gg_preserves_default', function(cm, vim, helpers) {
+  CodeMirror.Vim.unmap('gg');
+  cm.setCursor(2, 0);
+  helpers.doKeys('g', 'g');
+  helpers.assertCursorAt(0, 0);
+}, { value: 'line one\nline two\nline three' });
+
+testVim('resetKeymap_restores_defaults_after_force_unmap', function(cm, vim, helpers) {
+  CodeMirror.Vim.unmap('j', undefined, { includeDefaults: true });
+  CodeMirror.Vim.unmap('gg', undefined, { includeDefaults: true });
+  CodeMirror.Vim.resetKeymap();
+  var afterReset = CodeMirror.Vim.getKeymap();
+  var hasJ = afterReset.some(function(k) { return k.keys === 'j'; });
+  var hasGg = afterReset.some(function(k) { return k.keys === 'gg'; });
+  is(hasJ);
+  is(hasGg);
+  cm.setCursor(0, 0);
+  helpers.doKeys('j');
+  helpers.assertCursorAt(1, 0);
+}, { value: 'line one\nline two' });
+
+testVim('resetKeymap_preserves_user_mappings', function(cm, vim, helpers) {
+  CodeMirror.Vim.map('Q', 'j');
+  CodeMirror.Vim.resetKeymap();
+  var afterReset = CodeMirror.Vim.getKeymap();
+  var hasQ = afterReset.some(function(k) { return k.keys === 'Q' && k.toKeys === 'j'; });
+  is(hasQ);
+  cm.setCursor(0, 0);
+  helpers.doKeys('Q');
+  helpers.assertCursorAt(1, 0);
+}, { value: 'line one\nline two' });
+
+testVim('mapclear_preserves_defaults_with_isDefault', function(cm, vim, helpers) {
+  CodeMirror.Vim.map('Q', 'j');
+  CodeMirror.Vim.mapclear();
+  var keymap = CodeMirror.Vim.getKeymap();
+  var hasJ = keymap.some(function(k) { return k.keys === 'j'; });
+  var hasGg = keymap.some(function(k) { return k.keys === 'gg'; });
+  var hasQ = keymap.some(function(k) { return k.keys === 'Q'; });
+  is(hasJ);
+  is(hasGg);
+  is(!hasQ);
+  cm.setCursor(0, 0);
+  helpers.doKeys('j');
+  helpers.assertCursorAt(1, 0);
+}, { value: 'line one\nline two' });
+
+// --- leaveVimMode cleanup tests ---
+
+testVim('leaveVimMode_clears_input_state', function(cm, vim, helpers) {
+  helpers.doKeys('g');
+  var inputState = CodeMirror.Vim.getInputState(cm);
+  is(inputState.keyBuffer.length > 0);
+  CodeMirror.Vim.leaveVimMode(cm);
+  eq(null, cm.state.vim);
+}, { value: 'abc' });
+
+testVim('leaveVimMode_from_insert_mode', function(cm, vim, helpers) {
+  helpers.doKeys('i');
+  eq(true, vim.insertMode);
+  CodeMirror.Vim.leaveVimMode(cm);
+  eq(null, cm.state.vim);
+}, { value: 'abc' });
+
 // --- getKeymap() API tests ---
 
 testVim('getKeymap_returns_array', function(cm, vim, helpers) {

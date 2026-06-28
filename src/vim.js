@@ -266,6 +266,12 @@ export function initVim(CM) {
     // Ex command
     { keys: ':', type: 'ex' }
   ];
+  for (var _di = 0; _di < defaultKeymap.length; _di++) {
+    defaultKeymap[_di]._isDefault = true;
+  }
+  var DEFAULT_KEYMAP_SNAPSHOT = defaultKeymap.map(function(cmd) {
+    return Object.assign({}, cmd);
+  });
   var usedKeys = Object.create(null);
   var defaultKeymapLength = defaultKeymap.length;
 
@@ -335,6 +341,40 @@ export function initVim(CM) {
 
   /** @arg {CodeMirror} cm */
   function leaveVimMode(cm) {
+    var vim = cm.state.vim;
+
+    // Clean up insert-mode listeners if active — enterInsertMode registers
+    // 'change' and 'keydown' listeners that exitInsertMode normally removes.
+    // leaveVimMode can be called without going through exitInsertMode (e.g.
+    // when the editor is destroyed while in insert mode), so remove them here.
+    if (vim && vim.insertMode) {
+      if (!vimGlobalState.macroModeState.isPlaying) {
+        cm.off('change', onChange);
+        if (vim.insertEnd) vim.insertEnd.clear();
+        vim.insertEnd = undefined;
+        CM.off(cm.getInputField(), 'keydown', onKeyEventTargetKeyDown);
+      }
+    }
+
+    // Clear the global insert-mode key timer — it holds a closure over cm
+    // and could fire after the editor is destroyed.
+    if (lastInsertModeKeyTimer) {
+      window.clearTimeout(lastInsertModeKeyTimer);
+      lastInsertModeKeyTimer = undefined;
+    }
+
+    // Clear virtual prompt if active.
+    if (virtualPrompt) {
+      virtualPrompt = null;
+    }
+
+    // Reset input state before nulling vim — clears keyBuffer, pending
+    // operator, motion, etc.
+    if (vim) {
+      vim.inputState = new InputState();
+      vim.expectLiteralNext = false;
+    }
+
     cm.setOption('disableInput', false);
     cm.off('cursorActivity', onCursorActivity);
     // @ts-ignore
@@ -743,6 +783,7 @@ export function initVim(CM) {
         // in terms of langmaps.
         expectLiteralNext: false,
         status: "",
+        _commandGeneration: 0,
       };
     }
     return cm.state.vim;
@@ -825,6 +866,31 @@ export function initVim(CM) {
     // Testing hook.
     resetVimGlobalState_: resetVimGlobalState,
 
+    clearInputState: clearInputState,
+
+    resetKeymap: function() {
+      var userMappings = [];
+      for (var i = 0; i < defaultKeymap.length; i++) {
+        if (!defaultKeymap[i]._isDefault) {
+          userMappings.push(defaultKeymap[i]);
+        }
+      }
+      defaultKeymap.length = 0;
+      for (var i = 0; i < userMappings.length; i++) {
+        defaultKeymap.push(userMappings[i]);
+      }
+      for (var i = 0; i < DEFAULT_KEYMAP_SNAPSHOT.length; i++) {
+        var copy = Object.assign({}, DEFAULT_KEYMAP_SNAPSHOT[i]);
+        copy._isDefault = true;
+        defaultKeymap.push(copy);
+      }
+      usedKeys = Object.create(null);
+      for (var i = 0; i < defaultKeymap.length; i++) {
+        if (defaultKeymap[i].keys) addUsedKeys(defaultKeymap[i].keys);
+      }
+      defaultKeymapLength = DEFAULT_KEYMAP_SNAPSHOT.length;
+    },
+
     // Testing hook.
     getVimGlobalState_: function() {
       return vimGlobalState;
@@ -882,22 +948,26 @@ export function initVim(CM) {
     // Remove all user-defined mappings for the provided context.
     /**@arg {string} [ctx]} */
     mapclear: function(ctx) {
-      // Partition the existing keymap into user-defined and true defaults.
-      var actualLength = defaultKeymap.length,
-          origLength = defaultKeymapLength;
-      var userKeymap = defaultKeymap.slice(0, actualLength - origLength);
-      defaultKeymap = defaultKeymap.slice(actualLength - origLength);
+      var defaults = [];
+      var userMappings = [];
+      for (var i = 0; i < defaultKeymap.length; i++) {
+        if (defaultKeymap[i]._isDefault) {
+          defaults.push(defaultKeymap[i]);
+        } else {
+          userMappings.push(defaultKeymap[i]);
+        }
+      }
+      defaultKeymap.length = 0;
+      for (var i = 0; i < defaults.length; i++) {
+        defaultKeymap.push(defaults[i]);
+      }
       if (ctx) {
-        // If a specific context is being cleared, we need to keep mappings
-        // from all other contexts.
-        for (var i = userKeymap.length - 1; i >= 0; i--) {
-          var mapping = userKeymap[i];
+        for (var i = userMappings.length - 1; i >= 0; i--) {
+          var mapping = userMappings[i];
           if (ctx !== mapping.context) {
             if (mapping.context) {
               this._mapCommand(mapping);
             } else {
-              // `mapping` applies to all contexts so create keymap copies
-              // for each context except the one being cleared.
               var contexts = ['normal', 'insert', 'visual'];
               for (var j in contexts) {
                 if (contexts[j] !== ctx) {
@@ -909,6 +979,10 @@ export function initVim(CM) {
             }
           }
         }
+      }
+      usedKeys = Object.create(null);
+      for (var i = 0; i < defaultKeymap.length; i++) {
+        if (defaultKeymap[i].keys) addUsedKeys(defaultKeymap[i].keys);
       }
     },
     langmap: updateLangmap,
@@ -1490,6 +1564,9 @@ export function initVim(CM) {
   function clearInputState(cm, reason) {
     cm.state.vim.inputState = new InputState();
     cm.state.vim.expectLiteralNext = false;
+    if (typeof cm.state.vim._commandGeneration === 'number') {
+      cm.state.vim._commandGeneration++;
+    }
     CM.signal(cm, 'vim-command-done', reason);
   }
 
@@ -2187,6 +2264,7 @@ export function initVim(CM) {
             inputState.selectedCharacter;
       }
       motionArgs.repeat = repeat;
+      var preDispatchGeneration = vim._commandGeneration;
       clearInputState(cm);
       if (motion) {
         var motionResultRaw = motions[motion](cm, origHead, motionArgs, vim, inputState);
@@ -2194,6 +2272,7 @@ export function initVim(CM) {
 
         if (motionResultRaw && typeof (/** @type {any} */ (motionResultRaw)).then === 'function') {
           var asyncResult = /** @type {Promise<import("./types").Pos|[import("./types").Pos,import("./types").Pos]|null>} */ (motionResultRaw);
+          var savedGeneration = preDispatchGeneration;
           var savedOperator = operator;
           var savedOperatorArgs = operatorArgs;
           var savedMotionArgs = motionArgs;
@@ -2206,6 +2285,7 @@ export function initVim(CM) {
           var dispatcher = this;
           asyncResult.then(function(resolvedResult) {
             if (!resolvedResult || !cm.state.vim) return;
+            if (cm.state.vim._commandGeneration !== savedGeneration + 1) return;
             var rNewHead, rNewAnchor;
             if (resolvedResult instanceof Array) {
               rNewAnchor = resolvedResult[0];
@@ -2238,7 +2318,9 @@ export function initVim(CM) {
               cm.setCursor(rNewHead.line, rNewHead.ch);
             }
           }).catch(function() {
-            clearInputState(cm);
+            if (cm.state.vim && cm.state.vim._commandGeneration === savedGeneration + 1) {
+              clearInputState(cm);
+            }
           });
           return;
         }
@@ -6976,8 +7058,9 @@ export function initVim(CM) {
         _mapCommand(mapping);
       }
     }
-    /**@type {(lhs: string, ctx: string) => boolean|void} */
-    unmap(lhs, ctx) {
+    /**@type {(lhs: string, ctx: string, options?: {includeDefaults?: boolean}) => boolean|void} */
+    unmap(lhs, ctx, options) {
+      var includeDefaults = options && options.includeDefaults;
       if (lhs != ':' && lhs.charAt(0) == ':') {
         // Ex to Ex or Ex to key mapping
         if (ctx) { throw Error('Mode not supported for ex mappings'); }
@@ -6992,6 +7075,9 @@ export function initVim(CM) {
         for (var i = 0; i < defaultKeymap.length; i++) {
           if (keys == defaultKeymap[i].keys
               && defaultKeymap[i].context === ctx) {
+            if (defaultKeymap[i]._isDefault && !includeDefaults) {
+              continue;
+            }
             defaultKeymap.splice(i, 1);
             removeUsedKeys(keys);
             return true;
@@ -7835,6 +7921,9 @@ export function initVim(CM) {
 
   /** @arg {vimKey} command*/
   function _mapCommand(command) {
+    if (!command.hasOwnProperty('_isDefault')) {
+      command._isDefault = false;
+    }
     defaultKeymap.unshift(command);
     if (command.keys) addUsedKeys(command.keys);
   }

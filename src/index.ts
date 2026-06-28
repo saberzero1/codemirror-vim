@@ -57,6 +57,7 @@ const vimPlugin = ViewPlugin.fromClass(
     public status = "";
     blockCursor: BlockCursorPlugin;
     _escapeHandler: ((e: KeyboardEvent) => void) | null = null;
+    _blurHandler: (() => void) | null = null;
     constructor(view: EditorView) {
       this.view = view as EditorViewExtended;
       const cm = (this.cm = new CodeMirror(view));
@@ -91,6 +92,19 @@ const vimPlugin = ViewPlugin.fromClass(
         }
       };
       view.dom.ownerDocument.addEventListener("keydown", this._escapeHandler, true);
+
+      // Reset partial key sequences (e.g. a buffered 'g') on blur to prevent
+      // stale prefixes from combining with later keystrokes after refocus.
+      this._blurHandler = () => {
+        const vim = this.cm.state.vim;
+        if (!vim || vim.insertMode) return;
+        if (vim.inputState && vim.inputState.keyBuffer.length > 0) {
+          Vim.clearInputState(this.cm as any, 'blur');
+          vim.status = "";
+          this.updateStatus();
+        }
+      };
+      view.contentDOM.addEventListener("blur", this._blurHandler);
 
       this.cm.on("vim-command-done", () => {
         if (cm.state.vim) cm.state.vim.status = "";
@@ -202,6 +216,10 @@ const vimPlugin = ViewPlugin.fromClass(
       if (this._escapeHandler) {
         this.view.dom.ownerDocument.removeEventListener("keydown", this._escapeHandler, true);
         this._escapeHandler = null;
+      }
+      if (this._blurHandler) {
+        this.view.contentDOM.removeEventListener("blur", this._blurHandler);
+        this._blurHandler = null;
       }
       Vim.leaveVimMode(this.cm);
       this.updateClass();

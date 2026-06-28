@@ -42,6 +42,7 @@ export type vimState = {
     expectLiteralNext?: boolean,
     cursorShapes?: import("./block-cursor").CursorShapeConfig,
     surroundInsertClose?: string,
+    _commandGeneration: number,
     surroundState?: {
         type: string,
         target?: string,
@@ -271,6 +272,7 @@ type allCommands = {
     repeatOverride?: number,
     noremap?: boolean,
     operatorPending?: boolean,
+    _isDefault?: boolean,
 }
 export type motionCommand = allCommands & {
     type: 'motion',

@@ -90,6 +90,89 @@ Visual mode is properly handled in the async path — selection head/anchor and
 marks are updated when an async motion resolves during visual mode. `MotionFn`
 return type widened to include `Promise<Pos|[Pos,Pos]|null>`.
 
+### Async motion generation tracking
+
+**File**: `src/vim.js`
+
+Async motion callbacks now validate a `_commandGeneration` counter to reject
+stale resolutions. The counter lives on `cm.state.vim` and is incremented by
+`clearInputState()`. Before dispatching an async motion, `evalInput` captures
+the pre-increment generation. The `.then()` callback checks that the current
+generation equals `savedGeneration + 1` — if another command ran in between
+(incrementing the counter further), the callback exits without modifying
+cursor or content. The `.catch()` path applies the same guard before clearing
+input state.
+
+This prevents a race where an async motion (e.g. EasyMotion overlay) resolves
+after the user has already issued another command, which would otherwise apply
+the old operator to the new cursor position.
+
+### Blur handler for partial key prefix reset
+
+**File**: `src/index.ts`
+
+The CM6 ViewPlugin registers a `blur` event listener on `view.contentDOM` that
+resets partial normal-mode key sequences when the editor loses focus. Without
+this, a buffered prefix like `g` persists indefinitely — when the user refocuses
+and types `G`, the stale `g` + `G` = `gG` produces a no-match, and the `G`
+keystroke is swallowed. The blur handler calls `Vim.clearInputState()` and
+clears `vim.status` so the chord display also resets. Insert mode is excluded
+(partial sequences like `jk` escape should not be disrupted by transient blur).
+Cleaned up in `destroy()`.
+
+### `leaveVimMode` cleanup hardening
+
+**File**: `src/vim.js`
+
+`leaveVimMode()` now performs comprehensive cleanup before nulling
+`cm.state.vim`:
+
+- Removes insert-mode `change` and `keydown` listeners if the editor was in
+  insert mode (these are normally removed by `exitInsertMode()`, but
+  `leaveVimMode` can be called without going through that path — e.g. when
+  the CM6 ViewPlugin `destroy()` fires while in insert mode)
+- Clears the global `lastInsertModeKeyTimer` (prevents stale timer callbacks
+  from firing against a destroyed editor)
+- Clears `virtualPrompt` (prevents dangling prompt state)
+- Resets `vim.inputState` (clears any pending key prefix, operator, or motion)
+
+### Default keymap protection
+
+**Files**: `src/vim.js`, `src/types.ts`
+
+Default keymap entries are tagged with `_isDefault: true` at module
+initialization and a frozen snapshot (`DEFAULT_KEYMAP_SNAPSHOT`) is stored
+for recovery. Three API changes protect against accidental keymap corruption:
+
+1. **`unmap()` skips defaults**: The `exCommandDispatcher.unmap()` method now
+   skips entries with `_isDefault === true` unless called with
+   `{ includeDefaults: true }` in the options argument. This prevents
+   accidental removal of built-in keys like `j`, `gg`, `G` during plugin
+   lifecycle churn.
+
+2. **`Vim.resetKeymap()`**: New API method that rebuilds the `defaultKeymap`
+   array from the frozen snapshot. User-defined mappings are preserved;
+   defaults are restored from fresh copies. `usedKeys` is rebuilt from
+   scratch and `defaultKeymapLength` is recalibrated. Intended for host
+   environments (Obsidian) where the module-level singleton survives
+   plugin enable/disable cycles.
+
+3. **`mapclear()` uses `_isDefault` flag**: Instead of relying on the
+   `defaultKeymapLength` index (fragile if other code splices the array),
+   `mapclear()` now partitions entries by the `_isDefault` flag.
+   `usedKeys` is rebuilt after clearing.
+
+`_mapCommand()` marks new entries as `_isDefault: false` to distinguish
+user-defined mappings from defaults.
+
+### `clearInputState` API exposure
+
+**File**: `src/vim.js`
+
+`clearInputState(cm, reason?)` is now exposed on the `vimApi` object.
+Previously private, it is needed by the blur handler in `src/index.ts` and
+by host plugins that need to reset pending key state (e.g. on pane switch).
+
 ### Neovim golden comparison infrastructure
 
 **Files**: `test/neovim/`
@@ -532,8 +615,9 @@ replacement position triggers function wrapping.
 - `OperatorArgs`: Added `cursorCol?: number`, `surroundNewline?: boolean`, `surroundCharRepeat?: number`
 - `InputStateInterface`: Added `_surroundReplacement`, `_surroundSelOffset`, `_surroundNewline`
 - `SurroundReplacementSpec`: Union type for tag and function specs
-- `vimState`: Added `surroundInsertClose?: string`
+- `vimState`: Added `surroundInsertClose?: string`, `_commandGeneration: number`
 - `surroundState`: Added `tagResult`, `from`, `to`, `newline`, `count`, `charRepeat`, `pendingInput`
+- `allCommands`: Added `_isDefault?: boolean`
 - `moveByLines` return: `Pos | null`
 - `moveByWords` return: `Pos | null | undefined`
 - `MotionFn` return: Widened to include `Promise` variants
