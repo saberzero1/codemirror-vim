@@ -624,7 +624,12 @@ export class CodeMirror {
           if (doc.line(i).text === '---') { fmEnd = i; break; }
         }
         const movedIntoFrontmatter = fmEnd > 0 && pos.line + 1 <= fmEnd;
-        const stuckAtBoundary = fmEnd > 0 && pos.line === start.line && start.line + 1 === fmEnd + 1;
+        // "Stuck" means the cursor truly couldn't move — same character offset.
+        // On a wrapped line, moveVertically may move to a different display line
+        // within the same document line (range.head changes but pos.line doesn't).
+        // That is NOT stuck — the cursor navigated a visual line of wrapped text.
+        const stuckAtBoundary = fmEnd > 0 && pos.line === start.line && start.line + 1 === fmEnd + 1
+            && range.head === startOffset;
         if (movedIntoFrontmatter || stuckAtBoundary) {
           const container = cm6.dom.closest('.markdown-source-view');
           const focusTarget = (

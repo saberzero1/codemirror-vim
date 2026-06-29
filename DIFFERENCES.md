@@ -236,7 +236,13 @@ the frontmatter properties widget. Two cases trigger `focusBefore`:
 2. **Stuck at boundary**: `moveVertically` can't move up because the
    properties widget replaces the frontmatter lines, so the cursor stays on
    the first content line right after the closing `---`
-   (`pos.line === start.line && start.line + 1 === fmEnd + 1`).
+   (`pos.line === start.line && start.line + 1 === fmEnd + 1`) **and** the
+   cursor offset truly didn't change (`range.head === startOffset`). The
+   offset check distinguishes "cursor moved to a higher display line within
+   a wrapped line" (different offset, same doc line) from "cursor is truly
+   stuck" (identical offset). Without this guard, `gk` on a long wrapped
+   first content line would fire `focusBefore` immediately instead of
+   navigating through the wrapped display lines first.
 
 In both cases, a `focusBefore` callback is attached to the result position.
 The callback queries the DOM for Obsidian's metadata container
