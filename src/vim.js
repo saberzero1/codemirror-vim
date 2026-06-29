@@ -1195,6 +1195,7 @@ export function initVim(CM) {
     mapCommand: mapCommand,
     _mapCommand: _mapCommand,
     removeMapCommand: function(keys) {
+      keys = normalizeKeyString(keys);
       var found = false;
       for (var i = defaultKeymap.length - 1; i >= 0; i--) {
         if (defaultKeymap[i].keys == keys) {
@@ -7072,7 +7073,6 @@ export function initVim(CM) {
     unmap(lhs, ctx, options) {
       var includeDefaults = options && options.includeDefaults;
       if (lhs != ':' && lhs.charAt(0) == ':') {
-        // Ex to Ex or Ex to key mapping
         if (ctx) { throw Error('Mode not supported for ex mappings'); }
         var commandName = lhs.substring(1);
         if (this.commandMap_[commandName] && this.commandMap_[commandName].user) {
@@ -7080,8 +7080,7 @@ export function initVim(CM) {
           return true;
         }
       } else {
-        // Key to Ex or key to key mapping
-        var keys = lhs;
+        var keys = normalizeKeyString(lhs);
         for (var i = 0; i < defaultKeymap.length; i++) {
           if (keys == defaultKeymap[i].keys
               && defaultKeymap[i].context === ctx) {
@@ -7929,11 +7928,20 @@ export function initVim(CM) {
     actions.enterInsertMode(cm, {}, cm.state.vim);
   }
 
+  /** @arg {string} keys  @returns {string} */
+  function normalizeKeyString(keys) {
+    return keys.replace(/<[^>]+>|( )/g, function(m, literalSpace) {
+      return literalSpace ? '<Space>' : m;
+    });
+  }
+
   /** @arg {vimKey} command*/
   function _mapCommand(command) {
     if (!command.hasOwnProperty('_isDefault')) {
       command._isDefault = false;
     }
+    if (command.keys) command.keys = normalizeKeyString(command.keys);
+    if ('toKeys' in command && command.toKeys) command.toKeys = normalizeKeyString(command.toKeys);
     defaultKeymap.unshift(command);
     if (command.keys) addUsedKeys(command.keys);
   }

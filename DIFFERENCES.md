@@ -90,6 +90,31 @@ plugin-registered keymap entries (EasyMotion motions, leader-prefixed
 commands, etc.) that need to be cleaned up when the leader key changes or
 features are toggled.
 
+### Key string normalization for `map`/`mapCommand`
+
+**File**: `src/vim.js`
+
+Added `normalizeKeyString(keys)` which converts literal special characters in
+key sequence strings to the angle-bracket notation that `vimKeyFromEvent`
+produces. Currently only space (`' '` → `'<Space>'`) is affected — it is the
+only printable character in the `specialKey` map. Existing angle-bracket
+groups (e.g. `<C-Space>`, `<S-Space>`) are preserved.
+
+`_mapCommand` now normalizes both `command.keys` and `command.toKeys` before
+inserting into the keymap. `ExCommandDispatcher.unmap()` and
+`removeMapCommand()` normalize the lookup key before comparison.
+
+This fixes the mismatch where `Vim.map(' j', 'gj')` stored `keys: ' j'` but
+`vimKeyFromEvent` produced `'<Space>'` on key press, causing `commandMatch`
+to never find the mapping. With normalization, the stored key becomes
+`'<Space>j'`, matching the dispatched key. The default keymap already uses
+`<Space>` notation (e.g. `{ keys: '<Space>', toKeys: 'l' }`), so
+normalization is a no-op for built-in entries.
+
+Callers of `Vim.map()`, `Vim.mapCommand()`, `Vim.noremap()`,
+`Vim.unmap()`, and `Vim.removeMapCommand()` can now use either literal
+space or `<Space>` — both resolve to the same keymap entry.
+
 ### Async motion dispatch
 
 **Files**: `src/vim.js`, `src/types.ts`
