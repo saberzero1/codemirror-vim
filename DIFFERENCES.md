@@ -64,6 +64,16 @@ included alongside default bindings.
 
 Types `KeymapEntry` and `KeymapCompletion` added to `src/types.ts`.
 
+### `getAction` API
+
+**File**: `src/vim.js`
+
+Added `getAction(name)` to the `vimApi` object. Returns the current action
+function registered under the given name, or `undefined` if no action exists
+with that name. This enables the save/restore pattern for action overrides:
+a host plugin can capture the original built-in action before replacing it
+via `defineAction()`, and restore it on unload.
+
 ### `removeMapCommand` API
 
 **File**: `src/vim.js`

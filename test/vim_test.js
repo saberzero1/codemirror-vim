@@ -4978,6 +4978,36 @@ testVim('api_enterInsertMode', function(cm, vim, helpers) {
   helpers.doKeys('<Esc>');
   is(!vim.insertMode);
 });
+testVim('api_getAction_returns_builtin', function(cm, vim, helpers) {
+  var action = CodeMirror.Vim.getAction('newLineAndEnterInsertMode');
+  is(action);
+  is(typeof action === 'function');
+});
+testVim('api_getAction_returns_user_defined', function(cm, vim, helpers) {
+  var called = false;
+  CodeMirror.Vim.defineAction('testGetAction', function() {
+    called = true;
+  });
+  var action = CodeMirror.Vim.getAction('testGetAction');
+  is(action);
+  is(typeof action === 'function');
+  action(cm, {}, vim);
+  is(called);
+});
+testVim('api_getAction_returns_undefined_for_missing', function(cm, vim, helpers) {
+  var action = CodeMirror.Vim.getAction('nonExistentAction');
+  is(!action);
+});
+testVim('api_getAction_reflects_override', function(cm, vim, helpers) {
+  var original = CodeMirror.Vim.getAction('newLineAndEnterInsertMode');
+  is(original);
+  var replacement = function() {};
+  CodeMirror.Vim.defineAction('newLineAndEnterInsertMode', replacement);
+  var after = CodeMirror.Vim.getAction('newLineAndEnterInsertMode');
+  eq(after, replacement);
+  // Restore original
+  CodeMirror.Vim.defineAction('newLineAndEnterInsertMode', original);
+});
 testVim('ex_set_callback', function(cm, vim, helpers) {
   var global;
 

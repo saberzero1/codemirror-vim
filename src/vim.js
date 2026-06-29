@@ -1190,6 +1190,7 @@ export function initVim(CM) {
 
     defineMotion: defineMotion,
     defineAction: defineAction,
+    getAction: function(name) { return actions[name]; },
     defineOperator: defineOperator,
     mapCommand: mapCommand,
     _mapCommand: _mapCommand,
