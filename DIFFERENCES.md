@@ -251,6 +251,14 @@ The callback queries the DOM for Obsidian's metadata container
 Obsidian's built-in vim mode uses. Both `k` (`moveByLines`) and `gk`
 (`moveByDisplayLines`) check for `focusBefore` on the `findPosV` result.
 
+### Frontmatter-aware `O` (open line above)
+
+**File**: `src/vim.js`
+
+`newLineAndEnterInsertMode` (the `O` command) has a special case for inserting a newline before the first line of the document. In Obsidian, when YAML frontmatter is present (`---\n…\n---`), the properties UI hides those lines but the CodeMirror document still contains them. The original check `insertAt.line === cm.firstLine()` was always false when frontmatter was present (cursor on line 3+, firstLine is 0), causing `O` to insert at the end of the previous line — which fell inside the frontmatter region.
+
+The fix scans past `---`-delimited frontmatter to find the first editable line and uses `insertAt.line <= firstEditable` as the boundary check. The insertion point uses `{ line: insertAt.line, ch: 0 }` instead of hardcoded `cm.firstLine()`. Documents without frontmatter are unaffected.
+
 ### Widget-aware vertical navigation
 
 **File**: `src/cm_adapter.ts`

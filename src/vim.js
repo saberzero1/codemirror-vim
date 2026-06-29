@@ -4130,10 +4130,19 @@ export function initVim(CM) {
     newLineAndEnterInsertMode: function(cm, actionArgs, vim) {
       vim.insertMode = true;
       var insertAt = copyCursor(cm.getCursor());
-      if (insertAt.line === cm.firstLine() && !actionArgs.after) {
-        // Special case for inserting newline before start of document.
-        cm.replaceRange('\n', new Pos(cm.firstLine(), 0));
-        cm.setCursor(cm.firstLine(), 0);
+      // Determine the first editable line, skipping YAML frontmatter.
+      // Obsidian's properties UI hides frontmatter but the document
+      // still contains those lines — O on the first content line must
+      // not insert into the frontmatter region.
+      var firstEditable = cm.firstLine();
+      if (cm.getLine(firstEditable) === '---') {
+        for (var fi = firstEditable + 1; fi <= cm.lastLine(); fi++) {
+          if (cm.getLine(fi) === '---') { firstEditable = fi + 1; break; }
+        }
+      }
+      if (insertAt.line <= firstEditable && !actionArgs.after) {
+        cm.replaceRange('\n', new Pos(insertAt.line, 0));
+        cm.setCursor(insertAt.line, 0);
       } else {
         insertAt.line = (actionArgs.after) ? insertAt.line :
             insertAt.line - 1;
