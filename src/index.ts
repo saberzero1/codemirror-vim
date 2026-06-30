@@ -12,6 +12,7 @@ import {
   PluginValue,
   ViewUpdate,
   Decoration,
+  type DecorationSet,
   EditorView,
   showPanel,
   Panel,
@@ -44,6 +45,10 @@ const vimStyle = EditorView.baseTheme({
 
   "&light .cm-searchMatch": { backgroundColor: "#ffff0054" },
   "&dark .cm-searchMatch": { backgroundColor: "#00ffff8a" },
+
+  ".cm-vim-linewise-selection": { backgroundColor: "Highlight", color: "HighlightText" },
+  "&light .cm-vim-linewise-selection": { backgroundColor: "rgba(0, 100, 200, 0.2)" },
+  "&dark .cm-vim-linewise-selection": { backgroundColor: "rgba(100, 180, 255, 0.2)" },
 });
 type EditorViewExtended = EditorView & { cm: CodeMirror };
 
@@ -487,6 +492,40 @@ function statusPanel(view: EditorView): Panel {
   return { dom };
 }
 
+const linewiseSelMark = Decoration.line({ class: "cm-vim-linewise-selection" });
+
+const linewiseVisualHighlight = ViewPlugin.fromClass(class {
+  decorations: DecorationSet = Decoration.none;
+  constructor(view: EditorView) {
+    this.decorations = this.build(view);
+  }
+  update(update: ViewUpdate) {
+    if (update.docChanged || update.selectionSet || update.viewportChanged) {
+      this.decorations = this.build(update.view);
+    }
+  }
+  build(view: EditorView): DecorationSet {
+    const cm = (view as EditorViewExtended).cm;
+    if (!cm?.state?.vim) return Decoration.none;
+    const vim = cm.state.vim;
+    if (!vim.visualMode || !vim.visualLine) return Decoration.none;
+    const sel = vim.sel;
+    if (!sel) return Decoration.none;
+    const startLine = Math.min(sel.anchor.line, sel.head.line);
+    const endLine = Math.max(sel.anchor.line, sel.head.line);
+    const doc = view.state.doc;
+    const builder = new RangeSetBuilder<Decoration>();
+    for (let i = startLine; i <= endLine; i++) {
+      const lineNum = i + 1;
+      if (lineNum > doc.lines) break;
+      builder.add(doc.line(lineNum).from, doc.line(lineNum).from, linewiseSelMark);
+    }
+    return builder.finish();
+  }
+}, {
+  decorations: (v) => v.decorations,
+});
+
 export function vim(options: { status?: boolean; cursorShapes?: import("./block-cursor").CursorShapeConfig } = {}): Extension {
   if (options.cursorShapes) {
     initialCursorShapes = options.cursorShapes;
@@ -495,6 +534,7 @@ export function vim(options: { status?: boolean; cursorShapes?: import("./block-
     vimStyle,
     vimPlugin,
     hideNativeSelection,
+    linewiseVisualHighlight,
     options.status ? showPanel.of(statusPanel) : vimPanelState,
   ];
 }

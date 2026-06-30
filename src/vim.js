@@ -2459,7 +2459,7 @@ export function initVim(CM) {
         cmSel = makeCmSelection(cm, {
           anchor: newPositions.start,
           head: newPositions.end
-        }, mode);
+        }, mode, true);
         if (linewise) {
           var ranges = cmSel.ranges;
           if (mode == 'block') {
@@ -3151,14 +3151,18 @@ export function initVim(CM) {
       // In visual mode, n> shifts the selection right n times, instead of
       // shifting n lines right once.
       var repeat = vim.visualMode ? args.repeat || 1 : 1;
+      var sw = getOption('shiftwidth', cm);
+      var et = getOption('expandtab', cm);
+      var tabSize = cm.getOption('tabSize');
+      var indentSize = (typeof sw === 'number' && sw > 0) ? sw : tabSize;
+      var useSpaces = (typeof et === 'boolean') ? et : !cm.getOption('indentWithTabs');
+      var indentStr = useSpaces ? ' '.repeat(indentSize) : '\t';
       if (vim.visualBlock) {
-        var tabSize = cm.getOption('tabSize');
-        var indent = cm.getOption('indentWithTabs') ? '\t' : ' '.repeat(tabSize);
         var cursor;
         for (var i = ranges.length - 1; i >= 0; i--) {
           cursor = cursorMin(ranges[i].anchor, ranges[i].head);
           if (args.indentRight) {
-            cm.replaceRange(indent.repeat(repeat), cursor, cursor);
+            cm.replaceRange(indentStr.repeat(repeat), cursor, cursor);
           } else {
             var text = cm.getLine(cursor.line);
             var end = 0;
@@ -3168,7 +3172,7 @@ export function initVim(CM) {
                 end++;
               } else if (ch == ' ') {
                 end++;
-                for (var k = 1; k < indent.length; k++) {
+                for (var k = 1; k < indentSize; k++) {
                   ch = text[cursor.ch + end];
                   if (ch !== ' ') break;
                   end++;
@@ -3199,7 +3203,20 @@ export function initVim(CM) {
         }
         for (var i = startLine; i <= endLine; i++) {
           for (var j = 0; j < repeat; j++) {
-            cm.indentLine(i, args.indentRight);
+            if (args.indentRight) {
+              cm.replaceRange(indentStr, new Pos(i, 0), new Pos(i, 0));
+            } else {
+              var lineText = cm.getLine(i);
+              var removeCount = 0;
+              for (var c = 0; c < indentSize && c < lineText.length; c++) {
+                if (lineText[c] === ' ') removeCount++;
+                else if (lineText[c] === '\t') { removeCount++; break; }
+                else break;
+              }
+              if (removeCount > 0) {
+                cm.replaceRange('', new Pos(i, 0), new Pos(i, removeCount));
+              }
+            }
           }
         }
       }
@@ -5069,15 +5086,14 @@ export function initVim(CM) {
     } else if (mode == 'line') {
       if (!cursorIsBefore(sel.head, sel.anchor)) {
         anchor.ch = 0;
-
         var lastLine = cm.lastLine();
         if (head.line > lastLine) {
           head.line = lastLine;
         }
-        head.ch = lineLength(cm, head.line);
+        head.ch = exclusive ? lineLength(cm, head.line) : 0;
       } else {
         head.ch = 0;
-        anchor.ch = lineLength(cm, anchor.line);
+        anchor.ch = exclusive ? lineLength(cm, anchor.line) : 0;
       }
       return {
         ranges: [{anchor: anchor, head: head}],

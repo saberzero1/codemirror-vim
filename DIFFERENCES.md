@@ -544,6 +544,66 @@ idle when no sub-commands exist (preventing browser-level interception).
 - Golden recorder: `redraw` after `setCursor` prevents stale Neovim state in recordings
 - Golden recorder: `set columns=80 lines=24` viewport simulation for accurate display-line motion recording
 
+### `scanForBracket` string and comment awareness
+
+**File**: `src/cm_adapter.ts` — `scanForBracket()`
+
+The `%` motion's fallback bracket scanner now calls `getTokenTypeAt()` for
+each bracket candidate and skips any bracket inside a `"string"` or
+`"comment"` token. Previously, `scanForBracket` did purely positional stack
+counting — if a closing bracket appeared inside a string literal before the
+actual match, `%` would jump to the wrong position. The forward-seek in
+`moveToMatchedSymbol` (vim.js) already had string-awareness for the initial
+bracket search; this extends the same protection to the matching phase.
+
+Note: in Markdown mode, Lezer does not classify double-quoted text as string
+tokens, so this fix primarily benefits languages with proper syntax trees
+(JavaScript, TypeScript, etc.). The Markdown `%` deviation for quoted
+brackets remains as a Lezer parser limitation.
+
+### Indent operator respects `shiftwidth` and `expandtab`
+
+**File**: `src/vim.js` — `operators.indent`
+
+The `>>` / `<<` indent operator now reads the vim options `shiftwidth` and
+`expandtab` (via `getOption()`) before falling back to CM6's `tabSize` and
+`indentWithTabs` options. When a host plugin defines these vim options (e.g.
+via `Vim.defineOption('shiftwidth', 4, 'number')` and `set shiftwidth=2` in
+a vimrc), the indent operator uses them for both the visual-block path and
+the line-by-line fallback path. When the options are not defined, the
+operator falls back to the previous behavior using CM6's native settings.
+
+The `cm.indentMore()` / `cm.indentLess()` CM6 API path is preserved as the
+primary non-block path when available; the manual `replaceRange` fallback
+uses the vim-aware indent string.
+
+### Linewise visual cursor positioning
+
+**Files**: `src/vim.js` — `makeCmSelection`, `src/index.ts` — `linewiseVisualHighlight`
+
+`V` (linewise visual mode) now positions the cursor at column 0 of the head
+line, matching Neovim. Previously, CM6's exclusive selection model required
+setting `head.ch = lineLength(line)` to include the full line in the
+selection range, which caused the cursor to appear at the end of the line.
+
+The fix uses two mechanisms:
+
+1. `makeCmSelection` in `'line'` mode now sets `head.ch = 0` when the
+   `exclusive` parameter is falsy (the display path via `updateCmSelection`).
+   When `exclusive` is truthy (the operator path), the old
+   `head.ch = lineLength(...)` behavior is preserved so operators continue
+   to receive correct full-line ranges.
+
+2. A `ViewPlugin` (`linewiseVisualHighlight`) reads the vim visual state
+   (`vim.visualMode && vim.visualLine`) and provides `Decoration.line`
+   decorations with the `.cm-vim-linewise-selection` class for each line in
+   the inclusive range `[min(anchor.line, head.line), max(...)]`. This
+   provides the full-line visual highlight that the CM6 selection can no
+   longer provide (since the selection head is now at `ch:0`).
+
+Theme rules for `.cm-vim-linewise-selection` are included in `vimStyle`
+(both light and dark variants).
+
 ## Surround operators (vim-surround)
 
 **Files**: `src/vim.js`, `src/types.ts`

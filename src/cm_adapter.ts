@@ -1053,8 +1053,9 @@ function scanForBracket(cm: CodeMirror, where: Pos, dir: -1 | 1, style: any, con
     if (lineNo == where.line) pos = where.ch - (dir < 0 ? 1 : 0);
     for (; pos != end; pos += dir) {
       var ch = line.charAt(pos);
-      if (re.test(ch) /*&& (style === undefined ||
-                          (cm.getTokenTypeAt(new Pos(lineNo, pos + 1)) || "") == (style || ""))*/) {
+      if (re.test(ch)) {
+        var tokenType = cm.getTokenTypeAt(new Pos(lineNo, pos + 1));
+        if (tokenType === "string" || tokenType === "comment") continue;
         var match = matching[ch];
         if (match && (match.charAt(1) == ">") == (dir > 0)) stack.push(ch);
         else if (!stack.length) return { pos: new Pos(lineNo, pos), ch: ch };
