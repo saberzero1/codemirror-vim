@@ -2459,7 +2459,7 @@ export function initVim(CM) {
         cmSel = makeCmSelection(cm, {
           anchor: newPositions.start,
           head: newPositions.end
-        }, mode, true);
+        }, mode, mode === 'line');
         if (linewise) {
           var ranges = cmSel.ranges;
           if (mode == 'block') {
