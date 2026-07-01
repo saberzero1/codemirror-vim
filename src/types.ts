@@ -35,6 +35,7 @@ export type vimState = {
     lastHSPos: number,
     lastHPos: number,
     wasInVisualBlock?: boolean,
+    blockInsertLeft?: number,
     insertEnd?: Marker,
     status: string,
     exMode?: boolean,
@@ -433,6 +434,7 @@ export type InsertModeChanges = {
     changes: (InsertModeKey|string|[string,number?])[];
     expectCursorActivityForChange: boolean;
     visualBlock?: number,
+    blockInsertLeft?: number,
     maybeReset?: boolean,
     ignoreCount?: number,
     repeatOverride?: number,

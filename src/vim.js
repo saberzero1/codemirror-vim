@@ -2526,6 +2526,7 @@ export function initVim(CM) {
       macroModeState.lastInsertModeChanges.changes = [];
       macroModeState.lastInsertModeChanges.expectCursorActivityForChange = false;
       macroModeState.lastInsertModeChanges.visualBlock = vim.visualBlock ? vim.sel.head.line - vim.sel.anchor.line : 0;
+      macroModeState.lastInsertModeChanges.blockInsertLeft = vim.visualBlock ? Math.min(vim.sel.head.ch, vim.sel.anchor.ch) : undefined;
     }
   };
 
@@ -3998,10 +3999,12 @@ export function initVim(CM) {
             head = new Pos(sel.anchor.line, 0);
           }
         } else {
+          var leftCol = Math.min(sel.head.ch, sel.anchor.ch);
           head = new Pos(
               Math.min(sel.head.line, sel.anchor.line),
-              Math.min(sel.head.ch, sel.anchor.ch));
+              leftCol);
           height = Math.abs(sel.head.line - sel.anchor.line) + 1;
+          vim.blockInsertLeft = leftCol;
         }
       } else if (insertAt == 'endOfSelectedArea') {
           if (!vim.visualMode)
@@ -4013,10 +4016,12 @@ export function initVim(CM) {
             head = new Pos(sel.anchor.line, 0);
           }
         } else {
+          var leftCol = Math.min(sel.head.ch, sel.anchor.ch);
           head = new Pos(
               Math.min(sel.head.line, sel.anchor.line),
               Math.max(sel.head.ch, sel.anchor.ch) + 1);
           height = Math.abs(sel.head.line - sel.anchor.line) + 1;
+          vim.blockInsertLeft = leftCol;
         }
       } else if (insertAt == 'inplace') {
         if (vim.visualMode){
@@ -5124,7 +5129,7 @@ export function initVim(CM) {
           fromCh = anchor.ch,
           bottom = Math.max(anchor.line, head.line),
           toCh = head.ch;
-      if (fromCh < toCh) { toCh += 1 }
+      if (fromCh <= toCh) { toCh += 1 }
       else { fromCh += 1 };
       var height = bottom - top + 1;
       var primary = head.line == top ? 0 : height - 1;
@@ -7946,7 +7951,12 @@ export function initVim(CM) {
     }
     vim.insertMode = false;
     if (!keepCursor) {
-      cm.setCursor(cm.getCursor().line, cm.getCursor().ch-1);
+      if (vim.blockInsertLeft != null) {
+        cm.setCursor(cm.getCursor().line, vim.blockInsertLeft);
+        delete vim.blockInsertLeft;
+      } else {
+        cm.setCursor(cm.getCursor().line, cm.getCursor().ch-1);
+      }
     }
     cm.setOption('keyMap', 'vim');
     cm.setOption('disableInput', true);
@@ -8325,7 +8335,12 @@ export function initVim(CM) {
       }
     }
     if (visualBlock) {
-      cm.setCursor(offsetCursor(head, 0, 1));
+      var blockLeft = vimGlobalState.macroModeState.lastInsertModeChanges.blockInsertLeft;
+      if (blockLeft != null) {
+        cm.setCursor(new Pos(head.line, blockLeft));
+      } else {
+        cm.setCursor(offsetCursor(head, 0, 1));
+      }
     }
   }
 

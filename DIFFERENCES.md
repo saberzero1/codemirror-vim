@@ -725,7 +725,7 @@ replacement position triggers function wrapping.
 **File**: `src/vim.js`
 
 Block visual mode (`CTRL-V`) `I` and `A` now enter insert mode with correctly
-positioned multi-cursors on every selected line. Three changes were required:
+positioned multi-cursors on every selected line. Six changes were required:
 
 1. **`enterInsertMode` preserves `wasInVisualBlock`**: Before calling
    `exitVisualMode` (which clears `vim.visualBlock`), `enterInsertMode` now
@@ -748,6 +748,27 @@ positioned multi-cursors on every selected line. Three changes were required:
    `applyOperator` already extends each range's head to EOL when `linewise` is
    true in block mode (lines 2465–2468).
 
+4. **`exitInsertMode` block cursor positioning**: When `vim.blockInsertLeft` is
+   set (by `enterInsertMode` for both `I` and `A`), `exitInsertMode` positions
+   the cursor at the block's original left column instead of the standard
+   `ch - 1`. This fixes `A` cursor placement — Neovim places the cursor at the
+   block's left edge after exiting block append, not at the insert position
+   minus one.
+
+5. **`makeCmSelection` zero-width block fix**: Changed `fromCh < toCh` to
+   `fromCh <= toCh` in the block mode path. When `fromCh === toCh` (zero-width
+   block created by `<C-v>jj` without horizontal motion), the old code executed
+   `fromCh += 1`, creating a backwards range `[col+1, col]` that excluded the
+   character at the cursor. The fix treats the equal case the same as
+   less-than: `toCh += 1`, creating a correct forward range `[col, col+1)`.
+   This fixes `C` on zero-width blocks.
+
+6. **`repeatInsertModeChanges` block cursor**: The final cursor position after
+   block insert dot-repeat now uses `blockInsertLeft` (stored on
+   `lastInsertModeChanges` by `recordLastEdit`) instead of a hardcoded
+   `offsetCursor(head, 0, 1)`. This ensures dot-repeat places the cursor at
+   the block's left column, matching Neovim.
+
 Text typed after `I`/`A` appears on all lines in real-time via CM6's native
 multi-selection, unlike Neovim where text is only visible on the primary cursor
 until `<Esc>`. Dot-repeat (`.`) works via the existing `repeatInsertModeChanges`
@@ -760,9 +781,10 @@ block-replay logic.
 - `OperatorArgs`: Added `cursorCol?: number`, `surroundNewline?: boolean`, `surroundCharRepeat?: number`
 - `InputStateInterface`: Added `_surroundReplacement`, `_surroundSelOffset`, `_surroundNewline`
 - `SurroundReplacementSpec`: Union type for tag and function specs
-- `vimState`: Added `surroundInsertClose?: string`, `_commandGeneration: number`
+- `vimState`: Added `surroundInsertClose?: string`, `_commandGeneration: number`, `blockInsertLeft?: number`
 - `surroundState`: Added `tagResult`, `from`, `to`, `newline`, `count`, `charRepeat`, `pendingInput`
 - `allCommands`: Added `_isDefault?: boolean`
 - `moveByLines` return: `Pos | null`
 - `moveByWords` return: `Pos | null | undefined`
+- `InsertModeChanges`: Added `blockInsertLeft?: number`
 - `MotionFn` return: Widened to include `Promise` variants
