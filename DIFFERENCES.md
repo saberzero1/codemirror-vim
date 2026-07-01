@@ -720,6 +720,39 @@ inner spaces; closing brackets don't. `<` in replacement position triggers tag
 prompting (breaking change — use `>` for no-space angle brackets). `f`/`F` in
 replacement position triggers function wrapping.
 
+### Block visual insert (`I`/`A`), change (`c`/`C`)
+
+**File**: `src/vim.js`
+
+Block visual mode (`CTRL-V`) `I` and `A` now enter insert mode with correctly
+positioned multi-cursors on every selected line. Three changes were required:
+
+1. **`enterInsertMode` preserves `wasInVisualBlock`**: Before calling
+   `exitVisualMode` (which clears `vim.visualBlock`), `enterInsertMode` now
+   sets `vim.wasInVisualBlock = true` when exiting from block visual. This
+   preserves the block context for `multiSelectHandleKey`, which routes
+   subsequent keys through `vimApi.handleKey` (single dispatch) instead of
+   `forEachSelection` (per-cursor dispatch) — allowing CM6's native
+   multi-selection text input to operate on all cursors simultaneously.
+
+2. **`selectForInsert` skips short lines**: When the block column exceeds a
+   line's length, that line is excluded from the multi-cursor set instead of
+   clipping the cursor to the line end. This matches Neovim's behavior — short
+   lines are left unchanged by block insert. Previously, all lines received a
+   cursor regardless of length, causing text to be inserted at the wrong column.
+
+3. **`operators.change` block visual path**: The `change` operator now detects
+   `vim.visualBlock` and uses `cm.replaceSelections()` to delete the block
+   selection before entering insert mode at the block's left column. This
+   handles both `c` (change block) and `C` (change to EOL), since
+   `applyOperator` already extends each range's head to EOL when `linewise` is
+   true in block mode (lines 2465–2468).
+
+Text typed after `I`/`A` appears on all lines in real-time via CM6's native
+multi-selection, unlike Neovim where text is only visible on the primary cursor
+until `<Esc>`. Dot-repeat (`.`) works via the existing `repeatInsertModeChanges`
+block-replay logic.
+
 ## Type changes
 
 **File**: `src/types.ts`

@@ -3065,7 +3065,18 @@ export function initVim(CM) {
       var vim = cm.state.vim;
       var anchor = ranges[0].anchor,
           head = ranges[0].head;
-      if (!vim.visualMode) {
+      if (vim.visualBlock) {
+        var leftCol = Math.min(ranges[0].anchor.ch, ranges[0].head.ch);
+        text = cm.getSelection();
+        var replacement = fillArray('', ranges.length);
+        cm.replaceSelections(replacement);
+        finalHead = new Pos(ranges[0].anchor.line, leftCol);
+        vimGlobalState.registerController.pushText(
+            args.registerName, 'change', text,
+            args.linewise, true);
+        actions.enterInsertMode(cm, {head: finalHead}, cm.state.vim);
+        return;
+      } else if (!vim.visualMode) {
         text = cm.getRange(anchor, head);
         var lastState = vim.lastEditInputState;
         if (lastState?.motion == "moveByWords" && !isWhiteSpaceString(text)) {
@@ -4033,6 +4044,9 @@ export function initVim(CM) {
         CM.on(cm.getInputField(), 'keydown', onKeyEventTargetKeyDown);
       }
       if (vim.visualMode) {
+        if (vim.visualBlock) {
+          vim.wasInVisualBlock = true;
+        }
         exitVisualMode(cm);
       }
       selectForInsert(cm, head, height);
@@ -4980,8 +4994,14 @@ export function initVim(CM) {
   function selectForInsert(cm, head, height) {
     var sel = [];
     for (var i = 0; i < height; i++) {
-      var lineHead = offsetCursor(head, i, 0);
-      sel.push({anchor: lineHead, head: lineHead});
+      var line = head.line + i;
+      if (line <= cm.lastLine() && lineLength(cm, line) >= head.ch) {
+        var lineHead = new Pos(line, head.ch);
+        sel.push({anchor: lineHead, head: lineHead});
+      }
+    }
+    if (sel.length === 0) {
+      sel.push({anchor: head, head: head});
     }
     cm.setSelections(sel, 0);
   }
