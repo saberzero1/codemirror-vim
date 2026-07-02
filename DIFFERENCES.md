@@ -211,6 +211,44 @@ user-defined mappings from defaults.
 Previously private, it is needed by the blur handler in `src/index.ts` and
 by host plugins that need to reset pending key state (e.g. on pane switch).
 
+### Stale marker and posFromIndex safety guards
+
+**File**: `src/cm_adapter.ts`
+
+Three defensive changes prevent `RangeError` crashes when `Marker` objects
+hold offsets from a previous (longer) document — a scenario that occurs when
+the global jumpList (`vimGlobalState.jumpList`) retains markers across
+document switches in host environments like Obsidian.
+
+1. **`posFromIndex` offset clamping**: `posFromIndex(doc, offset)` now clamps
+   `offset` to `[0, doc.length]` before calling `doc.lineAt(offset)`. This
+   mirrors the bounds checking already present in `indexFromPos` (lines
+   14–24) and prevents `RangeError` for any out-of-range offset. All 19+
+   callers of `posFromIndex` benefit uniformly — including `Marker.find()`,
+   `getCursor()`, `listSelections()`, and `getSearchCursor()`.
+
+2. **`Marker.find()` try-catch**: `find()` now catches exceptions from
+   `posFromIndex` and returns `null` instead of throwing. The return type is
+   already `Pos | null`, and all callers (`jumpList.add` line 624,
+   `jumpList.move` line 649/658, `jumpList.find` line 671, `vim.marks`
+   access) already handle `null` gracefully. This provides defense-in-depth
+   beyond the `posFromIndex` clamping — covering potential failures from
+   detached EditorViews or null document state.
+
+3. **`Marker.update()` try-catch**: `update(change)` now catches `RangeError`
+   from `change.mapPos()` and sets `this.offset = null`. CM6's `mapPos`
+   throws when the marker offset exceeds the changeset's starting document
+   length — which occurs when a marker was created on a document that has
+   since been replaced without the change flowing through the CM6 transaction
+   system. Setting `offset` to `null` marks the marker as deleted, consistent
+   with the existing `MapMode.TrackDel` → `null` semantics.
+
+The crash path without these guards: `jumpList.add()` → `curMark.find()` →
+`posFromIndex(this.offset)` → `doc.lineAt(offset)` → `RangeError` → bubbles
+through `evalInput` → `processMotion` → `processCommand` → `cm.operation()`
+try-catch → `cm.state.vim = undefined; maybeInitVimState(cm); throw e` →
+vim state wiped, subsequent keystrokes fall through to text insertion.
+
 ### Neovim golden comparison infrastructure
 
 **Files**: `test/neovim/`
