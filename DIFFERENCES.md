@@ -774,6 +774,30 @@ multi-selection, unlike Neovim where text is only visible on the primary cursor
 until `<Esc>`. Dot-repeat (`.`) works via the existing `repeatInsertModeChanges`
 block-replay logic.
 
+### Block visual EOL cursor clamping
+
+**File**: `src/vim.js` — `makeCmSelection`
+
+The block mode branch of `makeCmSelection` now clamps `toCh` and `fromCh`
+per-line to each line's actual length via `lineLength(cm, top + i)`. Previously,
+when `$` (end-of-line) was pressed in visual block mode, the motion returned
+`Infinity` for `ch`. `selectBlock` clipped this via `cm.clipPos()` to the line
+length, and then `makeCmSelection` added `+1` to `toCh` for inclusive selection
+— pushing the cursor one position past the last character on each line.
+
+The `$` motion's intentional `Infinity` return (line 2359) is preserved — it
+enables ragged-right block selections where each line extends to its own EOL.
+The clamping only happens at the selection-building stage in `makeCmSelection`,
+not at the motion return path.
+
+Edge cases handled:
+- Empty lines (length 0): both `fromCh` and `toCh` clamp to 0, producing a
+  zero-width range
+- Single-character lines: `toCh` clamps to 1 (line length), which is the
+  valid end-of-selection boundary
+- Lines shorter than the block column: `fromCh` clamps to `lineLen`, producing
+  a zero-width range at the line end
+
 ## Type changes
 
 **File**: `src/types.ts`

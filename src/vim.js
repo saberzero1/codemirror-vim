@@ -5135,9 +5135,10 @@ export function initVim(CM) {
       var primary = head.line == top ? 0 : height - 1;
       var ranges = [];
       for (var i = 0; i < height; i++) {
+        var lineLen = lineLength(cm, top + i);
         ranges.push({
-          anchor: new Pos(top + i, fromCh),
-          head: new Pos(top + i, toCh)
+          anchor: new Pos(top + i, Math.min(fromCh, lineLen)),
+          head: new Pos(top + i, Math.min(toCh, lineLen))
         });
       }
       return {
