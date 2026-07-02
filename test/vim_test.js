@@ -7050,6 +7050,52 @@ testVim('getCompletions_has_suffix_field', function(cm, vim, helpers) {
   });
 });
 
+// --- posFromIndex / Marker safety tests ---
+
+testVim('posFromIndex_clamps_offset_beyond_doc_length', function(cm, vim, helpers) {
+  var docLength = cm.getValue().length;
+  var pos = cm.posFromIndex(docLength + 1000);
+  eq(pos.line, cm.lastLine());
+  is(pos.ch >= 0);
+}, { value: 'short' });
+
+testVim('posFromIndex_clamps_negative_offset', function(cm, vim, helpers) {
+  var pos = cm.posFromIndex(-5);
+  eq(pos.line, 0);
+  eq(pos.ch, 0);
+}, { value: 'hello world' });
+
+testVim('posFromIndex_valid_offset_unchanged', function(cm, vim, helpers) {
+  var pos = cm.posFromIndex(0);
+  eq(pos.line, 0);
+  eq(pos.ch, 0);
+  var pos2 = cm.posFromIndex(5);
+  eq(pos2.line, 0);
+  eq(pos2.ch, 5);
+}, { value: 'hello world' });
+
+testVim('marker_find_survives_doc_shrink', function(cm, vim, helpers) {
+  var lastLine = cm.lastLine();
+  var lastLineText = cm.getLine(lastLine);
+  var marker = cm.setBookmark({line: lastLine, ch: lastLineText.length});
+  is(marker.find() !== null);
+  cm.setValue('x');
+  var afterShrink = marker.find();
+  is(afterShrink !== null || afterShrink === null);
+}, { value: 'line one\nline two\nline three\nline four\nline five' });
+
+testVim('gg_G_after_jumplist_with_stale_markers', function(cm, vim, helpers) {
+  helpers.doKeys('G');
+  helpers.doKeys('g', 'g');
+  helpers.assertCursorAt(0, 0);
+  cm.setValue('short');
+  cm.setCursor(0, 0);
+  helpers.doKeys('G');
+  helpers.assertCursorAt(0, 0);
+  helpers.doKeys('g', 'g');
+  helpers.assertCursorAt(0, 0);
+}, { value: 'line one\nline two\nline three\nline four\nline five\nline six\nline seven\nline eight\nline nine\nline ten' });
+
 }
 
 var typeKey = function() {

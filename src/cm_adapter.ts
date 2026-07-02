@@ -24,6 +24,7 @@ function indexFromPos(doc: Text, pos: Pos): number {
   return Math.min(line.from + Math.max(0, ch), line.to)
 }
 function posFromIndex(doc: Text, offset: number): Pos {
+  offset = Math.max(0, Math.min(offset, doc.length));
   let line = doc.lineAt(offset)
   return { line: line.number - 1, ch: offset - line.from }
 }
@@ -1118,11 +1119,20 @@ class Marker {
   clear() { delete this.cm.marks[this.id] };
   find(): Pos | null {
     if (this.offset == null) return null;
-    return this.cm.posFromIndex(this.offset)
+    try {
+      return this.cm.posFromIndex(this.offset);
+    } catch {
+      return null;
+    }
   };
   update(change: ChangeDesc) {
-    if (this.offset != null)
-      this.offset = change.mapPos(this.offset, this.assoc, MapMode.TrackDel)
+    if (this.offset != null) {
+      try {
+        this.offset = change.mapPos(this.offset, this.assoc, MapMode.TrackDel);
+      } catch {
+        this.offset = null;
+      }
+    }
   }
 }
 
