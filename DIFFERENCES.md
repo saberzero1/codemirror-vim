@@ -871,6 +871,11 @@ the "display" selection.
 - Ctrl+C handler (`index.ts`): when `vim.visualLine` is true and
   `somethingSelected()` returns false, computes linewise text from `vim.sel`
   and copies to clipboard via `navigator.clipboard.writeText()`.
+- Async motion callback (`vim.js`): the `.then()` handler for async motions
+  (EasyMotion) in visual mode now wraps `updateCmSelection(cm)` in
+  `cm.operation()` with `isVimOp = true`. Without this, the cursor-only
+  selection dispatch triggers `handleExternalSelection`, which sees
+  `visualMode && !somethingSelected()` and exits visual mode.
 
 ### Trade-offs
 

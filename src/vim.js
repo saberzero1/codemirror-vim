@@ -2310,7 +2310,11 @@ export function initVim(CM) {
               rNewAnchor = rNewAnchor || savedOldAnchor;
               savedSel.anchor = rNewAnchor;
               savedSel.head = rNewHead;
-              updateCmSelection(cm);
+              cm.operation(function() {
+                // @ts-ignore
+                if (cm.curOp) cm.curOp.isVimOp = true;
+                updateCmSelection(cm);
+              });
               updateMark(cm, savedVim, '<',
                   cursorIsBefore(rNewAnchor, rNewHead) ? rNewAnchor : rNewHead);
               updateMark(cm, savedVim, '>',
