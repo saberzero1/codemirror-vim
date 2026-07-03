@@ -193,6 +193,10 @@ const vimPlugin = ViewPlugin.fromClass(
         this.view.scrollDOM.classList.add("cm-vimVisual");
       else
         this.view.scrollDOM.classList.remove("cm-vimVisual");
+      if (state.vim?.visualMode && state.vim?.visualLine)
+        this.view.scrollDOM.classList.add("cm-vimVisualLine");
+      else
+        this.view.scrollDOM.classList.remove("cm-vimVisualLine");
     }
     updateStatus() {
       let dom = this.cm.state.statusbar;
@@ -285,6 +289,18 @@ const vimPlugin = ViewPlugin.fromClass(
       let isCopy = key === "<C-c>" && !CodeMirror.isMac;
       if (isCopy && cm.somethingSelected()) {
         this.waitForCopy = true;
+        return true;
+      }
+      // Visual-line uses cursor-only CM6 selection (no spanning range),
+      // so somethingSelected() is false. Copy linewise text from vim.sel.
+      if (isCopy && vim.visualMode && vim.visualLine && vim.sel) {
+        let startLine = Math.min(vim.sel.anchor.line, vim.sel.head.line);
+        let endLine = Math.max(vim.sel.anchor.line, vim.sel.head.line);
+        let lines: string[] = [];
+        for (let i = startLine; i <= endLine; i++) {
+          lines.push(cm.getLine(i));
+        }
+        navigator.clipboard.writeText(lines.join("\n") + "\n");
         return true;
       }
 

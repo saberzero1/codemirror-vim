@@ -836,6 +836,49 @@ Edge cases handled:
 - Lines shorter than the block column: `fromCh` clamps to `lineLen`, producing
   a zero-width range at the line end
 
+## Visual-line cursor-only CM6 selection
+
+**Files**: `src/vim.js`, `src/index.ts`, `src/block-cursor.ts`
+
+In visual-line mode (`V`), the CM6 `EditorSelection` is set to a cursor-only
+position at `sel.head` instead of a spanning range across the selected lines.
+This prevents editors with Live Preview (like Obsidian) from uncollapsing
+hidden markup (`Decoration.replace` ranges) when the selection overlaps them.
+
+The visual highlight is provided independently by the `linewiseVisualHighlight`
+ViewPlugin, which reads `vim.sel` directly and applies `Decoration.line()`
+decorations to each line in the selection range. Operators (`y`, `d`, `c`)
+recompute their own CM6 selection from `vim.sel` at dispatch time via
+`makeCmSelection(cm, sel, 'line', exclusive=true)` — they do not depend on
+the "display" selection.
+
+### Changes
+
+- `updateCmSelection` (`vim.js`): when `vim.visualLine` is true, calls
+  `cm.setCursor(sel.head.line, sel.head.ch)` instead of
+  `cm.setSelections(makeCmSelection(...).ranges)`.
+- `joinLines` action (`vim.js`): reads `vim.sel.anchor`/`vim.sel.head` via
+  `copyCursor()` instead of `cm.getCursor('anchor')`/`cm.getCursor('head')`
+  in visual mode, since the CM6 selection is now cursor-only.
+- `replace` action (`vim.js`): reads from `vim.sel` instead of
+  `cm.getCursor('start'/'end')` in visual mode, with line boundary expansion
+  (`Pos(line, 0)` to `Pos(line, lineLength)`) for visual-line.
+- `updateClass` (`index.ts`): adds/removes `.cm-vimVisualLine` class on
+  `scrollDOM` when `vim.visualMode && vim.visualLine` changes.
+- `themeSpec` (`block-cursor.ts`): the `::selection` transparency rule now
+  covers `.cm-vimMode.cm-vimVisualLine .cm-line` in addition to
+  `.cm-vimMode:not(.cm-vimVisual) .cm-line`.
+- Ctrl+C handler (`index.ts`): when `vim.visualLine` is true and
+  `somethingSelected()` returns false, computes linewise text from `vim.sel`
+  and copies to clipboard via `navigator.clipboard.writeText()`.
+
+### Trade-offs
+
+- `cm.somethingSelected()` returns `false` in visual-line mode
+- `cm.getSelection()` returns `""` in visual-line mode
+- Third-party code that reads CM6 selection state during visual-line will not
+  see the selection; the canonical API is `window.CodeMirrorAdapter.Vim`
+
 ## Type changes
 
 **File**: `src/types.ts`

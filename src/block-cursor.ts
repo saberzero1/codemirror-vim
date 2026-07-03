@@ -142,7 +142,7 @@ function configChanged(update: ViewUpdate) {
 }
 
  const themeSpec = {
-  ".cm-vimMode:not(.cm-vimVisual) .cm-line": {
+  ".cm-vimMode:not(.cm-vimVisual) .cm-line, .cm-vimMode.cm-vimVisualLine .cm-line": {
     "& ::selection": {backgroundColor: "transparent !important"},
     "&::selection": {backgroundColor: "transparent !important"},
   },

@@ -4121,8 +4121,8 @@ export function initVim(CM) {
     joinLines: function(cm, actionArgs, vim) {
       var curStart, curEnd;
       if (vim.visualMode) {
-        curStart = cm.getCursor('anchor');
-        curEnd = cm.getCursor('head');
+        curStart = copyCursor(vim.sel.anchor);
+        curEnd = copyCursor(vim.sel.head);
         if (cursorIsBefore(curEnd, curStart)) {
           var tmp = curEnd;
           curEnd = curStart;
@@ -4394,10 +4394,16 @@ export function initVim(CM) {
       var curStart = cm.getCursor();
       var replaceTo;
       var curEnd;
-      var selections = cm.listSelections();
       if (vim.visualMode) {
-        curStart = cm.getCursor('start');
-        curEnd = cm.getCursor('end');
+        var selStart = cursorMin(vim.sel.anchor, vim.sel.head);
+        var selEnd = cursorMax(vim.sel.anchor, vim.sel.head);
+        if (vim.visualLine) {
+          curStart = new Pos(selStart.line, 0);
+          curEnd = new Pos(selEnd.line, lineLength(cm, selEnd.line));
+        } else {
+          curStart = selStart;
+          curEnd = selEnd;
+        }
       } else {
         var line = cm.getLine(curStart.line);
         replaceTo = curStart.ch + actionArgs.repeat;
@@ -4431,8 +4437,7 @@ export function initVim(CM) {
           cm.replaceRange(replaceWithStr, curStart, curEnd);
         }
         if (vim.visualMode) {
-          curStart = cursorIsBefore(selections[0].anchor, selections[0].head) ?
-                        selections[0].anchor : selections[0].head;
+          curStart = cursorMin(vim.sel.anchor, vim.sel.head);
           cm.setCursor(curStart);
           exitVisualMode(cm, false);
         } else {
@@ -5087,8 +5092,20 @@ export function initVim(CM) {
     if (!mode) {
       mode = vim.visualLine ? 'line' : vim.visualBlock ? 'block' : 'char';
     }
-    var cmSel = makeCmSelection(cm, sel, mode);
-    cm.setSelections(cmSel.ranges, cmSel.primary);
+    if (vim.visualLine) {
+      // In visual-line mode, set a cursor-only CM6 selection at the head
+      // position instead of a spanning range. This prevents editors like
+      // Obsidian from uncollapsing hidden markup (links, wikilinks) when
+      // the selection range overlaps replaced content in Live Preview.
+      // The visual highlight is provided independently by the
+      // linewiseVisualHighlight ViewPlugin (reads vim.sel directly).
+      // Operators (y/d/c) recompute their own selection from vim.sel
+      // at dispatch time (see operator section in processCommand).
+      cm.setCursor(sel.head.line, sel.head.ch);
+    } else {
+      var cmSel = makeCmSelection(cm, sel, mode);
+      cm.setSelections(cmSel.ranges, cmSel.primary);
+    }
   }
   /**
    * @arg {CodeMirror} cm 
