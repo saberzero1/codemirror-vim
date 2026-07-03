@@ -855,8 +855,10 @@ the "display" selection.
 ### Changes
 
 - `updateCmSelection` (`vim.js`): when `vim.visualLine` is true, calls
-  `cm.setCursor(sel.head.line, sel.head.ch)` instead of
-  `cm.setSelections(makeCmSelection(...).ranges)`.
+  `cm.setCursor(sel.head.line, 0)` instead of
+  `cm.setSelections(makeCmSelection(...).ranges)`. Column 0 is used
+  (matching Neovim) to avoid landing inside widget decorations
+  (checkboxes, collapsed links) on the head line.
 - `joinLines` action (`vim.js`): reads `vim.sel.anchor`/`vim.sel.head` via
   `copyCursor()` instead of `cm.getCursor('anchor')`/`cm.getCursor('head')`
   in visual mode, since the CM6 selection is now cursor-only.

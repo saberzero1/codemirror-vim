@@ -5105,7 +5105,7 @@ export function initVim(CM) {
       // linewiseVisualHighlight ViewPlugin (reads vim.sel directly).
       // Operators (y/d/c) recompute their own selection from vim.sel
       // at dispatch time (see operator section in processCommand).
-      cm.setCursor(sel.head.line, sel.head.ch);
+      cm.setCursor(sel.head.line, 0);
     } else {
       var cmSel = makeCmSelection(cm, sel, mode);
       cm.setSelections(cmSel.ranges, cmSel.primary);
