@@ -879,6 +879,14 @@ the "display" selection.
   selection dispatch triggers `handleExternalSelection`, which sees
   `visualMode && !somethingSelected()` and exits visual mode.
 
+- Unhandled key passthrough (`index.ts`): when `handleKey` returns false
+  (vim didn't handle the key) and the editor is in visual-line mode, the
+  CM6 selection is temporarily expanded to the full linewise range before
+  the event propagates to Obsidian. A `Promise.resolve().then()` microtask
+  restores cursor-only selection after Obsidian's command executes. This
+  ensures Obsidian commands (Tab/indent, formatting toggles) operate on
+  all selected lines.
+
 ### Trade-offs
 
 - `cm.somethingSelected()` returns `false` in visual-line mode

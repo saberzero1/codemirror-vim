@@ -323,6 +323,27 @@ const vimPlugin = ViewPlugin.fromClass(
         e.preventDefault();
         e.stopPropagation();
         this.blockCursor.scheduleRedraw();
+      } else if (vim.visualMode && vim.visualLine && vim.sel) {
+        // Vim didn't handle this key — it will propagate to Obsidian.
+        // Expand CM6 selection to full linewise range so Obsidian commands
+        // (Tab/indent, formatting toggles) operate on all selected lines.
+        let startLine = Math.min(vim.sel.anchor.line, vim.sel.head.line);
+        let endLine = Math.max(vim.sel.anchor.line, vim.sel.head.line);
+        let doc = this.view.state.doc;
+        let from = doc.line(startLine + 1).from;
+        let to = doc.line(endLine + 1).to;
+        this.view.dispatch({ selection: {anchor: from, head: to} });
+        // Restore cursor-only selection after Obsidian processes the command
+        Promise.resolve().then(() => {
+          let vimState = cm.state.vim;
+          if (vimState && vimState.visualLine && vimState.sel) {
+            cm.operation(() => {
+              // @ts-ignore
+              if (cm.curOp) cm.curOp.isVimOp = true;
+              cm.setCursor(vimState!.sel.head.line, 0);
+            });
+          }
+        });
       }
 
       this.updateStatus();
