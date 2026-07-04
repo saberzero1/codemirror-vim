@@ -197,6 +197,10 @@ const vimPlugin = ViewPlugin.fromClass(
         this.view.scrollDOM.classList.add("cm-vimVisualLine");
       else
         this.view.scrollDOM.classList.remove("cm-vimVisualLine");
+      if (state.vim?.selectMode)
+        this.view.scrollDOM.classList.add("cm-vimSelect");
+      else
+        this.view.scrollDOM.classList.remove("cm-vimSelect");
     }
     updateStatus() {
       let dom = this.cm.state.statusbar;
@@ -308,16 +312,6 @@ const vimPlugin = ViewPlugin.fromClass(
       let result = Vim.multiSelectHandleKey(cm, key, "user");
       vim = Vim.maybeInitVimState_(cm); // the object can change if there is an exception in handleKey
 
-      // insert mode
-      if (!result && vim.insertMode && cm.state.overwrite) {
-        if (e.key && e.key.length == 1 && !/\n/.test(e.key)) {
-          result = true;
-          cm.overWriteSelection(e.key);
-        } else if (e.key == "Backspace") {
-          result = true;
-          CodeMirror.commands.cursorCharLeft(cm);
-        }
-      }
       if (result) {
         CodeMirror.signal(this.cm, 'vim-keypress', key);
         e.preventDefault();
@@ -584,4 +578,3 @@ export type { CursorShape, CursorShapeConfig } from "./block-cursor";
 export function getCM(view: EditorView): CodeMirror | null {
   return (view as EditorViewExtended).cm || null;
 }
-

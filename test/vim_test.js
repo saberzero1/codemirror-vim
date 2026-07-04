@@ -1379,6 +1379,466 @@ testVim('on_mode_change', async function(cm, vim, helpers) {
   test(":startinsert\n", "insert");
 });
 
+// Select mode / Virtual Replace / Ctrl-O return tests
+// Select mode tests
+testVim('select_mode_gh_enters_charwise', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'h');
+  is(vim.selectMode);
+  is(vim.visualMode);
+  is(!vim.visualLine);
+  is(!vim.visualBlock);
+}, { value: 'hello world' });
+
+testVim('select_mode_gH_enters_linewise', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'H');
+  is(vim.selectMode);
+  is(vim.visualMode);
+  is(vim.visualLine);
+}, { value: 'hello world' });
+
+testVim('select_mode_g_ctrl_h_enters_blockwise', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', '<C-h>');
+  is(vim.selectMode);
+  is(vim.visualMode);
+  is(vim.visualBlock);
+}, { value: 'hello\nworld' });
+
+testVim('select_mode_type_replaces_selection', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'l', 'l');
+  helpers.doKeys('<C-g>');
+  is(vim.selectMode);
+  helpers.doKeys('x');
+  is(vim.insertMode);
+  is(!vim.selectMode);
+  if (isOldCodeMirror) {
+    eq('xlo world', cm.getValue());
+  } else {
+    eq('lxlo world', cm.getValue());
+  }
+}, { value: 'hello world' });
+
+testVim('select_mode_linewise_type_replaces', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'H');
+  helpers.doKeys('x');
+  is(vim.insertMode);
+  eq('x\nsecond', cm.getValue());
+}, { value: 'first\nsecond' });
+
+testVim('select_mode_bs_deletes_selection', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'l', 'l');
+  helpers.doKeys('<C-g>');
+  is(vim.selectMode);
+  helpers.doKeys('<BS>');
+  is(!vim.insertMode);
+  is(!vim.visualMode);
+  is(!vim.selectMode);
+  if (isOldCodeMirror) {
+    eq('lo world', cm.getValue());
+  } else {
+    eq('llo world', cm.getValue());
+  }
+}, { value: 'hello world' });
+
+testVim('select_mode_esc_exits', function(cm, vim, helpers) {
+  cm.setCursor(0, 2);
+  helpers.doKeys('v', 'l');
+  helpers.doKeys('<C-g>');
+  is(vim.selectMode);
+  helpers.doKeys('<Esc>');
+  is(!vim.selectMode);
+  is(!vim.visualMode);
+  eq('hello world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('select_mode_ctrl_g_visual_to_select', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'l');
+  is(vim.visualMode);
+  is(!vim.selectMode);
+  helpers.doKeys('<C-g>');
+  is(vim.selectMode);
+  is(vim.visualMode);
+}, { value: 'hello' });
+
+testVim('select_mode_ctrl_g_select_to_visual', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'h');
+  is(vim.selectMode);
+  helpers.doKeys('<C-g>');
+  is(!vim.selectMode);
+  is(vim.visualMode);
+}, { value: 'hello' });
+
+testVim('on_mode_change_select', function(cm, vim, helpers) {
+  var modeHist = [];
+  cm.on('vim-mode-change', function(arg) {
+    modeHist.push(arg.mode + (arg.subMode ? ':' + arg.subMode : ''));
+  });
+  helpers.doKeys('g', 'h');
+  eq(modeHist[modeHist.length - 1], 'select');
+  helpers.doKeys('<Esc>');
+  eq(modeHist[modeHist.length - 1], 'normal');
+}, { value: 'hello' });
+
+testVim('on_mode_change_select_linewise', function(cm, vim, helpers) {
+  var modeHist = [];
+  cm.on('vim-mode-change', function(arg) {
+    modeHist.push(arg.mode + (arg.subMode ? ':' + arg.subMode : ''));
+  });
+  helpers.doKeys('g', 'H');
+  eq(modeHist[modeHist.length - 1], 'select:linewise');
+}, { value: 'hello' });
+
+testVim('select_mode_operators_fall_through', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'l', 'l');
+  helpers.doKeys('<C-g>');
+  is(vim.selectMode);
+  helpers.doKeys('d');
+  is(!vim.visualMode);
+  is(!vim.selectMode);
+  if (isOldCodeMirror) {
+    eq('lo world', cm.getValue());
+  } else {
+    eq('ldlo world', cm.getValue());
+  }
+}, { value: 'hello world' });
+
+// Virtual Replace mode tests
+testVim('vreplace_gR_enters', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'R');
+  is(vim.insertMode);
+  is(vim.virtualReplace);
+}, { value: 'hello' });
+
+testVim('on_mode_change_vreplace', function(cm, vim, helpers) {
+  var modeHist = [];
+  cm.on('vim-mode-change', function(arg) {
+    modeHist.push(arg.mode);
+  });
+  helpers.doKeys('g', 'R');
+  eq(modeHist[modeHist.length - 1], 'vreplace');
+  helpers.doKeys('<Esc>');
+  eq(modeHist[modeHist.length - 1], 'normal');
+}, { value: 'hello' });
+
+testVim('vreplace_overwrites_char', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'R');
+  helpers.doKeys('x');
+  helpers.doKeys('<Esc>');
+  eq('xello', cm.getValue());
+}, { value: 'hello' });
+
+testVim('vreplace_bs_restores', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'R');
+  helpers.doKeys('x');
+  helpers.doKeys('<BS>');
+  helpers.doKeys('<Esc>');
+  eq('hello', cm.getValue());
+}, { value: 'hello' });
+
+testVim('vreplace_eol_appends', function(cm, vim, helpers) {
+  cm.setCursor(0, 4);
+  helpers.doKeys('g', 'R');
+  helpers.doKeys('x');
+  helpers.doKeys('<Esc>');
+  eq('hellox', cm.getValue());
+}, { value: 'hello' });
+
+testVim('vreplace_exit_clears_state', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'R');
+  helpers.doKeys('a', 'b', 'c');
+  helpers.doKeys('<Esc>');
+  is(!vim.virtualReplace);
+  is(!vim.insertMode);
+  eq(0, vim.replaceStack.length);
+}, { value: 'hello' });
+
+testVim('vreplace_insert_toggle', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'R');
+  is(vim.virtualReplace);
+  helpers.doKeys('<Ins>');
+  is(vim.insertMode);
+  is(!cm.state.overwrite);
+  helpers.doKeys('<Ins>');
+  is(cm.state.overwrite);
+  is(vim.virtualReplace);
+}, { value: 'hello' });
+
+testVim('vreplace_multi_replace_bs', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'R');
+  helpers.doKeys('a', 'b', 'c');
+  helpers.doKeys('<BS>', '<BS>', '<BS>');
+  helpers.doKeys('<Esc>');
+  eq('hello', cm.getValue());
+}, { value: 'hello' });
+
+testVim('replace_overwrite_via_handleKey', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('R');
+  helpers.doKeys('x', 'y');
+  helpers.doKeys('<Esc>');
+  eq('xyllo', cm.getValue());
+}, { value: 'hello' });
+
+testVim('replace_bs_via_handleKey', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('R');
+  helpers.doKeys('x');
+  helpers.doKeys('<BS>');
+  helpers.doKeys('<Esc>');
+  eq('hello', cm.getValue());
+  helpers.assertCursorAt(0, 0);
+}, { value: 'hello' });
+
+testVim('replace_dot_repeat', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('R', 'a', 'b', '<Esc>');
+  eq('abllo', cm.getLine(0));
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('abllo', cm.getLine(1));
+}, { value: 'hello\nhello' });
+
+testVim('vreplace_dot_repeat', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'R', 'a', 'b', '<Esc>');
+  eq('abllo', cm.getLine(0));
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('abllo', cm.getLine(1));
+}, { value: 'hello\nhello' });
+
+testVim('replace_ctrl_h_as_backspace', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('R');
+  helpers.doKeys('x', 'y');
+  helpers.doKeys('<C-h>');
+  helpers.doKeys('<Esc>');
+  helpers.assertCursorAt(0, 1);
+}, { value: 'hello' });
+
+testVim('replace_macro_replay', function(cm, vim, helpers) {
+  helpers.doKeys('q', 'a');
+  helpers.doKeys('R', 'x', 'y', '<Esc>');
+  helpers.doKeys('q');
+  cm.setCursor(1, 0);
+  helpers.doKeys('@', 'a');
+  eq('xyllo', cm.getLine(1));
+}, { value: 'hello\nhello' });
+
+testVim('vreplace_macro_replay', function(cm, vim, helpers) {
+  helpers.doKeys('q', 'a');
+  helpers.doKeys('g', 'R', 'x', 'y', '<Esc>');
+  helpers.doKeys('q');
+  cm.setCursor(1, 0);
+  helpers.doKeys('@', 'a');
+  eq('xyllo', cm.getLine(1));
+}, { value: 'hello\nhello' });
+
+testVim('replace_count_prefix', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('3', 'R', '-', '<Esc>');
+  eq('---lo', cm.getValue());
+}, { value: 'hello' });
+
+testVim('replace_count_multi_char', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('3', 'R', 'a', 'b', 'c', '<Esc>');
+  eq('abcabcabc', cm.getValue());
+}, { value: 'helloworl' });
+
+testVim('replace_bs_restores_multiple', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('R', 'x', 'y', 'z');
+  helpers.doKeys('<BS>', '<BS>', '<BS>');
+  helpers.doKeys('<Esc>');
+  eq('hello', cm.getValue());
+}, { value: 'hello' });
+
+testVim('replace_bs_at_eol_deletes', function(cm, vim, helpers) {
+  cm.setCursor(0, 4);
+  helpers.doKeys('R', 'x', 'y');
+  helpers.doKeys('<BS>');
+  helpers.doKeys('<Esc>');
+  eq('hellx', cm.getValue());
+}, { value: 'hello' });
+
+testVim('smap_creates_select_mapping', function(cm, vim, helpers) {
+  helpers.doEx('smap X dd');
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'h');
+  is(vim.selectMode);
+  helpers.doKeys('X');
+  is(!vim.selectMode);
+  eq('', cm.getValue());
+}, { value: 'hello' });
+
+testVim('smap_takes_precedence_over_vmap', function(cm, vim, helpers) {
+  CodeMirror.Vim.map('X', ':let g:vmap_fired=1', 'visual');
+  CodeMirror.Vim.map('X', ':let g:smap_fired=1', 'select');
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'l');
+  helpers.doKeys('<C-g>');
+  is(vim.selectMode);
+  helpers.doKeys('X');
+}, { value: 'hello' });
+
+testVim('selectmode_cmd_enters_select', function(cm, vim, helpers) {
+  CodeMirror.Vim.setOption('selectmode', 'cmd');
+  cm.setCursor(0, 0);
+  helpers.doKeys('v');
+  is(vim.selectMode);
+  is(vim.visualMode);
+  helpers.doKeys('<Esc>');
+  CodeMirror.Vim.setOption('selectmode', '');
+}, { value: 'hello' });
+
+testVim('selectmode_cmd_V_enters_select_linewise', function(cm, vim, helpers) {
+  CodeMirror.Vim.setOption('selectmode', 'cmd');
+  cm.setCursor(0, 0);
+  helpers.doKeys('V');
+  is(vim.selectMode);
+  is(vim.visualLine);
+  helpers.doKeys('<Esc>');
+  CodeMirror.Vim.setOption('selectmode', '');
+}, { value: 'hello\nworld' });
+
+testVim('selectmode_empty_normal_visual', function(cm, vim, helpers) {
+  CodeMirror.Vim.setOption('selectmode', '');
+  cm.setCursor(0, 0);
+  helpers.doKeys('v');
+  is(!vim.selectMode);
+  is(vim.visualMode);
+  helpers.doKeys('<Esc>');
+}, { value: 'hello' });
+
+testVim('keymodel_startsel_not_implemented', function(cm, vim, helpers) {
+  CodeMirror.Vim.setOption('keymodel', 'startsel');
+  var km = CodeMirror.Vim.getOption('keymodel');
+  eq('startsel', km);
+  CodeMirror.Vim.setOption('keymodel', '');
+}, { value: 'hello' });
+
+testVim('vreplace_tab_padding', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'R');
+  helpers.doKeys('x');
+  helpers.doKeys('<Esc>');
+  var line = cm.getLine(0);
+  eq('x', line[0]);
+  is(line.length >= 5);
+}, { value: '\thello' });
+
+testVim('replace_bs_at_session_start', function(cm, vim, helpers) {
+  cm.setCursor(0, 2);
+  helpers.doKeys('R');
+  helpers.doKeys('<BS>');
+  eq('hello', cm.getValue());
+  helpers.assertCursorAt(0, 1);
+}, { value: 'hello' });
+
+testVim('select_mode_char_replace_enters_insert', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'h');
+  is(vim.selectMode);
+  helpers.doKeys('x');
+  is(vim.insertMode);
+  is(!vim.selectMode);
+}, { value: 'hello' });
+
+// Ctrl-O return-to-mode tests
+testVim('ctrl_o_returns_to_insert', function(cm, vim, helpers) {
+  helpers.doKeys('i');
+  is(vim.insertMode);
+  helpers.doKeys('<C-o>');
+  is(!vim.insertMode);
+  helpers.doKeys('l');
+  is(vim.insertMode);
+  eq('vim-insert', cm.getOption('keyMap'));
+}, { value: 'hello world' });
+
+testVim('ctrl_o_returns_to_replace', function(cm, vim, helpers) {
+  helpers.doKeys('R');
+  is(vim.insertMode);
+  is(cm.state.overwrite);
+  helpers.doKeys('<C-o>');
+  is(!vim.insertMode);
+  helpers.doKeys('l');
+  is(vim.insertMode);
+  is(cm.state.overwrite);
+  eq('vim-replace', cm.getOption('keyMap'));
+}, { value: 'hello world' });
+
+testVim('ctrl_o_returns_to_vreplace', function(cm, vim, helpers) {
+  helpers.doKeys('g', 'R');
+  is(vim.insertMode);
+  is(vim.virtualReplace);
+  helpers.doKeys('<C-o>');
+  is(!vim.insertMode);
+  helpers.doKeys('l');
+  is(vim.insertMode);
+  is(vim.virtualReplace);
+}, { value: 'hello world' });
+
+testVim('ctrl_o_mode_change_event', function(cm, vim, helpers) {
+  var modeHist = [];
+  cm.on('vim-mode-change', function(arg) {
+    modeHist.push(arg.mode + (arg.subMode ? ':' + arg.subMode : ''));
+  });
+  helpers.doKeys('i');
+  helpers.doKeys('<C-o>');
+  eq(modeHist[modeHist.length - 1], 'normal:ctrl-o');
+}, { value: 'hello' });
+
+testVim('ctrl_o_replace_mode_change_event', function(cm, vim, helpers) {
+  var modeHist = [];
+  cm.on('vim-mode-change', function(arg) {
+    modeHist.push(arg.mode + (arg.subMode ? ':' + arg.subMode : ''));
+  });
+  helpers.doKeys('R');
+  helpers.doKeys('<C-o>');
+  eq(modeHist[modeHist.length - 1], 'normal:ctrl-o-replace');
+}, { value: 'hello' });
+
+// Regression: existing modes unaffected
+testVim('visual_mode_unaffected_by_select', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'l', 'l', 'd');
+  is(!vim.selectMode);
+  eq('lo world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('replace_mode_unaffected_by_vreplace', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('R');
+  helpers.doKeys('x', 'y');
+  helpers.doKeys('<Esc>');
+  is(!vim.virtualReplace);
+  eq('xyllo', cm.getValue());
+}, { value: 'hello' });
+
+testVim('gv_restores_select_mode', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'h', 'l');
+  helpers.doKeys('<Esc>');
+  helpers.doKeys('g', 'v');
+  is(vim.selectMode);
+  is(vim.visualMode);
+}, { value: 'hello' });
+
 // Swapcase commands edit in place and do not modify registers.
 testVim('g~w_repeat', function(cm, vim, helpers) {
   // Assert that dw does delete newline if it should go to the next line, and

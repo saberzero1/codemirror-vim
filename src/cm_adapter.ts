@@ -870,6 +870,80 @@ export class CodeMirror {
     this.replaceSelection(text)
   }
 
+  virtualReplaceChar(key: string, vim: any, tabstop: number) {
+    let cursor = this.getCursor();
+    let line = this.getLine(cursor.line);
+
+    if (cursor.ch >= Math.max(0, line.length - 1)) {
+      let insertCh = Math.min(cursor.ch + 1, line.length);
+      vim.replaceStack.push({ original: '', vcols: 0 });
+      this.replaceRange(key,
+        { line: cursor.line, ch: insertCh },
+        { line: cursor.line, ch: insertCh });
+      this.setCursor(cursor.line, insertCh + 1);
+    } else {
+      let origChar = line[cursor.ch];
+      let vcol = this._computeVCol(line, cursor.ch, tabstop);
+      let origWidth = this._charVColWidth(origChar, vcol, tabstop);
+      let newWidth = this._charVColWidth(key, vcol, tabstop);
+
+      vim.replaceStack.push({ original: origChar, vcols: origWidth });
+
+      let padding = origWidth > newWidth ? ' '.repeat(origWidth - newWidth) : '';
+      let endCh = cursor.ch + 1;
+      this.replaceRange(key + padding,
+        { line: cursor.line, ch: cursor.ch },
+        { line: cursor.line, ch: endCh });
+      this.setCursor(cursor.line, cursor.ch + 1);
+    }
+  }
+
+  virtualReplaceBackspace(vim: any, tabstop: number) {
+    if (vim.replaceStack.length === 0) return;
+    let entry = vim.replaceStack.pop()!;
+    let cursor = this.getCursor();
+
+    if (entry.original === '') {
+      this.replaceRange('',
+        { line: cursor.line, ch: cursor.ch - 1 },
+        { line: cursor.line, ch: cursor.ch });
+      this.setCursor(cursor.line, cursor.ch - 1);
+    } else {
+      let line = this.getLine(cursor.line);
+      let restorePos = cursor.ch - 1;
+      let vcol = this._computeVCol(line, restorePos, tabstop);
+      let origWidth = entry.vcols;
+      let currentChar = line[restorePos];
+      let currentWidth = this._charVColWidth(currentChar, vcol, tabstop);
+      let padCount = 0;
+      for (let i = restorePos + 1; i < line.length && line[i] === ' '; i++) {
+        padCount++;
+        if (currentWidth + padCount >= origWidth) break;
+      }
+      this.replaceRange(entry.original,
+        { line: cursor.line, ch: restorePos },
+        { line: cursor.line, ch: restorePos + 1 + padCount });
+      this.setCursor(cursor.line, restorePos);
+    }
+  }
+
+  private _computeVCol(line: string, ch: number, tabstop: number): number {
+    let vcol = 0;
+    for (let i = 0; i < ch && i < line.length; i++) {
+      if (line[i] === '\t') {
+        vcol += tabstop - (vcol % tabstop);
+      } else {
+        vcol += 1;
+      }
+    }
+    return vcol;
+  }
+
+  private _charVColWidth(ch: string, vcol: number, tabstop: number): number {
+    if (ch === '\t') return tabstop - (vcol % tabstop);
+    return 1;
+  }
+
   /*** multiselect ****/
   isInMultiSelectMode() {
     return this.cm6.state.selection.ranges.length > 1
@@ -1214,4 +1288,3 @@ function hardWrap(cm: CodeMirror, options: hardWrapOptions) {
     }
   }
 }
-

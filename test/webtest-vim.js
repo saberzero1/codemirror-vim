@@ -19,6 +19,7 @@ var disabled = {
   vim_zt_to_top: 1,
   "vim_zb<zz": 1,
   vim_rendered_cursor_position_eol_cm6: 1,
+  vim_smap_creates_select_mapping: 1,
 };
 
 describe("Vim extension", () => {

@@ -908,3 +908,62 @@ the "display" selection.
 - `moveByWords` return: `Pos | null | undefined`
 - `InsertModeChanges`: Added `blockInsertLeft?: number`
 - `MotionFn` return: Widened to include `Promise` variants
+
+## Select mode (gh/gH/g<C-h>)
+
+**Files**: `src/vim.js`, `src/index.ts`, `src/types.ts`
+
+Added Vim select mode — a mode where typing replaces the selection and enters insert mode. Entry via `gh` (charwise), `gH` (linewise), `g<C-h>` (blockwise). `<C-g>` toggles between visual and select mode. `<BS>` deletes the selection. `<Esc>` exits to normal mode.
+
+Vim state: `selectMode` flag on `vimState`, cleared in `exitVisualMode`. Mode change event: `{mode: "select", subMode: ""|"linewise"|"blockwise"}`. Select mode saved/restored by `updateLastSelection`/`reselectLastSelection` for `gv`.
+
+Key dispatch: `handleKeyNonInsertMode` checks for select-mode-specific mappings (`:smap`) before the printable char intercept. If no `:smap` mapping exists, printable chars replace the selection via `exitVisualMode` + `replaceRange` + `enterInsertMode`.
+
+Context: `commandMatches` uses `'select'` context when `vim.selectMode` is true, with automatic fallback to `'visual'` context when no select-specific mapping matches.
+
+CSS class: `.cm-vimSelect` toggled on `scrollDOM` in `updateClass()`.
+
+## Virtual Replace mode (gR)
+
+**Files**: `src/vim.js`, `src/cm_adapter.ts`, `src/index.ts`, `src/types.ts`
+
+Added virtual replace mode — replace mode that operates on screen columns instead of byte positions. Entry via `gR`. Mode change event: `{mode: "vreplace"}`.
+
+Replace stack (`vim.replaceStack`) tracks original characters for `<BS>` restore. Adapter methods `virtualReplaceChar(key, vim, tabstop)` and `virtualReplaceBackspace(vim, tabstop)` handle virtual column math with TAB-aware width calculations. Private helpers `_computeVCol` and `_charVColWidth` on the adapter.
+
+`<Insert>` key toggles between virtual replace and insert mode, preserving the `virtualReplace` flag across toggles.
+
+## Replace mode replace stack
+
+**File**: `src/vim.js`
+
+Extended the replace stack (previously only for `gR`) to regular `R` mode. `handleReplaceModeInput` pushes original characters to `vim.replaceStack` before overwriting. `<BS>` pops from the stack and restores the original character, matching Neovim's `R` mode behavior.
+
+## Unified replace mode character handling
+
+**Files**: `src/vim.js`, `src/cm_adapter.ts`, `src/index.ts`
+
+Moved replace/vreplace character I/O from `index.ts` (DOM-only path) into `vim.js` (`handleReplaceModeInput` function). Called from `handleKeyInsertMode` in the `match.type == 'none'` branch when `cm.state.overwrite` is true. This ensures `Vim.handleKey` is authoritative for all replace-mode operations — programmatic dispatch, macro replay, and tests work correctly.
+
+The `index.ts` overwrite block (previously lines 335-404) and helper functions (`computeVCol`, `charVColWidth`) were removed.
+
+## Ctrl-O mode return fix
+
+**File**: `src/vim.js`
+
+`oneNormalCommand` (`<C-o>` in insert mode) now returns to the correct mode (insert, replace, or virtual replace) instead of always returning to insert. Uses `vim._suppressModeSignal` to prevent a spurious `{mode:"normal"}` event from `exitInsertMode`, then emits `{mode:"normal", subMode:"ctrl-o"|"ctrl-o-replace"|"ctrl-o-vreplace"}`.
+
+`vim.insertModeReturnArgs` stores the mode to return to (`{replace: true}` or `{replace: true, virtualReplace: true}`).
+
+## Select mode mapping commands
+
+**Files**: `src/vim.js`
+
+Added `:smap`, `:snoremap`, `:sunmap`, `:smapclear` ex commands for select-mode-specific mappings. Added `selectmode` and `keymodel` vim options via `defineOption`. `selectmode=cmd` makes `v`/`V`/`<C-v>` enter select mode instead of visual. `gV` command prevents select mode reselection after mapping fallback.
+
+## Type changes (additions)
+
+**File**: `src/types.ts`
+
+- `vimState`: Added `selectMode`, `virtualReplace`, `replaceStack`, `_preventReselect`, `_suppressModeSignal`, `insertModeReturnArgs`
+- `lastSelection`: Added `selectMode`

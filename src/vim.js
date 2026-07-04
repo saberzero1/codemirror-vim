@@ -233,6 +233,7 @@ export function initVim(CM) {
     { keys: 'q<register>', type: 'action', action: 'enterMacroRecordMode' },
     // Handle Replace-mode as a special case of insert mode.
     { keys: 'R', type: 'action', action: 'enterInsertMode', isEdit: true, actionArgs: { replace: true }, context: 'normal'},
+    { keys: 'gR', type: 'action', action: 'enterInsertMode', isEdit: true, actionArgs: { replace: true, virtualReplace: true }, context: 'normal' },
     { keys: 'R', type: 'operator', operator: 'change', operatorArgs: { linewise: true, fullLine: true }, context: 'visual', exitVisualBlock: true},
     { keys: 'u', type: 'action', action: 'undo', context: 'normal' },
     { keys: 'u', type: 'operator', operator: 'changeCase', operatorArgs: {toLower: true}, context: 'visual', isEdit: true },
@@ -264,7 +265,12 @@ export function initVim(CM) {
     { keys: 'g*', type: 'search', searchArgs: { forward: true, querySrc: 'wordUnderCursor', toJumplist: true }},
     { keys: 'g#', type: 'search', searchArgs: { forward: false, querySrc: 'wordUnderCursor', toJumplist: true }},
     // Ex command
-    { keys: ':', type: 'ex' }
+    { keys: ':', type: 'ex' },
+    { keys: 'gh', type: 'action', action: 'enterSelectMode' },
+    { keys: 'gH', type: 'action', action: 'enterSelectMode', actionArgs: { linewise: true } },
+    { keys: 'g<C-h>', type: 'action', action: 'enterSelectMode', actionArgs: { blockwise: true } },
+    { keys: '<C-g>', type: 'action', action: 'toggleSelectMode', context: 'visual' },
+    { keys: 'gV', type: 'action', action: 'preventReselect' }
   ];
   for (var _di = 0; _di < defaultKeymap.length; _di++) {
     defaultKeymap[_di]._isDefault = true;
@@ -299,6 +305,10 @@ export function initVim(CM) {
     { name: 'vmapclear', shortName: 'vmapc' },
     { name: 'imapclear', shortName: 'imapc' },
     { name: 'omapclear', shortName: 'omapc' },
+    { name: 'smap', shortName: 'sma' },
+    { name: 'snoremap', shortName: 'snor' },
+    { name: 'sunmap', shortName: 'sunm' },
+    { name: 'smapclear', shortName: 'smapc' },
     { name: 'write', shortName: 'w' },
     { name: 'undo', shortName: 'u' },
     { name: 'redo', shortName: 'red' },
@@ -773,6 +783,9 @@ export function initVim(CM) {
         // If we are in visual line mode. No effect if visualMode is false.
         visualLine: false,
         visualBlock: false,
+        selectMode: false,
+        virtualReplace: false,
+        replaceStack: [],
         lastSelection: /**@type{vimState["lastSelection"]}*/( /**@type{unknown}*/(null)),
         lastPastedText: undefined,
         sel: {anchor: new Pos(0, 0), head: new Pos(0, 0)},
@@ -852,6 +865,7 @@ export function initVim(CM) {
 
   /** @type {number | undefined|false} */
   var lastInsertModeKeyTimer;
+  var suppressNextCursorActivity = false;
   var vimApi = {
     enterVimMode: enterVimMode,
     leaveVimMode: leaveVimMode,
@@ -1064,7 +1078,21 @@ export function initVim(CM) {
         var match = commandDispatcher.matchCommand(keys, defaultKeymap, vim.inputState, 'insert');
         var changeQueue = vim.inputState.changeQueue;
 
-        if (match.type == 'none') { clearInputState(cm); return false; }
+        if (match.type == 'none') {
+          clearInputState(cm);
+          if (cm.state.overwrite && (keysAreChars || key === '<BS>' || key === '<C-h>')) {
+            var restoreCursor = !vim.virtualReplace && key === '<C-h>' ? cm.getCursor() : null;
+            if (!vim.virtualReplace && keysAreChars) {
+              suppressNextCursorActivity = true;
+            }
+            var replaceResult = handleReplaceModeInput(cm, key, vim);
+            if (replaceResult !== undefined) {
+              if (restoreCursor) cm.setCursor(restoreCursor);
+              return replaceResult;
+            }
+          }
+          return false;
+        }
         else if (match.type == 'partial') {
           if (match.expectLiteralNext) vim.expectLiteralNext = true;
           var hasNonCharKey = vim.inputState.keyBuffer.some(function(k) { return k.length > 1; });
@@ -1083,6 +1111,13 @@ export function initVim(CM) {
               var text = cm.getRange(from, cm.state.overwrite ? offsetCursor(to, 0, 1) : to);
               changeQueue.removed[i] = (changeQueue.removed[i] || "") + text;
             }
+          }
+          if (cm.state.overwrite && keysAreChars && !hasNonCharKey) {
+            if (!vim.virtualReplace) {
+              suppressNextCursorActivity = true;
+            }
+            var replaceResult = handleReplaceModeInput(cm, key, vim);
+            if (replaceResult !== undefined) return true;
           }
           if (hasNonCharKey) return true;
           return !keysAreChars;
@@ -1109,6 +1144,65 @@ export function initVim(CM) {
       function handleKeyNonInsertMode() {
         if (handleMacroRecording() || handleEsc()) { return true; }
 
+        // Select mode: check for :smap mappings first, then handle
+        // printable chars as selection replacement.
+        if (vim.visualMode && vim.selectMode) {
+          // Check for select-context-ONLY mappings (no visual fallback).
+          // Only user-defined :smap mappings have context === 'select'.
+          var hasSelectMapping = defaultKeymap.some(function(cmd) {
+            return cmd.context === 'select' && commandMatch(key, cmd.keys) === 'full';
+          });
+          if (hasSelectMapping) {
+            vim.inputState.keyBuffer.push(key);
+            var keys = vim.inputState.keyBuffer.join("");
+            var selectMatch = commandDispatcher.matchCommand(keys, defaultKeymap, vim.inputState, 'select');
+            if (selectMatch.type === 'full') {
+              vim.inputState.keyBuffer.length = 0;
+              return selectMatch.command;
+            }
+          }
+          if ((key.length === 1 && key !== '\x1b') || key === '<CR>' || key === '<NL>') {
+            var anchor = copyCursor(vim.sel.anchor);
+            var head = copyCursor(vim.sel.head);
+            var selStart = cursorIsBefore(anchor, head) ? anchor : head;
+            var selEnd = cursorIsBefore(anchor, head) ? head : anchor;
+            if (vim.visualLine) {
+              selStart = new Pos(selStart.line, 0);
+              selEnd = new Pos(selEnd.line, lineLength(cm, selEnd.line));
+            }
+            vim.lastEditInputState = vim.inputState;
+            vim.lastEditActionCommand = {
+              keys: '',
+              type: 'action', action: 'enterInsertMode',
+              isEdit: true, actionArgs: {}
+            };
+            exitVisualMode(cm, false);
+            cm.replaceRange('', selStart, selEnd);
+            actions.enterInsertMode(cm, {}, vim);
+            var insertKey = (key === '<CR>' || key === '<NL>') ? '\n' : key;
+            cm.replaceSelection(insertKey);
+            return true;
+          }
+          // BS: delete selection, go to normal mode
+          if (key === '<BS>' || key === '<C-h>') {
+            var anchor = copyCursor(vim.sel.anchor);
+            var head = copyCursor(vim.sel.head);
+            var selStart = cursorIsBefore(anchor, head) ? anchor : head;
+            var selEnd = cursorIsBefore(anchor, head) ? head : anchor;
+            exitVisualMode(cm, false);
+            cm.replaceRange('', selStart, selEnd);
+            cm.setCursor(selStart);
+            CM.signal(cm, "vim-mode-change", {mode: "normal"});
+            return true;
+          }
+          // Esc/C-c/C-[: exit select mode
+          if (key === '<Esc>' || key === '<C-c>' || key === '<C-[>') {
+            exitVisualMode(cm);
+            return true;
+          }
+          // All other keys (motions, operators): fall through to normal visual dispatch
+        }
+
         if (vim.surroundState) {
           var surroundResult = handleSurroundSubState(cm, key, vim);
           if (surroundResult !== false) return surroundResult;
@@ -1120,7 +1214,7 @@ export function initVim(CM) {
 
         var keysMatcher = /^(\d*)(.*)$/.exec(keys);
         if (!keysMatcher) { clearInputState(cm); return false; }
-        var context = vim.visualMode ? 'visual' :
+        var context = vim.visualMode ? (vim.selectMode ? 'select' : 'visual') :
                                         'normal';
         var mainKey = keysMatcher[2] || keysMatcher[1];
         if (vim.inputState.operatorShortcut && vim.inputState.operatorShortcut.slice(-1) == mainKey) {
@@ -1570,6 +1664,48 @@ export function initVim(CM) {
       cm.state.vim._commandGeneration++;
     }
     CM.signal(cm, 'vim-command-done', reason);
+  }
+
+  function handleReplaceModeInput(cm, key, vim) {
+    var tabstop = getOption('tabstop') || 8;
+    if (key.length === 1 && key !== '\x1b') {
+      if (vim.virtualReplace) {
+        cm.virtualReplaceChar(key, vim, tabstop);
+      } else {
+        // Regular R mode: push original char to replace stack before overwriting
+        var cursor = cm.getCursor();
+        var line = cm.getLine(cursor.line);
+        if (cursor.ch < line.length) {
+          vim.replaceStack.push({ original: line[cursor.ch], vcols: 1 });
+        } else {
+          vim.replaceStack.push({ original: '', vcols: 0 });
+        }
+        cm.overWriteSelection(key);
+      }
+      return true;
+    }
+    if (key === '<BS>' || key === '<C-h>') {
+      if (vim.replaceStack.length > 0) {
+        // Both R and gR: restore from replace stack
+        if (vim.virtualReplace) {
+          cm.virtualReplaceBackspace(vim, tabstop);
+        } else {
+          var entry = vim.replaceStack.pop();
+          var cursor = cm.getCursor();
+          var restorePos = new Pos(cursor.line, cursor.ch - 1);
+          if (entry.original === '') {
+            cm.replaceRange('', restorePos, cursor);
+          } else {
+            cm.replaceRange(entry.original, restorePos, cursor);
+          }
+          cm.setCursor(restorePos);
+        }
+      } else {
+        CM.commands.cursorCharLeft(cm);
+      }
+      return true;
+    }
+    return undefined;
   }
 
   function ChangeQueue() {
@@ -3965,10 +4101,15 @@ export function initVim(CM) {
       }
     },
     toggleOverwrite: function(cm) {
+      var vim = cm.state.vim;
       if (!cm.state.overwrite) {
         cm.toggleOverwrite(true);
         cm.setOption('keyMap', 'vim-replace');
-        CM.signal(cm, "vim-mode-change", {mode: "replace"});
+        if (vim.virtualReplace) {
+          CM.signal(cm, "vim-mode-change", {mode: "vreplace"});
+        } else {
+          CM.signal(cm, "vim-mode-change", {mode: "replace"});
+        }
       } else {
         cm.toggleOverwrite(false);
         cm.setOption('keyMap', 'vim-insert');
@@ -4039,7 +4180,13 @@ export function initVim(CM) {
         // Handle Replace-mode as a special case of insert mode.
         cm.toggleOverwrite(true);
         cm.setOption('keyMap', 'vim-replace');
-        CM.signal(cm, "vim-mode-change", {mode: "replace"});
+        if (actionArgs.virtualReplace) {
+          vim.virtualReplace = true;
+          vim.replaceStack = [];
+          CM.signal(cm, "vim-mode-change", {mode: "vreplace"});
+        } else {
+          CM.signal(cm, "vim-mode-change", {mode: "replace"});
+        }
       } else {
         cm.toggleOverwrite(false);
         cm.setOption('keyMap', 'vim-insert');
@@ -4080,6 +4227,15 @@ export function initVim(CM) {
           head: newPosition.end
         };
         CM.signal(cm, "vim-mode-change", {mode: "visual", subMode: vim.visualLine ? "linewise" : vim.visualBlock ? "blockwise" : ""});
+        // Check selectmode option for automatic select mode entry
+        var slm = getOption('selectmode') || '';
+        if (slm.indexOf('cmd') !== -1) {
+          vim.selectMode = true;
+          CM.signal(cm, "vim-mode-change", {
+            mode: "select",
+            subMode: vim.visualLine ? "linewise" : vim.visualBlock ? "blockwise" : ""
+          });
+        }
         updateCmSelection(cm);
         updateMark(cm, vim, '<', cursorMin(anchor, head));
         updateMark(cm, vim, '>', cursorMax(anchor, head));
@@ -4089,10 +4245,40 @@ export function initVim(CM) {
         vim.visualLine = !!actionArgs.linewise;
         vim.visualBlock = !!actionArgs.blockwise;
         CM.signal(cm, "vim-mode-change", {mode: "visual", subMode: vim.visualLine ? "linewise" : vim.visualBlock ? "blockwise" : ""});
+        // Check selectmode option for automatic select mode entry
+        var slm = getOption('selectmode') || '';
+        if (slm.indexOf('cmd') !== -1) {
+          vim.selectMode = true;
+          CM.signal(cm, "vim-mode-change", {
+            mode: "select",
+            subMode: vim.visualLine ? "linewise" : vim.visualBlock ? "blockwise" : ""
+          });
+        }
         updateCmSelection(cm);
       } else {
         exitVisualMode(cm);
       }
+    },
+    enterSelectMode: function(cm, actionArgs, vim) {
+      actions.toggleVisualMode(cm, actionArgs, vim);
+      if (vim.visualMode) {
+        vim.selectMode = true;
+        CM.signal(cm, "vim-mode-change", {
+          mode: "select",
+          subMode: vim.visualLine ? "linewise" : vim.visualBlock ? "blockwise" : ""
+        });
+      }
+    },
+    toggleSelectMode: function(cm, actionArgs, vim) {
+      if (!vim.visualMode) return;
+      vim.selectMode = !vim.selectMode;
+      CM.signal(cm, "vim-mode-change", {
+        mode: vim.selectMode ? "select" : "visual",
+        subMode: vim.visualLine ? "linewise" : vim.visualBlock ? "blockwise" : ""
+      });
+    },
+    preventReselect: function(cm, actionArgs, vim) {
+      vim._preventReselect = true;
     },
     reselectLastSelection: function(cm, _actionArgs, vim) {
       var lastSelection = vim.lastSelection;
@@ -4113,11 +4299,14 @@ export function initVim(CM) {
         vim.visualMode = true;
         vim.visualLine = lastSelection.visualLine;
         vim.visualBlock = lastSelection.visualBlock;
+        if (lastSelection.selectMode) {
+          vim.selectMode = true;
+        }
         updateCmSelection(cm);
         updateMark(cm, vim, '<', cursorMin(anchor, head));
         updateMark(cm, vim, '>', cursorMax(anchor, head));
         CM.signal(cm, 'vim-mode-change', {
-          mode: 'visual',
+          mode: vim.selectMode ? 'select' : 'visual',
           subMode: vim.visualLine ? 'linewise' :
                     vim.visualBlock ? 'blockwise' : ''});
       }
@@ -4376,14 +4565,38 @@ export function initVim(CM) {
       }
     },
     oneNormalCommand: function(cm, actionArgs, vim) {
+      // Save what mode we were in before Ctrl-O
+      var wasReplace = !!cm.state.overwrite;
+      var wasVirtualReplace = !!vim.virtualReplace;
+
+      // Suppress the mode-change signal that exitInsertMode emits,
+      // so ecosystem plugins don't see a spurious {mode:"normal"} event.
+      vim._suppressModeSignal = true;
       exitInsertMode(cm, true);
+      vim._suppressModeSignal = false;
+
+      // Set return flags and emit the correct insert-normal signal
       vim.insertModeReturn = true;
+      vim.insertModeReturnArgs = wasVirtualReplace
+          ? { replace: true, virtualReplace: true }
+          : wasReplace
+              ? { replace: true }
+              : {};
+
+      CM.signal(cm, "vim-mode-change", {
+          mode: "normal",
+          subMode: wasVirtualReplace ? "ctrl-o-vreplace" :
+                   wasReplace ? "ctrl-o-replace" : "ctrl-o"
+      });
+
       CM.on(cm, 'vim-command-done', function handler() {
         if (vim.visualMode) return;
         if (vim.insertModeReturn) {
           vim.insertModeReturn = false;
+          var returnArgs = vim.insertModeReturnArgs || {};
+          delete vim.insertModeReturnArgs;
           if (!vim.insertMode) {
-            actions.enterInsertMode(cm, {}, vim);
+            actions.enterInsertMode(cm, returnArgs, vim);
           }
         }
         CM.off(cm, 'vim-command-done', handler);
@@ -4848,6 +5061,21 @@ export function initVim(CM) {
       if (match == 'partial') { partial.push(command); }
       if (match == 'full') { full.push(command); }
     }
+    // Select mode fallback: if no full matches in select context,
+    // try visual context (Neovim falls back to :vmap when no :smap exists)
+    if (context === 'select' && full.length === 0) {
+      for (var i = startIndex; i < keyMap.length; i++) {
+        var command = keyMap[i];
+        if (command.context === 'visual' &&
+            !(inputState.operator && command.type == 'action' && !command.operatorPending) &&
+            (match = commandMatch(keys, command.keys))) {
+          if (match == 'partial') { partial.push(command); }
+          if (match == 'full') {
+            full.push(Object.assign({}, command, { _selectFallback: true }));
+          }
+        }
+      }
+    }
     return {
       partial: partial,
       full: full
@@ -5057,7 +5285,8 @@ export function initVim(CM) {
                           'head': copyCursor(head),
                           'visualMode': vim.visualMode,
                           'visualLine': vim.visualLine,
-                          'visualBlock': vim.visualBlock};
+                          'visualBlock': vim.visualBlock,
+                          'selectMode': vim.selectMode};
   }
   /** @arg {CodeMirrorV} cm @arg {Pos} start @arg {Pos} end @arg {Boolean} [move] @returns {[Pos, Pos]} */
   function expandSelection(cm, start, end, move) {
@@ -5198,6 +5427,8 @@ export function initVim(CM) {
     vim.visualMode = false;
     vim.visualLine = false;
     vim.visualBlock = false;
+    vim.selectMode = false;
+    vim._preventReselect = false;
     if (moveHead !== false) {
       cm.setCursor(clipCursorToContent(cm, vim.sel.head));
     }
@@ -6267,6 +6498,8 @@ export function initVim(CM) {
   }
 
   defineOption('clipboard', '', 'string', ['clip']);
+  defineOption('selectmode', '', 'string', ['slm']);
+  defineOption('keymodel', '', 'string', ['km']);
 
   // Search functions
   defineOption('pcre', true, 'boolean');
@@ -7218,6 +7451,14 @@ export function initVim(CM) {
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     omapclear: function(cm, params) { vimApi.mapclear('operatorPending'); },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
+    smap: function(cm, params) { this.map(cm, params, 'select'); },
+    /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
+    snoremap: function(cm, params) { this.map(cm, params, 'select', true); },
+    /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
+    sunmap: function(cm, params) { this.unmap(cm, params, 'select'); },
+    /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
+    smapclear: function(cm, params) { vimApi.mapclear('select'); },
+    /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     move: function(cm, params) {
       commandDispatcher.processCommand(cm, cm.state.vim, {
         keys: "",
@@ -7972,6 +8213,8 @@ export function initVim(CM) {
       cm.replaceRange(closeText, cm.getCursor());
     }
     vim.insertMode = false;
+    vim.virtualReplace = false;
+    vim.replaceStack = [];
     if (!keepCursor) {
       if (vim.blockInsertLeft != null) {
         cm.setCursor(cm.getCursor().line, vim.blockInsertLeft);
@@ -7985,7 +8228,9 @@ export function initVim(CM) {
     cm.toggleOverwrite(false); // exit replace mode if we were in it.
     // update the ". register before exiting insert mode
     insertModeChangeRegister.setText(lastChange.changes.join(''));
-    CM.signal(cm, "vim-mode-change", {mode: "normal"});
+    if (!vim._suppressModeSignal) {
+      CM.signal(cm, "vim-mode-change", {mode: "normal"});
+    }
     if (macroModeState.isRecording) {
       logInsertModeChange(macroModeState);
     }
@@ -8183,6 +8428,10 @@ export function initVim(CM) {
    */
   function onCursorActivity(cm) {
     var vim = cm.state.vim;
+    if (suppressNextCursorActivity) {
+      suppressNextCursorActivity = false;
+      return;
+    }
     if (vim.insertMode) {
       // Tracking cursor activity in insert mode (for macro support).
       var macroModeState = vimGlobalState.macroModeState;
