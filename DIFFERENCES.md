@@ -967,3 +967,18 @@ Added `:smap`, `:snoremap`, `:sunmap`, `:smapclear` ex commands for select-mode-
 
 - `vimState`: Added `selectMode`, `virtualReplace`, `replaceStack`, `_preventReselect`, `_suppressModeSignal`, `insertModeReturnArgs`
 - `lastSelection`: Added `selectMode`
+
+## TextYankPost signal (`vim-yank`)
+
+**File**: `src/vim.js`
+
+Added `CodeMirror.signal(cm, 'vim-yank', payload)` emission in three operators: `yank`, `delete`, and `change`. The signal fires after text is stored in the register, before any UI feedback (confirmation message or mode transition).
+
+Payload:
+- `operator`: `'y'` (yank), `'d'` (delete), or `'c'` (change)
+- `regName`: register name or `''` for unnamed
+- `regContents`: the yanked/deleted text
+- `regType`: `'V'` (linewise), `'v'` (charwise), or `'\x16'` (blockwise)
+- `visual`: `true` if the operation was from visual mode
+
+This enables the Obsidian plugin to implement Neovim-compatible `TextYankPost` autocommands for yank highlighting and clipboard integration.

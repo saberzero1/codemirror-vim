@@ -3215,6 +3215,13 @@ export function initVim(CM) {
         vimGlobalState.registerController.pushText(
             args.registerName, 'change', text,
             args.linewise, true);
+        CM.signal(cm, 'vim-yank', {
+          operator: 'c',
+          regName: args.registerName || '',
+          regContents: text,
+          regType: args.linewise ? 'V' : (vim.visualBlock ? '\x16' : 'v'),
+          visual: !!vim.visualMode
+        });
         actions.enterInsertMode(cm, {head: finalHead}, cm.state.vim);
         return;
       } else if (!vim.visualMode) {
@@ -3252,6 +3259,13 @@ export function initVim(CM) {
       vimGlobalState.registerController.pushText(
           args.registerName, 'change', text,
           args.linewise, ranges.length > 1);
+      CM.signal(cm, 'vim-yank', {
+        operator: 'c',
+        regName: args.registerName || '',
+        regContents: text,
+        regType: args.linewise ? 'V' : (vim.visualBlock ? '\x16' : 'v'),
+        visual: !!vim.visualMode
+      });
       actions.enterInsertMode(cm, {head: finalHead}, cm.state.vim);
     },
     delete: function(cm, args, ranges) {
@@ -3296,6 +3310,13 @@ export function initVim(CM) {
       vimGlobalState.registerController.pushText(
           args.registerName, 'delete', text,
           args.linewise, vim.visualBlock);
+      CM.signal(cm, 'vim-yank', {
+        operator: 'd',
+        regName: args.registerName || '',
+        regContents: text,
+        regType: args.linewise ? 'V' : (vim.visualBlock ? '\x16' : 'v'),
+        visual: !!vim.visualMode
+      });
       return clipCursorToContent(cm, finalHead);
     },
     indent: function(cm, args, ranges) {
@@ -3432,6 +3453,13 @@ export function initVim(CM) {
       vimGlobalState.registerController.pushText(
           args.registerName, 'yank',
           text, args.linewise, vim.visualBlock);
+      CM.signal(cm, 'vim-yank', {
+        operator: 'y',
+        regName: args.registerName || '',
+        regContents: text,
+        regType: args.linewise ? 'V' : (vim.visualBlock ? '\x16' : 'v'),
+        visual: !!vim.visualMode
+      });
       
       var lineCount = Math.abs(cm.getCursor("end").line - cm.getCursor("start").line) || 1;      
       showConfirm(cm, lineCount + ' lines yanked' + (args.registerName ? ' into "' + args.registerName : ''), false, 1500);
