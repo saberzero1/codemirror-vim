@@ -211,7 +211,7 @@ function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange,
         let letter = head < view.state.doc.length ? view.state.sliceDoc(head, head + 1) : "";
         if (letter !== "\n") {
           head--;
-        } else if (!vim.visualLine && !vim.visualBlock) {
+        } else if (!vim.visualLine) {
           let line = view.state.doc.lineAt(head);
           if (head > line.from)
             head--;

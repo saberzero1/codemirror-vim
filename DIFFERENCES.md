@@ -383,9 +383,15 @@ selections (`anchor < head`) to render the cursor on the last selected
 character. The original `letter != "\n"` guard (commit `8e8ea52`, empty-line
 fix) prevented the adjustment at EOL on non-empty lines, causing the block
 cursor to render past the visible line content in charwise visual mode.
-The fix uses the vim state (`vim.visualLine`, `vim.visualBlock`) to only
-apply the EOL decrement in charwise visual mode — linewise and blockwise
-visual skip the adjustment, preserving their existing rendering.
+The fix uses the vim state to scope the EOL decrement: linewise visual
+skips the adjustment (cursor-only CM6 selection manages positioning
+independently), while charwise and blockwise visual both apply the
+step-back to render the cursor on the last visible character. The
+blockwise exception was originally added (commit `b68fdd9`) when
+`makeCmSelection` did not clamp `toCh` per-line, so the head never
+landed on `"\n"`. After the per-line clamping fix (see "Block visual EOL
+cursor clamping" below), `head` legitimately lands on newline positions
+in block mode, requiring the same step-back as charwise.
 
 The `letter != "\n"` comparison also used loose equality (`!=`), which caused
 incorrect branch selection when `head >= doc.length`: the short-circuit
