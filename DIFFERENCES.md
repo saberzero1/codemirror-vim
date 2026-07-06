@@ -758,6 +758,63 @@ inner spaces; closing brackets don't. `<` in replacement position triggers tag
 prompting (breaking change — use `>` for no-space angle brackets). `f`/`F` in
 replacement position triggers function wrapping.
 
+### Custom surround pairs (`registerSurroundPair` / `unregisterSurroundPair`)
+
+**File**: `src/vim.js`
+
+Users can register custom single-character triggers that map to arbitrary
+open/close delimiter strings (including multi-character). The public API:
+
+- `Vim.registerSurroundPair(trigger, open, close)` — adds a pair to the
+  `customSurroundPairs` Map. Throws if `trigger` is not a single character,
+  if it is in `RESERVED_SURROUND_CHARS`, or if `open`/`close` are not strings.
+- `Vim.unregisterSurroundPair(trigger)` — removes a custom pair.
+
+Reserved characters (19 total): `( ) [ ] { } < > b B r a t T f F " ' \``.
+These are rejected to prevent overriding built-in bracket, quote, alias, tag,
+and function surround behavior.
+
+Custom pairs integrate with all surround operations:
+
+1. **`getSurroundPair(ch)`** checks `customSurroundPairs` after the
+   tag/function object check but before `normalizeSurroundTarget` and the
+   `surroundBrackets` lookup. Custom pairs take priority over the single-char
+   quote fallback.
+
+2. **`findSurroundingPair(cm, pos, target, count)`** checks
+   `customSurroundPairs` before the built-in bracket/quote dispatch. When a
+   custom pair is found, it delegates to `findSurroundingMultiChar`.
+
+3. **`findSurroundingMultiChar(cm, pos, open, close, count)`** handles
+   multi-character delimiter matching:
+   - **Asymmetric pairs** (`open !== close`): depth-based scanning. Backward
+     scan from cursor finds the opening delimiter at depth 0, forward scan
+     finds the matching close. Nesting is tracked by incrementing depth on
+     `open` occurrences and decrementing on `close`. Count > 1 iterates to
+     find the Nth outer pair.
+   - **Symmetric pairs** (`open === close`): same-line pair matching. All
+     occurrences of the delimiter on the cursor line are collected and paired
+     sequentially (0→1, 2→3, etc.). The pair containing the cursor is returned.
+     Count > 1 builds a repeated needle (`open` × count) for matching
+     count-prefix delimiters (e.g., `2ds` with `$$` → searches for `$$$$`).
+   - Returns `{ open: Pos, close: Pos, openWidth, closeWidth }`. The `Pos`
+     values point to the first character of each delimiter.
+
+4. **`deleteSurroundPair`** and **`changeSurroundPair`** use
+   `found.openWidth || found.width || 1` and
+   `found.closeWidth || found.width || 1` for delimiter range computation.
+   Space removal is gated to `openW === 1 && closeW === 1` (multi-char
+   delimiters never trigger space removal).
+
+5. **`isQuoteTarget`** in `surroundAction` excludes custom pairs:
+   `!surroundBrackets[...] && !customSurroundPairs.has(target)`. This prevents
+   custom pairs from being treated as quote-type targets (which would apply
+   `charRepeat` count semantics instead of bracket-style outer pair semantics).
+
+Test coverage: 11 tests in `test/vim_test.js` covering ys/ds/cs with asymmetric
+and symmetric custom pairs, reserved char rejection, unregister fallback,
+nested asymmetric, visual S, and built-in unaffected.
+
 ### Block visual insert (`I`/`A`), change (`c`/`C`)
 
 **File**: `src/vim.js`

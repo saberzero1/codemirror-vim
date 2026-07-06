@@ -999,6 +999,21 @@ export function initVim(CM) {
         if (defaultKeymap[i].keys) addUsedKeys(defaultKeymap[i].keys);
       }
     },
+    registerSurroundPair: function(trigger, open, close) {
+      if (typeof trigger !== 'string' || trigger.length !== 1) {
+        throw new Error('Surround trigger must be a single character, got: ' + JSON.stringify(trigger));
+      }
+      if (RESERVED_SURROUND_CHARS.has(trigger)) {
+        throw new Error('Cannot register surround pair for reserved character: "' + trigger + '". Reserved characters are: ' + Array.from(RESERVED_SURROUND_CHARS).join(', '));
+      }
+      if (typeof open !== 'string' || typeof close !== 'string') {
+        throw new Error('Surround open and close must be strings');
+      }
+      customSurroundPairs.set(trigger, { open: open, close: close });
+    },
+    unregisterSurroundPair: function(trigger) {
+      customSurroundPairs.delete(trigger);
+    },
     langmap: updateLangmap,
     vimKeyFromEvent: vimKeyFromEvent,
     // TODO: Expose setOption and getOption as instance methods. Need to decide how to namespace
@@ -3514,6 +3529,13 @@ export function initVim(CM) {
     '>': { open: '<', close: '>', pair: '<' },
   };
   var surroundAliases = { 'b': ')', 'B': '}', 'r': ']', 'a': '>' };
+  var customSurroundPairs = new Map();
+  var RESERVED_SURROUND_CHARS = new Set([
+    '(', ')', '[', ']', '{', '}', '<', '>',
+    'b', 'B', 'r', 'a',
+    't', 'T', 'f', 'F',
+    '"', "'", '`'
+  ]);
 
   function normalizeSurroundTarget(ch) {
     return surroundAliases[ch] || ch;
@@ -3531,6 +3553,8 @@ export function initVim(CM) {
           : { open: ch.value + '(', close: ')' };
       }
     }
+    var custom = customSurroundPairs.get(ch);
+    if (custom) return { open: custom.open, close: custom.close };
     ch = normalizeSurroundTarget(ch);
     var bracket = surroundBrackets[ch];
     if (bracket) return { open: bracket.open, close: bracket.close };
@@ -3538,6 +3562,10 @@ export function initVim(CM) {
   }
 
   function findSurroundingPair(cm, pos, target, count) {
+    var custom = customSurroundPairs.get(target);
+    if (custom) {
+      return findSurroundingMultiChar(cm, pos, custom.open, custom.close, count);
+    }
     target = normalizeSurroundTarget(target);
     var bracket = surroundBrackets[target];
     if (bracket) {
@@ -3635,25 +3663,158 @@ export function initVim(CM) {
     return best;
   }
 
+  function findSurroundingMultiChar(cm, pos, open, close, count) {
+    var openWidth = open.length;
+    var closeWidth = close.length;
+    if (!openWidth || !closeWidth) return null;
+    var n = count || 1;
+    if (open === close) {
+      var lineText = cm.getLine(pos.line);
+      if (n > 1) {
+        var needle = '';
+        for (var r = 0; r < n; r++) needle += open;
+        var beforeCursor = lineText.lastIndexOf(needle, pos.ch);
+        if (beforeCursor === -1) return null;
+        var afterContent = lineText.indexOf(needle, beforeCursor + needle.length);
+        if (afterContent === -1 || pos.ch > afterContent + needle.length - 1) return null;
+        return {
+          open: new Pos(pos.line, beforeCursor),
+          close: new Pos(pos.line, afterContent + needle.length - 1),
+          openWidth: needle.length,
+          closeWidth: needle.length
+        };
+      }
+      var positions = [];
+      var idx = lineText.indexOf(open);
+      while (idx !== -1) {
+        positions.push(idx);
+        idx = lineText.indexOf(open, idx + openWidth);
+      }
+      if (positions.length < 2) return null;
+      var best = null;
+      for (var i = 0; i < positions.length - 1; i += 2) {
+        var start = positions[i];
+        var end = positions[i + 1];
+        if (start === undefined || end === undefined) continue;
+        var endPos = end + closeWidth - 1;
+        if (pos.ch >= start && pos.ch <= endPos) {
+          if (!best || (end - start) < (best.close.ch - best.open.ch)) {
+            best = {
+              open: new Pos(pos.line, start),
+              close: new Pos(pos.line, endPos),
+              openWidth: openWidth,
+              closeWidth: closeWidth
+            };
+          }
+        }
+      }
+      return best;
+    }
+
+    function collectPositions(text, needle, limit) {
+      var positions = [];
+      var pos = text.indexOf(needle, 0);
+      while (pos !== -1 && pos < limit) {
+        positions.push(pos);
+        pos = text.indexOf(needle, pos + needle.length);
+      }
+      return positions;
+    }
+
+    function findOnce(cursor) {
+      var depth = 0;
+      var openPos = null;
+      var closePos = null;
+      var lineIndex;
+      for (lineIndex = cursor.line; lineIndex >= cm.firstLine(); lineIndex--) {
+        var text = cm.getLine(lineIndex);
+        var limit = (lineIndex === cursor.line) ? cursor.ch + 1 : text.length;
+        var opens = collectPositions(text, open, limit);
+        var closes = collectPositions(text, close, limit);
+        var oi = opens.length - 1;
+        var ci = closes.length - 1;
+        while (oi >= 0 || ci >= 0) {
+          var openIndex = oi >= 0 ? opens[oi] : -1;
+          var closeIndex = ci >= 0 ? closes[ci] : -1;
+          if (closeIndex > openIndex) {
+            depth++;
+            ci--;
+          } else {
+            if (openIndex === -1) break;
+            if (depth === 0) { openPos = new Pos(lineIndex, openIndex); break; }
+            depth--;
+            oi--;
+          }
+        }
+        if (openPos) break;
+      }
+      if (!openPos) return null;
+      depth = 0;
+      for (lineIndex = openPos.line; lineIndex <= cm.lastLine(); lineIndex++) {
+        var text = cm.getLine(lineIndex);
+        var startCh = (lineIndex === openPos.line) ? openPos.ch + openWidth : 0;
+        var openIndex = text.indexOf(open, startCh);
+        var closeIndex = text.indexOf(close, startCh);
+        while (openIndex !== -1 || closeIndex !== -1) {
+          if (openIndex !== -1 && (closeIndex === -1 || openIndex < closeIndex)) {
+            depth++;
+            startCh = openIndex + openWidth;
+          } else {
+            if (depth === 0) {
+              closePos = new Pos(lineIndex, closeIndex + closeWidth - 1);
+              break;
+            }
+            depth--;
+            startCh = closeIndex + closeWidth;
+          }
+          openIndex = text.indexOf(open, startCh);
+          closeIndex = text.indexOf(close, startCh);
+        }
+        if (closePos) break;
+      }
+      if (!closePos) return null;
+      return {
+        open: openPos,
+        close: closePos,
+        openWidth: openWidth,
+        closeWidth: closeWidth
+      };
+    }
+
+    var result = findOnce(pos);
+    for (var i = 1; i < n; i++) {
+      if (!result) return null;
+      var outerPos = result.open.ch > 0
+        ? new Pos(result.open.line, result.open.ch - 1)
+        : result.open.line > cm.firstLine()
+          ? new Pos(result.open.line - 1, cm.getLine(result.open.line - 1).length - 1)
+          : null;
+      if (!outerPos) return null;
+      result = findOnce(outerPos);
+    }
+    return result;
+  }
+
   function deleteSurroundPair(cm, found) {
     var open = found.open;
     var close = found.close;
-    var w = found.width || 1;
+    var openW = found.openWidth || found.width || 1;
+    var closeW = found.closeWidth || found.width || 1;
     var lineText = cm.getLine(open.line);
-    var hasOpenSpace = lineText.charAt(open.ch + w) === ' ';
+    var hasOpenSpace = lineText.charAt(open.ch + openW) === ' ';
     var closeLineText = cm.getLine(close.line);
-    var hasCloseSpace = closeLineText.charAt(close.ch - w) === ' ';
-    var removeSpaces = hasOpenSpace && hasCloseSpace && open.line === close.line && w === 1;
+    var hasCloseSpace = closeLineText.charAt(close.ch - closeW) === ' ';
+    var removeSpaces = hasOpenSpace && hasCloseSpace && open.line === close.line && openW === 1 && closeW === 1;
     cm.operation(function() {
       if (removeSpaces) {
         cm.replaceRange('', new Pos(close.line, close.ch - 1), new Pos(close.line, close.ch + 1));
       } else {
-        cm.replaceRange('', new Pos(close.line, close.ch - w + 1), new Pos(close.line, close.ch + 1));
+        cm.replaceRange('', new Pos(close.line, close.ch - closeW + 1), new Pos(close.line, close.ch + 1));
       }
       if (removeSpaces) {
         cm.replaceRange('', open, new Pos(open.line, open.ch + 2));
       } else {
-        cm.replaceRange('', open, new Pos(open.line, open.ch + w));
+        cm.replaceRange('', open, new Pos(open.line, open.ch + openW));
       }
       cm.setCursor(open.line, open.ch);
     });
@@ -3663,16 +3824,17 @@ export function initVim(CM) {
     var pair = getSurroundPair(replacement);
     var open = found.open;
     var close = found.close;
-    var w = found.width || 1;
+    var openW = found.openWidth || found.width || 1;
+    var closeW = found.closeWidth || found.width || 1;
     var lineText = cm.getLine(open.line);
-    var hasOpenSpace = lineText.charAt(open.ch + w) === ' ';
+    var hasOpenSpace = lineText.charAt(open.ch + openW) === ' ';
     var closeLineText = cm.getLine(close.line);
-    var hasCloseSpace = closeLineText.charAt(close.ch - w) === ' ';
-    var hadSpaces = hasOpenSpace && hasCloseSpace && open.line === close.line && w === 1;
+    var hasCloseSpace = closeLineText.charAt(close.ch - closeW) === ' ';
+    var hadSpaces = hasOpenSpace && hasCloseSpace && open.line === close.line && openW === 1 && closeW === 1;
     if (newline) {
-      var openEnd = hadSpaces ? new Pos(open.line, open.ch + 2) : new Pos(open.line, open.ch + w);
+      var openEnd = hadSpaces ? new Pos(open.line, open.ch + 2) : new Pos(open.line, open.ch + openW);
       var closeEnd = new Pos(close.line, close.ch + 1);
-      var closeStart = hadSpaces ? new Pos(close.line, close.ch - 1) : new Pos(close.line, close.ch - w + 1);
+      var closeStart = hadSpaces ? new Pos(close.line, close.ch - 1) : new Pos(close.line, close.ch - closeW + 1);
       var contentFrom = openEnd;
       var contentTo = closeStart;
       var content = cm.getRange(contentFrom, contentTo);
@@ -3693,12 +3855,12 @@ export function initVim(CM) {
         if (hadSpaces) {
           cm.replaceRange(pair.close, new Pos(close.line, close.ch - 1), new Pos(close.line, close.ch + 1));
         } else {
-          cm.replaceRange(pair.close, new Pos(close.line, close.ch - w + 1), new Pos(close.line, close.ch + 1));
+          cm.replaceRange(pair.close, new Pos(close.line, close.ch - closeW + 1), new Pos(close.line, close.ch + 1));
         }
         if (hadSpaces) {
           cm.replaceRange(pair.open, open, new Pos(open.line, open.ch + 2));
         } else {
-          cm.replaceRange(pair.open, open, new Pos(open.line, open.ch + w));
+          cm.replaceRange(pair.open, open, new Pos(open.line, open.ch + openW));
         }
         cm.setCursor(open.line, open.ch);
       });
@@ -4783,7 +4945,7 @@ export function initVim(CM) {
           var found = findSurroundingPair(cm, cm.getCursor(), target, count);
           if (found) changeSurroundPair(cm, found, savedReplacement);
         } else {
-          var isQuoteTarget = !surroundBrackets[normalizeSurroundTarget(target)];
+          var isQuoteTarget = !surroundBrackets[normalizeSurroundTarget(target)] && !customSurroundPairs.has(target);
           vim.surroundState = {
             type: 'change',
             target: target,

@@ -7142,6 +7142,100 @@ testVim('dot_S_visual_cursor_mid_word', function(cm, vim, helpers) {
 }, { value: 'hello world' });
 
 
+// --- Custom surround pairs (registerSurroundPair) ---
+
+testVim('custom_surround_ys_asymmetric', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('l', '[[', ']]');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', 'l');
+  eq('[[hello]] world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('l');
+}, { value: 'hello world' });
+
+testVim('custom_surround_ds_asymmetric', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('l', '[[', ']]');
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', 'l');
+  eq('hello world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('l');
+}, { value: '[[hello]] world' });
+
+testVim('custom_surround_cs_asymmetric', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('l', '[[', ']]');
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', 'l', ')');
+  eq('(hello) world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('l');
+}, { value: '[[hello]] world' });
+
+testVim('custom_surround_ys_symmetric', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('m', '$$', '$$');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', 'm');
+  eq('$$hello$$ world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('m');
+}, { value: 'hello world' });
+
+testVim('custom_surround_ds_symmetric', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('m', '$$', '$$');
+  cm.setCursor(0, 4);
+  helpers.doKeys('d', 's', 'm');
+  eq('hello world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('m');
+}, { value: '$$hello$$ world' });
+
+testVim('custom_surround_cs_to_custom', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('l', '[[', ']]');
+  CodeMirror.Vim.registerSurroundPair('m', '$$', '$$');
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', ')' , 'l');
+  eq('[[hello]] world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('l');
+  CodeMirror.Vim.unregisterSurroundPair('m');
+}, { value: '(hello) world' });
+
+testVim('custom_surround_reserved_char_rejected', function(cm, vim, helpers) {
+  var threw = false;
+  try {
+    CodeMirror.Vim.registerSurroundPair('(', '<<', '>>');
+  } catch (e) {
+    threw = true;
+  }
+  is(threw);
+}, { value: 'test' });
+
+testVim('custom_surround_unregister', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('l', '[[', ']]');
+  CodeMirror.Vim.unregisterSurroundPair('l');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', 'l');
+  eq('lhellol world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('custom_surround_nested_asymmetric', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('l', '[[', ']]');
+  cm.setCursor(0, 5);
+  helpers.doKeys('d', 's', 'l');
+  eq('[[hello]] world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('l');
+}, { value: '[[[[hello]]]] world' });
+
+testVim('custom_surround_visual_S', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('l', '[[', ']]');
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'e', 'S', 'l');
+  eq('[[hello]] world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('l');
+}, { value: 'hello world' });
+
+testVim('custom_surround_builtin_unaffected', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('l', '[[', ']]');
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', ')');
+  eq('hello world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('l');
+}, { value: '(hello) world' });
+
 async function delay(t) {
   return await new Promise(resolve => setTimeout(resolve, t));
 }
