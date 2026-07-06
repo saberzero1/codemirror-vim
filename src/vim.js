@@ -3570,7 +3570,10 @@ export function initVim(CM) {
     var bracket = surroundBrackets[target];
     if (bracket) {
       var n = count || 1;
-      var result = findSurroundingBrackets(cm, pos, target, bracket.pair);
+      var isOpening = '([{<'.indexOf(target) !== -1;
+      var closingChar = isOpening ? bracket.pair : target;
+      var openingChar = isOpening ? target : bracket.pair;
+      var result = findSurroundingBrackets(cm, pos, closingChar, openingChar);
       for (var i = 1; i < n; i++) {
         if (!result) return null;
         var outerPos = result.open.ch > 0
@@ -3579,7 +3582,7 @@ export function initVim(CM) {
             ? new Pos(result.open.line - 1, cm.getLine(result.open.line - 1).length - 1)
             : null;
         if (!outerPos) return null;
-        result = findSurroundingBrackets(cm, outerPos, target, bracket.pair);
+        result = findSurroundingBrackets(cm, outerPos, closingChar, openingChar);
       }
       return result;
     }
@@ -3806,15 +3809,20 @@ export function initVim(CM) {
     var hasCloseSpace = closeLineText.charAt(close.ch - closeW) === ' ';
     var removeSpaces = hasOpenSpace && hasCloseSpace && open.line === close.line && openW === 1 && closeW === 1;
     cm.operation(function() {
-      if (removeSpaces) {
-        cm.replaceRange('', new Pos(close.line, close.ch - 1), new Pos(close.line, close.ch + 1));
-      } else {
+      if (open.line !== close.line) {
         cm.replaceRange('', new Pos(close.line, close.ch - closeW + 1), new Pos(close.line, close.ch + 1));
-      }
-      if (removeSpaces) {
-        cm.replaceRange('', open, new Pos(open.line, open.ch + 2));
-      } else {
         cm.replaceRange('', open, new Pos(open.line, open.ch + openW));
+      } else {
+        if (removeSpaces) {
+          cm.replaceRange('', new Pos(close.line, close.ch - 1), new Pos(close.line, close.ch + 1));
+        } else {
+          cm.replaceRange('', new Pos(close.line, close.ch - closeW + 1), new Pos(close.line, close.ch + 1));
+        }
+        if (removeSpaces) {
+          cm.replaceRange('', open, new Pos(open.line, open.ch + 2));
+        } else {
+          cm.replaceRange('', open, new Pos(open.line, open.ch + openW));
+        }
       }
       cm.setCursor(open.line, open.ch);
     });
@@ -3888,7 +3896,7 @@ export function initVim(CM) {
       cm.operation(function() {
         cm.replaceRange(pair.close, to);
         cm.replaceRange(pair.open, from);
-        cm.setCursor(from.line, from.ch + pair.open.length);
+        cm.setCursor(from.line, from.ch);
       });
     }
   }
@@ -5003,10 +5011,11 @@ export function initVim(CM) {
             to: to,
             onRepeat: function(spec) {
               if (vim.lastEditInputState) {
+                var rp = getSurroundPair(spec);
                 vim.lastEditInputState._surroundReplacement = spec;
                 vim.lastEditInputState._surroundSelOffset = {
                   lineDelta: to.line - from.line,
-                  chDelta: to.ch - from.ch
+                  chDelta: to.ch - from.ch + rp.open.length
                 };
               }
             }
@@ -5017,9 +5026,10 @@ export function initVim(CM) {
         }
 
         if (vim.lastEditInputState) {
+          var rPair = getSurroundPair(replacement);
           vim.lastEditInputState._surroundSelOffset = {
             lineDelta: to.line - from.line,
-            chDelta: to.ch - from.ch
+            chDelta: to.ch - from.ch + rPair.open.length
           };
         }
         addSurroundToRange(cm, from, to, replacement);

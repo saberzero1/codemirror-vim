@@ -744,19 +744,30 @@ visual mode now surrounds instead of substituting.
 
 ### Cursor positioning after add-surround
 
-`addSurroundToRange` now positions the cursor on the first character of the
-inner text (`from.ch + pair.open.length`) instead of on the opening delimiter
-(`from.ch`). This fixes dot-repeat for visual surround: the replay
-reconstructs the selection range as `[cursor, cursor + savedOffset]`, so the
-cursor must start inside the delimiters for the offset to cover the original
-text. Without this fix, `viw S]` on `test` produces `[test]` with cursor on
-`[`; pressing `.` then surrounds `[tes` instead of `test`, yielding
-`[[tes]t]` instead of the expected `[[test]]`.
+`addSurroundToRange` positions the cursor on the opening delimiter
+(`from.ch`), matching vim-surround behavior. The `_surroundSelOffset`
+used for dot-repeat adds `pair.open.length` to `chDelta` at recording
+time to compensate — the replay computes `[cursor, cursor + chDelta]`
+and the offset accounts for the cursor now being on the delimiter
+rather than after it. This ensures `viw S]` on `test` produces
+`[test]` with cursor on `[`; pressing `.` surrounds `[test]` (offset
+includes the bracket width), yielding `[[test]]`.
 
 The newline branch (`gS`, `yS`, `ySS`) is not affected — it replaces the
 entire range in a single `replaceRange` call and the cursor lands on the
 opening delimiter line, which is correct for multi-line output where the
 inner text starts on the next line.
+
+### Opening bracket target semantics
+
+`findSurroundingPair` now correctly passes the closing bracket character
+as the `close` parameter and the opening bracket character as the `open`
+parameter to `findSurroundingBrackets`, regardless of whether the user
+typed the opening or closing form. Previously, when the target was an
+opening bracket (e.g. `ds(`), the parameters were reversed — `close='('`
+and `open=')'` — causing the backward search to look for `)` instead
+of `(`, which always failed. `ds(`, `ds[`, `ds{`, `ds<`, `cs({`,
+and multiline/nested `ds(` all now work correctly.
 
 Supported targets: `"`, `'`, `` ` ``, `(`, `)`, `[`, `]`, `{`, `}`, `<`, `>`,
 `t` (tag), aliases `b`→`)`, `B`→`}`, `r`→`]`, `a`→`>`. Opening brackets add

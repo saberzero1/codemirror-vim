@@ -3376,7 +3376,7 @@ testVim('S_visual', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('v', 'l', 'S', '"');
   eq('"aa"\nbb\ncc', cm.getValue());
-  helpers.assertCursorAt(0, 1);
+  helpers.assertCursorAt(0, 0);
 }, { value: 'aa\nbb\ncc'});
 
 testVim('d_/', function(cm, vim, helpers) {
@@ -7068,35 +7068,35 @@ testVim('S_visual_cursor_position_brackets', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('v', 'e', 'S', ']');
   eq('[hello] world', cm.getValue());
-  helpers.assertCursorAt(0, 1);
+  helpers.assertCursorAt(0, 0);
 }, { value: 'hello world' });
 
 testVim('S_visual_cursor_position_quotes', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('v', 'e', 'S', '"');
   eq('"hello" world', cm.getValue());
-  helpers.assertCursorAt(0, 1);
+  helpers.assertCursorAt(0, 0);
 }, { value: 'hello world' });
 
 testVim('S_visual_cursor_position_spaced_parens', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('v', 'e', 'S', '(');
   eq('( hello ) world', cm.getValue());
-  helpers.assertCursorAt(0, 2);
+  helpers.assertCursorAt(0, 0);
 }, { value: 'hello world' });
 
 testVim('ysiw_cursor_position_brackets', function(cm, vim, helpers) {
   cm.setCursor(0, 3);
   helpers.doKeys('y', 's', 'i', 'w', ']');
   eq('[hello] world', cm.getValue());
-  helpers.assertCursorAt(0, 1);
+  helpers.assertCursorAt(0, 0);
 }, { value: 'hello world' });
 
 testVim('yss_cursor_position_quotes', function(cm, vim, helpers) {
   cm.setCursor(0, 3);
   helpers.doKeys('y', 's', 's', '"');
   eq('"hello world"', cm.getValue());
-  helpers.assertCursorAt(0, 1);
+  helpers.assertCursorAt(0, 0);
 }, { value: 'hello world' });
 
 // --- Dot-repeat visual surround on same word (#22) ---
