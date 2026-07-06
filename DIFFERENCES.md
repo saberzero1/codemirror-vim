@@ -875,6 +875,29 @@ multi-selection, unlike Neovim where text is only visible on the primary cursor
 until `<Esc>`. Dot-repeat (`.`) works via the existing `repeatInsertModeChanges`
 block-replay logic.
 
+### Block visual A pads short lines
+
+**File**: `src/vim.js` — `selectForInsert`
+
+`selectForInsert` previously skipped lines shorter than the block column.
+Neovim pads short lines with spaces to reach the block's right edge before
+appending. The function now accepts a `padShortLines` parameter. When true
+(passed only for the `A` / `endOfSelectedArea` path), short lines are padded
+with spaces via `cm.replaceRange` before the multi-cursor is placed. The `I`
+path passes false, preserving the skip behavior (matching Neovim, which also
+skips short lines for `I`).
+
+### Visual replace charwise off-by-one
+
+**File**: `src/vim.js` — `actions.replace`
+
+The charwise visual branch of the `replace` action set `curEnd = selEnd`
+(the inclusive head position). Since `cm.getRange(from, to)` treats `to`
+as exclusive, this replaced one fewer character than the visual selection
+covered. Fixed by using `new Pos(selEnd.line, selEnd.ch + 1)` for
+`curEnd`, matching the inclusive-to-exclusive conversion used elsewhere
+(e.g. `makeCmSelection` char mode).
+
 ### Block visual EOL cursor clamping
 
 **File**: `src/vim.js` — `makeCmSelection`

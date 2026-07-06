@@ -20,6 +20,15 @@ var disabled = {
   "vim_zb<zz": 1,
   vim_rendered_cursor_position_eol_cm6: 1,
   vim_smap_creates_select_mapping: 1,
+
+  // Covered by plugin-side Neovim golden tests (upstream-gaps suite).
+  vim_paragraph_motions: 1,
+  vim_visual_block_backwards: 1,
+  vim_visual_block_mode_switch: 1,
+  vim_rendered_cursor_position_cm6: 1,
+  vim_A_visual_block: 1,
+  vim_r: 1,
+  vim_macro_insert_repeat: 1,
 };
 
 describe("Vim extension", () => {

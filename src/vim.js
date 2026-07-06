@@ -4395,7 +4395,7 @@ export function initVim(CM) {
         }
         exitVisualMode(cm);
       }
-      selectForInsert(cm, head, height);
+      selectForInsert(cm, head, height, insertAt == 'endOfSelectedArea');
     },
     toggleVisualMode: function(cm, actionArgs, vim) {
       var repeat = actionArgs.repeat;
@@ -4809,7 +4809,7 @@ export function initVim(CM) {
           curEnd = new Pos(selEnd.line, lineLength(cm, selEnd.line));
         } else {
           curStart = selStart;
-          curEnd = selEnd;
+          curEnd = new Pos(selEnd.line, selEnd.ch + 1);
         }
       } else {
         var line = cm.getLine(curStart.line);
@@ -5422,15 +5422,20 @@ export function initVim(CM) {
     base.ch = baseCh;
     return base;
   }
-  /** @arg {CodeMirror} cm  @arg {any} head  @arg {number} height */
-  function selectForInsert(cm, head, height) {
+  /** @arg {CodeMirror} cm  @arg {any} head  @arg {number} height  @arg {boolean} [padShortLines] */
+  function selectForInsert(cm, head, height, padShortLines) {
     var sel = [];
     for (var i = 0; i < height; i++) {
       var line = head.line + i;
-      if (line <= cm.lastLine() && lineLength(cm, line) >= head.ch) {
-        var lineHead = new Pos(line, head.ch);
-        sel.push({anchor: lineHead, head: lineHead});
+      if (line > cm.lastLine()) continue;
+      var len = lineLength(cm, line);
+      if (len < head.ch) {
+        if (!padShortLines) continue;
+        var padding = new Array(head.ch - len + 1).join(' ');
+        cm.replaceRange(padding, new Pos(line, len), new Pos(line, len), '+input');
       }
+      var lineHead = new Pos(line, head.ch);
+      sel.push({anchor: lineHead, head: lineHead});
     }
     if (sel.length === 0) {
       sel.push({anchor: head, head: head});
