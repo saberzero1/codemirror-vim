@@ -32693,7 +32693,7 @@
         "type": "keys",
         "keys": "ds)",
         "stateAfter": {
-          "content": "hello world",
+          "content": " hello  world",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -32702,7 +32702,7 @@
         }
       }
     ],
-    "expectedContent": "hello world",
+    "expectedContent": " hello  world",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -34766,7 +34766,7 @@
         "type": "keys",
         "keys": "cS\"(",
         "stateAfter": {
-          "content": "(\n  hello\n)",
+          "content": "(\nhello\n)",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -34775,7 +34775,7 @@
         }
       }
     ],
-    "expectedContent": "(\n  hello\n)",
+    "expectedContent": "(\nhello\n)",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -34798,7 +34798,7 @@
         "type": "keys",
         "keys": "yS$\"",
         "stateAfter": {
-          "content": "\"\n  hello world\n\"",
+          "content": "\"\nhello world\n\"",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -34807,7 +34807,7 @@
         }
       }
     ],
-    "expectedContent": "\"\n  hello world\n\"",
+    "expectedContent": "\"\nhello world\n\"",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -34830,7 +34830,7 @@
         "type": "keys",
         "keys": "ySS)",
         "stateAfter": {
-          "content": "(\n  hello world\n)",
+          "content": "(\nhello world\n)",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -34839,7 +34839,7 @@
         }
       }
     ],
-    "expectedContent": "(\n  hello world\n)",
+    "expectedContent": "(\nhello world\n)",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -34862,7 +34862,7 @@
         "type": "keys",
         "keys": "ySS)",
         "stateAfter": {
-          "content": "  (\n    hello\n  )",
+          "content": "  (\n  hello\n  )",
           "cursor": {
             "ch": 2,
             "line": 0
@@ -34871,7 +34871,7 @@
         }
       }
     ],
-    "expectedContent": "  (\n    hello\n  )",
+    "expectedContent": "  (\n  hello\n  )",
     "expectedCursor": {
       "ch": 2,
       "line": 0
@@ -34894,7 +34894,7 @@
         "type": "keys",
         "keys": "vegS\"",
         "stateAfter": {
-          "content": "\"\n  hello\n\" world",
+          "content": "\"\nhello\n\" world",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -34903,7 +34903,7 @@
         }
       }
     ],
-    "expectedContent": "\"\n  hello\n\" world",
+    "expectedContent": "\"\nhello\n\" world",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -34926,7 +34926,7 @@
         "type": "keys",
         "keys": "ySiw)",
         "stateAfter": {
-          "content": "(\n  hello\n) world",
+          "content": "(\nhello\n) world",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -34935,7 +34935,7 @@
         }
       }
     ],
-    "expectedContent": "(\n  hello\n) world",
+    "expectedContent": "(\nhello\n) world",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -34958,7 +34958,7 @@
         "type": "keys",
         "keys": "2ds)",
         "stateAfter": {
-          "content": "a (b) c",
+          "content": "a b c",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -34967,7 +34967,7 @@
         }
       }
     ],
-    "expectedContent": "a (b) c",
+    "expectedContent": "a b c",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -34990,7 +34990,7 @@
         "type": "keys",
         "keys": "3ds)",
         "stateAfter": {
-          "content": "a ((b)) c",
+          "content": "a b c",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -34999,7 +34999,7 @@
         }
       }
     ],
-    "expectedContent": "a ((b)) c",
+    "expectedContent": "a b c",
     "expectedCursor": {
       "ch": 0,
       "line": 0
@@ -35022,7 +35022,7 @@
         "type": "keys",
         "keys": "2cs)]",
         "stateAfter": {
-          "content": "[a (b) c]",
+          "content": "[a [b] c]",
           "cursor": {
             "ch": 0,
             "line": 0
@@ -35031,7 +35031,7 @@
         }
       }
     ],
-    "expectedContent": "[a (b) c]",
+    "expectedContent": "[a [b] c]",
     "expectedCursor": {
       "ch": 0,
       "line": 0

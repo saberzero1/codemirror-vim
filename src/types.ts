@@ -371,6 +371,7 @@ export interface InputStateInterface {
     pushRepeatDigit(n: string): void;
     getRepeat(): number;
     _surroundReplacement?: string | SurroundReplacementSpec;
+    _surroundType?: string;
     _surroundSelOffset?: { lineDelta: number, chDelta: number };
     _surroundNewline?: boolean;
 }

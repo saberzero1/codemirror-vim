@@ -697,14 +697,19 @@ same-name tags are handled via depth tracking.
 `S<character>` with `operatorPending: true` fires `surroundActionNewline` for
 `cS`/`yS`/`ySS`. `gS<character>` in visual mode fires `surroundVisualNewline`.
 The `newline` flag propagates through `surroundState` to `addSurroundToRange`
-and `changeSurroundPair`, which insert delimiters on separate lines with the
-content indented one level deeper than the base indentation.
+and `changeSurroundPair`, which insert delimiters on separate lines. Single-line
+content is placed on its own line without additional indentation (matching
+nvim-surround behavior). Multi-line content receives inner indentation one level
+deeper than the base indentation.
 
 ### Count support
 
-`actionArgs.repeat` is passed to `findSurroundingPair` and `findSurroundingTag`.
-For brackets, the Nth-level is found by iterating: find level 1, then search
-from outside it for level 2, etc.
+For bracket targets, count means "apply the operation N times," each iteration
+operating on the innermost remaining pair. `2dsb` on `((foo) bar (baz))`
+deletes twice: first the inner pair around the cursor, then the next inner pair.
+`3csbr` on `(((foo)))` changes all three levels to brackets: `[[[foo]]]`. The
+delete and change branches in `surroundAction` and `handleSurroundSubState`
+loop `count` times with `findSurroundingPair(..., 1)` per iteration.
 
 For quote-type (non-bracket) targets, count repeats the delimiter character:
 `2ysiw*` → `**word**`, `2ds*` on `**word**` → `word`. `findSurroundingQuotes`
@@ -712,6 +717,10 @@ with count > 1 searches for N consecutive quote chars. `deleteSurroundPair` and
 `changeSurroundPair` use a `width` field on the found pair to handle multi-char
 delimiters. In `handleSurroundSubState`, `charRepeat` on the surround state
 multiplies the replacement character before passing it to `getSurroundPair`.
+
+The bracket/quote distinction uses `isBracketTarget` (checks
+`surroundBrackets[normalizeSurroundTarget(target)]` or `customSurroundPairs`)
+to choose between loop-count and char-repeat semantics.
 
 This enables Markdown-specific pairs without custom key assignments:
 `2ysiw*` (bold), `2ysiw~` (strikethrough), `2ysiw=` (highlight),
@@ -733,11 +742,19 @@ unaffected (all-char buffers use the timeout path).
 
 ### Dot-repeat
 
-Stores `_surroundReplacement` on `vim.lastEditInputState` via an
-`onRepeat` callback. During replay, the action/operator detects the saved
-replacement and executes directly without entering the sub-state. Visual `S`
-stores selection dimensions in `_surroundSelOffset` for replay.
-`_surroundNewline` preserves the newline flag across dot-repeat.
+Stores `_surroundReplacement` and `_surroundType` on `vim.lastEditInputState`
+via an `onRepeat` callback. `_surroundType` tracks the operation kind (`'ys'`,
+`'cs'`, `'yss'`, `'visual'`) to prevent cross-type leaking — a `cs` operation's
+saved replacement is not used by a subsequent `ys` command (only by `cs`
+dot-repeat). During replay, the action/operator detects the saved replacement
+and executes directly without entering the sub-state. Visual `S` stores
+selection dimensions in `_surroundSelOffset` for replay. `_surroundNewline`
+preserves the newline flag across dot-repeat.
+
+For `cs` dot-repeat on nested structures (e.g. `csba..` on `(((test)))`), the
+search position is offset by `newPair.open.length` after each change so the next
+iteration finds the inner pair rather than re-matching the already-changed
+delimiter.
 
 Visual `S` replaces the previous `S` → `VdO` keyToKey in visual mode. `S` in
 visual mode now surrounds instead of substituting.
@@ -770,10 +787,58 @@ of `(`, which always failed. `ds(`, `ds[`, `ds{`, `ds<`, `cs({`,
 and multiline/nested `ds(` all now work correctly.
 
 Supported targets: `"`, `'`, `` ` ``, `(`, `)`, `[`, `]`, `{`, `}`, `<`, `>`,
-`t` (tag), aliases `b`→`)`, `B`→`}`, `r`→`]`, `a`→`>`. Opening brackets add
-inner spaces; closing brackets don't. `<` in replacement position triggers tag
-prompting (breaking change — use `>` for no-space angle brackets). `f`/`F` in
-replacement position triggers function wrapping.
+`t` (tag), `f` (function call — see below), aliases `b`→`)`, `B`→`}`, `r`→`]`,
+`a`→`>`. Opening brackets add inner spaces; closing brackets don't. `<` in
+replacement position triggers tag prompting (breaking change — use `>` for
+no-space angle brackets). `f`/`F` in replacement position triggers function
+wrapping.
+
+### Space preservation for closing bracket targets
+
+`deleteSurroundPair` accepts an optional `target` parameter indicating the
+character the user typed. When the target is a closing bracket (`)`, `]`, `}`,
+`>`), space-stripping is skipped — inner spaces are preserved. Opening bracket
+targets (`(`, `[`, `{`, `<`) still strip adjacent spaces. This matches
+nvim-surround semantics: `ds}` on `{ hello }` → ` hello ` (spaces kept),
+`ds{` on `{ hello }` → `hello` (spaces stripped).
+
+### Cursor clamping after delete
+
+`deleteSurroundPair` clamps the cursor to `Math.min(open.ch, lineLen - 1)`
+after deletion to prevent the cursor from landing past end-of-line when
+delimiters are at the end of a line (e.g., `function()` → `function`, cursor
+on the final `n` at ch:7 rather than ch:8).
+
+### Linewise motion detection for `ys`
+
+The surround operator branch in `evalInput` checks `motionArgs.linewise`. When
+true (motions like `j`, `k`, `+`, `-`), the range is expanded to cover full
+lines: `sFrom` is set to `(line, 0)` and `sMax` to `(line, lineLength)`. This
+makes `ysjb` surround the current and next line, and `ys2jB` surround 3 lines.
+
+### Linewise visual surround
+
+`surroundVisual` detects `vim.visualLine` and expands the selection to full
+lines before wrapping. Additionally, linewise visual surround uses newline mode
+(`addSurroundToRange` with `newline: true`), placing delimiters on separate
+lines matching nvim-surround's `VS` behavior.
+
+### Visual block per-line surround
+
+`surroundVisual` detects `vim.visualBlock` and wraps each line individually
+from bottom to top (to preserve line numbers). `Ctrl-V jj $ S}` on ragged
+lines produces `{line1}\n{line2}\n{line3}` instead of wrapping the entire
+block as one unit.
+
+### Delete surrounding function call (`dsf`)
+
+`findSurroundingFunction(cm, pos)` scans the current line for `identifier(`
+patterns using `/[\w$.]+\s*\(/g`, then uses `findSurroundingBrackets` to find
+the matching `)` for each. Candidates are filtered to those whose range
+contains the cursor position, and the innermost (rightmost `funcNameStart`) is
+selected. `dsf` removes the function name through `(` and the closing `)`,
+leaving the arguments. Handles nested calls, method chains (`obj.method()`),
+and no-arg functions (`func()` → ``).
 
 ### Custom surround pairs (`registerSurroundPair` / `unregisterSurroundPair`)
 

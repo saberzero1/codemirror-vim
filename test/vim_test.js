@@ -6585,7 +6585,7 @@ testVim('ds_alias_B', function(cm, vim, helpers) {
 testVim('ds_spaces', function(cm, vim, helpers) {
   cm.setCursor(0, 4);
   helpers.doKeys('d', 's', ')');
-  eq('hello world', cm.getValue());
+  eq(' hello  world', cm.getValue());
 }, { value: '( hello ) world' });
 
 testVim('ds_no_match', function(cm, vim, helpers) {
@@ -6974,56 +6974,56 @@ testVim('cst_to_tag_cr_accept', function(cm, vim, helpers) {
 testVim('cS_newline', function(cm, vim, helpers) {
   cm.setCursor(0, 1);
   helpers.doKeys('c', 'S', '"', '(');
-  eq('(\n  hello\n)', cm.getValue());
+  eq('(\nhello\n)', cm.getValue());
 }, { value: '"hello"' });
 
 testVim('yS_dollar_newline', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('y', 'S', '$', '"');
-  eq('"\n  hello world\n"', cm.getValue());
+  eq('"\nhello world\n"', cm.getValue());
 }, { value: 'hello world' });
 
 testVim('ySS_newline', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('y', 'S', 'S', ')');
-  eq('(\n  hello world\n)', cm.getValue());
+  eq('(\nhello world\n)', cm.getValue());
 }, { value: 'hello world' });
 
 testVim('ySS_newline_indented', function(cm, vim, helpers) {
   cm.setCursor(0, 4);
   helpers.doKeys('y', 'S', 'S', ')');
-  eq('  (\n    hello\n  )', cm.getValue());
+  eq('  (\n  hello\n  )', cm.getValue());
 }, { value: '  hello' });
 
 testVim('gS_visual_newline', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('v', 'e', 'g', 'S', '"');
-  eq('"\n  hello\n" world', cm.getValue());
+  eq('"\nhello\n" world', cm.getValue());
 }, { value: 'hello world' });
 
 testVim('yS_iw_newline', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('y', 'S', 'i', 'w', ')');
-  eq('(\n  hello\n) world', cm.getValue());
+  eq('(\nhello\n) world', cm.getValue());
 }, { value: 'hello world' });
 
 testVim('2ds_nested_parens', function(cm, vim, helpers) {
   cm.setCursor(0, 4);
   helpers.doKeys('2', 'd', 's', ')');
   var result = cm.getValue();
-  eq('a (b) c', result);
+  eq('a b c', result);
 }, { value: '(a (b) c)' });
 
 testVim('3ds_triple_nested', function(cm, vim, helpers) {
   cm.setCursor(0, 5);
   helpers.doKeys('3', 'd', 's', ')');
-  eq('a ((b)) c', cm.getValue());
+  eq('a b c', cm.getValue());
 }, { value: '(a ((b)) c)' });
 
 testVim('2cs_nested_parens', function(cm, vim, helpers) {
   cm.setCursor(0, 4);
   helpers.doKeys('2', 'c', 's', ')', ']');
-  eq('[a (b) c]', cm.getValue());
+  eq('[a [b] c]', cm.getValue());
 }, { value: '(a (b) c)' });
 
 testVim('2dst_nested_tags', function(cm, vim, helpers) {
