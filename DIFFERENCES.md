@@ -326,26 +326,30 @@ The fix scans past `---`-delimited frontmatter to find the first editable line a
 
 **File**: `src/cm_adapter.ts`
 
-The `findPosV` adapter detects when `moveVertically` jumps over multiple
-document lines in a single visual-line step. When the skipped range contains
-a replaced widget decoration (checked via `_rangeHasReplacedWidget`, which
-scans `EditorView.decorations` for point decorations with `dec.point === true`),
-the cursor is placed on the adjacent document line (N+1 going down, N−1 going
-up) instead of at the widget boundary, allowing step-by-step navigation through
-the widget's source text (e.g. rendered MathJax `$$` blocks in Obsidian's live
-preview).
+The `findPosV` adapter clamps any multi-document-line jump from
+`moveVertically` to a single document-line step when no fold exists in the
+skipped range. CM6's `moveVertically` is coordinate/pixel-based — it moves by
+visual distance, not document lines. Variable-height content (replaced widget
+decorations like rendered MathJax, headings with larger CSS font sizes, or any
+other element that increases line height) can cause a single "move one visual
+line" step to jump multiple document lines. The clamp ensures `gk`/`gj` never
+skip document lines unless content is actually folded/hidden. Wrapped lines are
+unaffected since they produce `lineJump === 0`.
 
-Folded ranges are excluded via `foldedRanges()` since folds legitimately
-collapse multiple lines. Tall-but-unreplaced lines (e.g. headings with larger
-font sizes) are also excluded — they span multiple visual lines due to CSS
-styling, not replaced content. Mark and line decorations (`dec.point === false`)
-are not considered replaced widgets.
+On the clamped target line, the horizontal cursor position is resolved via
+`posAtCoords` using the goalColumn (pixel X coordinate from the last horizontal
+motion). When `posAtCoords` is unavailable or resolves outside the target line's
+range, the character offset from the previous line is used as fallback.
 
-A `posAtCoords` fallback handles cases where `moveVertically` correctly moves
-one document line but misresolves the goalColumn on a line with altered font
-metrics. When the cursor lands at column 0 despite a non-zero goalColumn, the
+Folded ranges are excluded via `foldedRanges()` — folds legitimately collapse
+multiple document lines into a single visual line.
+
+A separate `posAtCoords` fallback handles the single-line-jump case: when
+`moveVertically` correctly moves one document line but misresolves the
+goalColumn (cursor lands at column 0 despite a non-zero goalColumn), the
 fallback uses `lineBlockAt` and `posAtCoords` to find the correct character
-position matching the pixel-based goalColumn on the target line.
+position. The `goalColumn > 0` guard was relaxed to `goalColumn != null` so
+this fixup also fires at column 0.
 
 ### Per-mode cursor shapes
 

@@ -566,21 +566,34 @@ export class CodeMirror {
         let prevLine = doc.lineAt(prev.head);
         let nextLine = doc.lineAt(range.head);
         let lineJump = Math.abs(nextLine.number - prevLine.number);
-        if (lineJump > 1
-            && !this._rangeHasFold(prev.head, range.head)
-            && this._rangeHasReplacedWidget(prev.head, range.head)) {
-          // moveVertically jumped over a replaced widget (e.g. MathJax).
-          // Step one document line instead to enter the widget's source.
-          let targetLineNum = amount > 0
+        if (lineJump > 1 && !this._rangeHasFold(prev.head, range.head)) {
+          // moveVertically jumped multiple document lines. This happens with
+          // replaced widgets (MathJax) and variable-height lines (headings).
+          // Clamp to a single document-line step — gk/gj should never skip
+          // doc lines unless content is folded/hidden.
+          const targetLineNum = amount > 0
             ? prevLine.number + 1
             : prevLine.number - 1;
           if (targetLineNum >= 1 && targetLineNum <= doc.lines) {
-            let targetLine = doc.line(targetLineNum);
-            let prevCh = prev.head - prevLine.from;
-            let ch = Math.min(prevCh, targetLine.length);
-            range = EditorSelection.cursor(targetLine.from + ch, 1, undefined, goalColumn);
+            const targetLine = doc.line(targetLineNum);
+            let resolved: number | null = null;
+            if (goalColumn != null) {
+              const rect = cm6.contentDOM.getBoundingClientRect();
+              const lineBlock = cm6.lineBlockAt(targetLine.from);
+              resolved = cm6.posAtCoords({
+                x: goalColumn + rect.left,
+                y: lineBlock.top + rect.top + 1,
+              });
+            }
+            if (resolved != null && resolved >= targetLine.from && resolved <= targetLine.to) {
+              range = EditorSelection.cursor(resolved, 1, undefined, goalColumn);
+            } else {
+              const prevCh = prev.head - prevLine.from;
+              const ch = Math.min(prevCh, targetLine.length);
+              range = EditorSelection.cursor(targetLine.from + ch, 1, undefined, goalColumn);
+            }
           }
-        } else if (goalColumn != null && goalColumn > 0
+        } else if (goalColumn != null
             && range.head === nextLine.from
             && nextLine.number !== prevLine.number
             && nextLine.length > 0) {
