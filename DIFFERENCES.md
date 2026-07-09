@@ -326,30 +326,38 @@ The fix scans past `---`-delimited frontmatter to find the first editable line a
 
 **File**: `src/cm_adapter.ts`
 
-The `findPosV` adapter clamps any multi-document-line jump from
-`moveVertically` to a single document-line step when no fold exists in the
-skipped range. CM6's `moveVertically` is coordinate/pixel-based — it moves by
-visual distance, not document lines. Variable-height content (replaced widget
-decorations like rendered MathJax, headings with larger CSS font sizes, or any
-other element that increases line height) can cause a single "move one visual
-line" step to jump multiple document lines. The clamp ensures `gk`/`gj` never
-skip document lines unless content is actually folded/hidden. Wrapped lines are
-unaffected since they produce `lineJump === 0`.
+The `findPosV` adapter applies three corrections to CM6's `moveVertically`:
 
-On the clamped target line, the horizontal cursor position is resolved via
-`posAtCoords` using the goalColumn (pixel X coordinate from the last horizontal
-motion). When `posAtCoords` is unavailable or resolves outside the target line's
-range, the character offset from the previous line is used as fallback.
+1. **Multi-line jump clamp** (`lineJump > 1`): When `moveVertically` jumps
+   more than one document line and no fold exists in the skipped range, the
+   cursor is clamped to the adjacent document line (±1). CM6's
+   `moveVertically` is coordinate/pixel-based — variable-height content
+   (replaced widgets like MathJax, headings with larger fonts) can cause a
+   single step to jump multiple document lines. The clamp ensures `gk`/`gj`
+   never skip doc lines unless content is folded/hidden. Character offset
+   from the previous line is preserved on the clamped target.
 
-Folded ranges are excluded via `foldedRanges()` — folds legitimately collapse
-multiple document lines into a single visual line.
+2. **Tall non-wrapped line detection** (`lineJump === 0`, same doc line):
+   Headings with large `font-size` and/or `line-height` produce line blocks
+   taller than `defaultLineHeight`. `moveVertically` takes multiple pixel
+   steps through the block, producing spurious within-line cursor moves even
+   though the text does not wrap. The fix uses `coordsAtPos` to measure the
+   Y-coordinate delta between the previous and new cursor positions. When
+   the delta is less than half `defaultLineHeight`, the move is spurious and
+   the cursor is force-moved to the adjacent document line. Legitimate
+   wrapped-line navigation (where the Y delta exceeds the threshold) is
+   unaffected.
 
-A separate `posAtCoords` fallback handles the single-line-jump case: when
-`moveVertically` correctly moves one document line but misresolves the
-goalColumn (cursor lands at column 0 despite a non-zero goalColumn), the
-fallback uses `lineBlockAt` and `posAtCoords` to find the correct character
-position. The `goalColumn > 0` guard was relaxed to `goalColumn != null` so
-this fixup also fires at column 0.
+3. **Column 0 fallback** (`lineJump === 1`, cursor at line start): When
+   `moveVertically` correctly crosses one line but drops the cursor at
+   column 0 despite a non-zero goalColumn, `posAtCoords` resolves the
+   correct character position from the pixel X coordinate. The
+   `goalColumn > 0` guard was relaxed to `goalColumn != null` so this fixup
+   also fires at column 0.
+
+Folded ranges are excluded from the multi-line clamp via `foldedRanges()` —
+folds legitimately collapse multiple document lines into a single visual
+line.
 
 ### Per-mode cursor shapes
 

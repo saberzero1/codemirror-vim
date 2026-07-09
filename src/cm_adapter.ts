@@ -567,30 +567,37 @@ export class CodeMirror {
         let nextLine = doc.lineAt(range.head);
         let lineJump = Math.abs(nextLine.number - prevLine.number);
         if (lineJump > 1 && !this._rangeHasFold(prev.head, range.head)) {
-          // moveVertically jumped multiple document lines. This happens with
-          // replaced widgets (MathJax) and variable-height lines (headings).
-          // Clamp to a single document-line step — gk/gj should never skip
-          // doc lines unless content is folded/hidden.
+          // moveVertically jumped multiple document lines. Clamp to ±1 —
+          // gk/gj should never skip doc lines unless content is folded.
           const targetLineNum = amount > 0
             ? prevLine.number + 1
             : prevLine.number - 1;
           if (targetLineNum >= 1 && targetLineNum <= doc.lines) {
             const targetLine = doc.line(targetLineNum);
-            let resolved: number | null = null;
-            if (goalColumn != null) {
-              const rect = cm6.contentDOM.getBoundingClientRect();
-              const lineBlock = cm6.lineBlockAt(targetLine.from);
-              resolved = cm6.posAtCoords({
-                x: goalColumn + rect.left,
-                y: lineBlock.top + rect.top + 1,
-              });
-            }
-            if (resolved != null && resolved >= targetLine.from && resolved <= targetLine.to) {
-              range = EditorSelection.cursor(resolved, 1, undefined, goalColumn);
-            } else {
-              const prevCh = prev.head - prevLine.from;
-              const ch = Math.min(prevCh, targetLine.length);
-              range = EditorSelection.cursor(targetLine.from + ch, 1, undefined, goalColumn);
+            const prevCh = prev.head - prevLine.from;
+            const ch = Math.min(prevCh, targetLine.length);
+            range = EditorSelection.cursor(targetLine.from + ch, 1, undefined, goalColumn);
+          }
+        } else if (lineJump === 0 && nextLine.number === prevLine.number) {
+          // Same doc line after moveVertically. Could be a legitimate move
+          // between wrapped visual lines, or a spurious move within a tall
+          // non-wrapped line (heading with large font + line-height).
+          // Detect spurious moves: if the Y coordinate didn't change by at
+          // least half a defaultLineHeight, force-move to the adjacent line.
+          const prevCoords = cm6.coordsAtPos(prev.head);
+          const nextCoords = cm6.coordsAtPos(range.head);
+          if (prevCoords && nextCoords) {
+            const yDelta = Math.abs(nextCoords.top - prevCoords.top);
+            if (yDelta < cm6.defaultLineHeight * 0.5) {
+              const targetLineNum = amount > 0
+                ? prevLine.number + 1
+                : prevLine.number - 1;
+              if (targetLineNum >= 1 && targetLineNum <= doc.lines) {
+                const targetLine = doc.line(targetLineNum);
+                const prevCh = prev.head - prevLine.from;
+                const ch = Math.min(prevCh, targetLine.length);
+                range = EditorSelection.cursor(targetLine.from + ch, 1, undefined, goalColumn);
+              }
             }
           }
         } else if (goalColumn != null
