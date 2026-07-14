@@ -376,6 +376,9 @@ export interface InputStateInterface {
     _surroundType?: string;
     _surroundSelOffset?: { lineDelta: number, chDelta: number };
     _surroundNewline?: boolean;
+    _asyncMotionTarget?: { lineDelta: number, chDelta: number };
+    _ysTextObjectMotion?: string;
+    _ysTextObjectChar?: string;
 }
 export interface SearchStateInterface {
     setReversed(reversed: boolean): void;

@@ -1183,3 +1183,27 @@ The `ys_motion` handler in `handleSurroundSubState` now directly evaluates text 
 **Fix**: When the `ys_motion` target is `a` or `i` (text object prefix), the handler directly calls `motions.textObjectManipulation(cm, head, { selectedCharacter, textObjectInner }, vim)` to get the motion result, then constructs the `ys_replacement` surround state inline — bypassing `evalInput` entirely. Single-character motions (like `w`, `$`, `j`) and count-prefixed motions (like `2j`) continue through the original `handleKey` dispatch path.
 
 **Type change**: Added `operatorArgs?: Record<string, unknown>` to the `surroundState` type in `types.ts`. All `ys_motion` creation sites now include `operatorArgs` to preserve surround-specific operator args through the handler.
+
+## Async motion dot-repeat (`_asyncMotionTarget`)
+
+**Files**: `src/vim.js`
+
+When an operator-pending async motion (e.g., `d` + EasyMotion target) resolves, the resolved position is now stored as a relative offset in `lastEditInputState._asyncMotionTarget`. During dot-repeat (`.`), `repeatLastEdit` detects this stored target and applies the operator with the relative offset instead of re-executing the async motion (which would re-show the EasyMotion overlay).
+
+**Implementation**:
+- After `applyOperator` in the async `.then()` callback, store `{ lineDelta, chDelta }` on `lastEditInputState`
+- In `repeatLastEdit`'s `repeatCommand()`, check for `_asyncMotionTarget` on `inputState`. When present, compute the target position from the current cursor plus the delta and apply the operator directly
+- Non-async motions and non-operator-pending async motions (cursor-only) are unaffected
+
+## Surround `ys` dot-repeat with text object motions (`_ysTextObjectMotion`)
+
+**Files**: `src/vim.js`, `src/types.ts`
+
+`ysiwb` (surround inner word with parentheses) then `.` on a different word now correctly replays the surround operation. Previously, dot-repeat failed because the text object motion characters (`i`, `w`) were not stored in `lastEditInputState` — only the replacement character was captured via `_surroundReplacement`.
+
+**Implementation**:
+- In the `ys_motion` handler's `onRepeat` callback, store `_ysTextObjectMotion` (the prefix: `'i'` or `'a'`) and `_ysTextObjectChar` (the object: `'w'`, `'B'`, `'"'`, etc.) alongside `_surroundReplacement` and `_surroundType`
+- In `repeatLastEdit`'s `repeatCommand()`, when `_ysTextObjectMotion` is present with `_surroundType === 'ys'`, re-evaluate the text object at the current cursor position via `motions.textObjectManipulation()` and apply the surround with `addSurroundToRange()`
+- Simple delimiters (`ysiwb`, `ysiw"`, `ysaw'`) work for dot-repeat. Tag (`ysiw<em>`) and function (`ysiwflen`) dot-repeat requires additional `pendingInput` prompt replay which is not yet implemented.
+
+**Type change**: Added `_asyncMotionTarget`, `_ysTextObjectMotion`, `_ysTextObjectChar` to `InputStateInterface` in `src/types.ts`.

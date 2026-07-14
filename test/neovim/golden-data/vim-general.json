@@ -21191,31 +21191,39 @@
                     "line": 0
                 }
             },
-            "keys": "ysiw\".",
+            "keys": "ysiw\"w.",
             "result": {
-                "content": "w\"hello .world",
+                "content": "\"hello\" \"world\"",
                 "cursor": {
                     "line": 0,
-                    "ch": 9
+                    "ch": 8
                 },
-                "mode": "insert"
+                "mode": "normal"
             },
             "stepResults": [
                 {
-                    "content": "w\"hello world",
+                    "content": "\"hello\" world",
                     "cursor": {
                         "line": 0,
-                        "ch": 2
+                        "ch": 0
                     },
-                    "mode": "insert"
+                    "mode": "normal"
                 },
                 {
-                    "content": "w\"hello .world",
+                    "content": "\"hello\" world",
                     "cursor": {
                         "line": 0,
-                        "ch": 9
+                        "ch": 8
                     },
-                    "mode": "insert"
+                    "mode": "normal"
+                },
+                {
+                    "content": "\"hello\" \"world\"",
+                    "cursor": {
+                        "line": 0,
+                        "ch": 8
+                    },
+                    "mode": "normal"
                 }
             ]
         },

@@ -2453,6 +2453,12 @@ export function initVim(CM) {
                 rNewAnchor, rNewHead, savedOldAnchor, savedOldHead,
                 savedRepeat
               );
+              if (savedVim.lastEditInputState) {
+                savedVim.lastEditInputState._asyncMotionTarget = {
+                  lineDelta: rNewHead.line - origHead.line,
+                  chDelta: rNewHead.ch - origHead.ch
+                };
+              }
             } else if (savedVim.visualMode) {
               rNewHead = clipCursorToContent(cm, rNewHead, savedOldHead);
               if (rNewAnchor) {
@@ -4019,6 +4025,8 @@ export function initVim(CM) {
         }
         var charRepeat = ysOpArgs && ysOpArgs.surroundCharRepeat;
         var surroundNewline = ysOpArgs && ysOpArgs.surroundNewline;
+        var savedMotionChar = motionChar;
+        var savedMotionKey = motionKey;
         clearInputState(cm);
         vim.surroundState = {
           type: 'ys_replacement',
@@ -4030,6 +4038,8 @@ export function initVim(CM) {
             if (vim.lastEditInputState) {
               vim.lastEditInputState._surroundReplacement = replacement;
               vim.lastEditInputState._surroundType = 'ys';
+              vim.lastEditInputState._ysTextObjectMotion = savedMotionChar;
+              vim.lastEditInputState._ysTextObjectChar = savedMotionKey;
               if (surroundNewline) vim.lastEditInputState._surroundNewline = true;
             }
           }
@@ -8944,6 +8954,51 @@ export function initVim(CM) {
     var lastAction = vim.lastEditActionCommand;
     var cachedInputState = vim.inputState;
     function repeatCommand() {
+      if (vim.inputState && vim.inputState._asyncMotionTarget) {
+        var target = vim.inputState._asyncMotionTarget;
+        var cur = cm.getCursor('head');
+        var newHead = new Pos(cur.line + target.lineDelta, cur.ch + target.chDelta);
+        newHead = clipCursorToContent(cm, newHead, cur);
+        var operator = vim.inputState.operator;
+        if (operator) {
+          commandDispatcher.applyOperator(
+            cm, vim, operator, vim.inputState.operatorArgs || {},
+            vim.inputState.motionArgs || {}, vim.inputState.registerName,
+            vim.sel, null, newHead, null, cur, vim.inputState.getRepeat()
+          );
+        }
+        return;
+      }
+      if (vim.inputState && vim.inputState._ysTextObjectMotion &&
+          vim.inputState._surroundType === 'ys' &&
+          vim.inputState._surroundReplacement) {
+        var head = cm.getCursor('head');
+        var motionResult = motions.textObjectManipulation(cm, head, {
+          repeat: 1,
+          selectedCharacter: vim.inputState._ysTextObjectChar,
+          textObjectInner: vim.inputState._ysTextObjectMotion === 'i'
+        }, vim);
+        if (motionResult) {
+          var sFrom, sTo;
+          if (motionResult instanceof Array) {
+            sFrom = cursorMin(motionResult[0], motionResult[1]);
+            sTo = cursorMax(motionResult[0], motionResult[1]);
+          } else {
+            sFrom = head;
+            sTo = motionResult;
+          }
+          var repl = vim.inputState._surroundReplacement;
+          var nl = vim.inputState._surroundNewline;
+          var charRepeat = vim.inputState.operatorArgs && vim.inputState.operatorArgs.surroundCharRepeat;
+          if (charRepeat && charRepeat > 1 && typeof repl === 'string' && repl.length === 1) {
+            var repeated = '';
+            for (var ri = 0; ri < charRepeat; ri++) repeated += repl;
+            repl = repeated;
+          }
+          addSurroundToRange(cm, sFrom, sTo, repl, nl);
+        }
+        return;
+      }
       if (lastAction) {
         commandDispatcher.processAction(cm, vim, lastAction);
       } else {
