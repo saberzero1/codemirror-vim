@@ -3991,10 +3991,50 @@ export function initVim(CM) {
 
     if (state.type === 'ys_motion') {
       var motionChar = state.target;
+      var ysOpArgs = state.operatorArgs || {};
       vim.surroundState = null;
+      vim.inputState.operator = 'surround';
+      vim.inputState.operatorArgs = ysOpArgs;
       vimApi.handleKey(cm, motionChar, 'mapping');
       if (vim.surroundState && vim.surroundState.type === 'ys_replacement') {
         return handleSurroundSubState(cm, key, vim);
+      }
+      if (motionChar === 'a' || motionChar === 'i') {
+        var motionKey = lastChar(key);
+        if (!motionKey) { vim.surroundState = null; return true; }
+        var head = cm.getCursor('head');
+        var motionResult = motions.textObjectManipulation(cm, head,
+          { repeat: 1, selectedCharacter: motionKey, textObjectInner: motionChar === 'i' }, vim);
+        if (!motionResult) {
+          clearInputState(cm);
+          return true;
+        }
+        var sFrom, sTo;
+        if (motionResult instanceof Array) {
+          sFrom = cursorMin(motionResult[0], motionResult[1]);
+          sTo = cursorMax(motionResult[0], motionResult[1]);
+        } else {
+          sFrom = head;
+          sTo = motionResult;
+        }
+        var charRepeat = ysOpArgs && ysOpArgs.surroundCharRepeat;
+        var surroundNewline = ysOpArgs && ysOpArgs.surroundNewline;
+        clearInputState(cm);
+        vim.surroundState = {
+          type: 'ys_replacement',
+          from: sFrom,
+          to: sTo,
+          newline: surroundNewline,
+          charRepeat: charRepeat,
+          onRepeat: function(replacement) {
+            if (vim.lastEditInputState) {
+              vim.lastEditInputState._surroundReplacement = replacement;
+              vim.lastEditInputState._surroundType = 'ys';
+              if (surroundNewline) vim.lastEditInputState._surroundNewline = true;
+            }
+          }
+        };
+        return true;
       }
       return false;
     }
@@ -5115,7 +5155,7 @@ export function initVim(CM) {
         if (target !== 's') {
           vim.inputState.operator = 'surround';
           vim.inputState.operatorArgs = { surroundCharRepeat: count };
-          vim.surroundState = { type: 'ys_motion', target: target };
+          vim.surroundState = { type: 'ys_motion', target: target, operatorArgs: { surroundCharRepeat: count } };
           return;
         }
         if (target === 's') {
@@ -5277,7 +5317,7 @@ export function initVim(CM) {
         } else {
           vim.inputState.operator = 'surround';
           vim.inputState.operatorArgs = { surroundNewline: true };
-          vim.surroundState = { type: 'ys_motion', target: target };
+          vim.surroundState = { type: 'ys_motion', target: target, operatorArgs: { surroundNewline: true } };
         }
       }
     },

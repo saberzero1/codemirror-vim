@@ -1171,3 +1171,15 @@ Payload:
 - `visual`: `true` if the operation was from visual mode
 
 This enables the Obsidian plugin to implement Neovim-compatible `TextYankPost` autocommands for yank highlighting and clipboard integration.
+
+## Surround `ys` with text object motions (`ys_motion` direct evaluation)
+
+**Files**: `src/vim.js`, `src/types.ts`
+
+The `ys_motion` handler in `handleSurroundSubState` now directly evaluates text object motions (`a`/`i` prefix) instead of dispatching the motion character through `handleKey` and relying on the outer key handler to complete the text object.
+
+**Problem**: For two-character text objects like `aB`, `iw`, `a"`, the `ys_motion` handler dispatched the first character (e.g., `a`) via `vimApi.handleKey(cm, motionChar, 'mapping')`. This created a partial keyBuffer match. The handler then returned `false`, expecting the outer `findKey` to process the second character (`B`) through the normal keyBuffer → `matchCommand` → `processMotion` → `evalInput` flow. However, `evalInput` calls `clearInputState` at line 2424 before the motion executes. Although `clearInputState` runs after `selectedCharacter` was captured in `motionArgs` at line 2414-2417, instrumentation revealed `selectedCharacter` was `null` at `evalInput` entry — indicating the `inputState` object read at line 2384 (`var inputState = vim.inputState`) was already a fresh one from a prior `clearInputState`, not the one `matchCommand` set `selectedCharacter` on.
+
+**Fix**: When the `ys_motion` target is `a` or `i` (text object prefix), the handler directly calls `motions.textObjectManipulation(cm, head, { selectedCharacter, textObjectInner }, vim)` to get the motion result, then constructs the `ys_replacement` surround state inline — bypassing `evalInput` entirely. Single-character motions (like `w`, `$`, `j`) and count-prefixed motions (like `2j`) continue through the original `handleKey` dispatch path.
+
+**Type change**: Added `operatorArgs?: Record<string, unknown>` to the `surroundState` type in `types.ts`. All `ys_motion` creation sites now include `operatorArgs` to preserve surround-specific operator args through the handler.

@@ -62,6 +62,7 @@ export type vimState = {
         newline?: boolean,
         count?: number,
         charRepeat?: number,
+        operatorArgs?: Record<string, unknown>,
         onRepeat?: (replacement: string | SurroundReplacementSpec) => void,
         pendingInput?: {
             kind: string,
