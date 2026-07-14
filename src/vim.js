@@ -2535,12 +2535,13 @@ export function initVim(CM) {
       if (operator === 'surround' && newHead) {
         var surroundAnchor = newAnchor || oldAnchor;
         var lastSurround = vim.lastEditInputState || undefined;
-        var savedReplacement = lastSurround && lastSurround._surroundReplacement;
-        if (savedReplacement && lastSurround && lastSurround._surroundType && lastSurround._surroundType !== 'ys') {
-          savedReplacement = undefined;
-        }
+        var savedReplacement = lastSurround && lastSurround._surroundType === 'ys'
+          ? lastSurround._surroundReplacement
+          : undefined;
         var surroundNewline = operatorArgs && operatorArgs.surroundNewline;
-        var savedNewline = lastSurround && lastSurround._surroundNewline;
+        var savedNewline = lastSurround && lastSurround._surroundType === 'ys'
+          ? lastSurround._surroundNewline
+          : undefined;
         var useNewline = surroundNewline || savedNewline;
         var sFrom = cursorMin(surroundAnchor, newHead);
         var sMax = cursorMax(surroundAnchor, newHead);
@@ -4018,6 +4019,12 @@ export function initVim(CM) {
       if (state.tagResult) {
         changeTagSurround(cm, state.tagResult, ch);
         if (state.onRepeat) state.onRepeat(ch);
+      } else if (state.funcResult) {
+        var funcRes = state.funcResult;
+        cm.operation(function() {
+          cm.replaceRange(ch, funcRes.funcNameStart, funcRes.open);
+        });
+        if (state.onRepeat) state.onRepeat(ch);
       } else {
         var isBracketTarget = !!surroundBrackets[normalizeSurroundTarget(state.target)] || customSurroundPairs.has(state.target);
         var csLoopCount = isBracketTarget ? (state.count || 1) : 1;
@@ -4983,6 +4990,7 @@ export function initVim(CM) {
       var pendingOp = actionArgs.pendingOperator;
       var target = actionArgs.selectedCharacter;
       var count = actionArgs.repeat;
+      var savedReplacement;
       if (!target) return;
 
       if (pendingOp === 'delete') {
@@ -5013,8 +5021,9 @@ export function initVim(CM) {
         }
       } else if (pendingOp === 'change') {
         var _csLast = vim.lastEditInputState || undefined;
-        var savedReplacement = _csLast && _csLast._surroundReplacement;
-        if (savedReplacement && _csLast && _csLast._surroundType && _csLast._surroundType !== 'cs') savedReplacement = undefined;
+        savedReplacement = _csLast && _csLast._surroundType === 'cs'
+          ? _csLast._surroundReplacement
+          : undefined;
         if (target === 't') {
           var tags = findSurroundingTag(cm, cm.getCursor(), count);
           if (!tags) return;
@@ -5033,7 +5042,49 @@ export function initVim(CM) {
               }
             };
           }
+        } else if (target === 'f' && !savedReplacement) {
+          var func = findSurroundingFunction(cm, cm.getCursor());
+          if (!func) return;
+          /** @type {{ funcNameStart: import("./types").Pos, open: import("./types").Pos, close: import("./types").Pos }} */
+          var funcResult = func;
+          var onRepeat = function(replacement) {
+            if (vim.lastEditInputState) {
+              vim.lastEditInputState._surroundReplacement = replacement;
+              vim.lastEditInputState._surroundType = 'cs';
+            }
+          };
+          vim.surroundState = {
+            type: 'change',
+            target: target,
+            funcResult: funcResult,
+            onRepeat: onRepeat
+          };
+          vim.surroundState.pendingInput = {
+            kind: 'func_rename',
+            buffer: '',
+            prompt: 'func: ',
+            acceptOn: { '<CR>': true },
+            spaced: false,
+            onAccept: function(buf) {
+              if (!buf) return;
+              cm.operation(function() {
+                cm.replaceRange(buf, funcResult.funcNameStart, funcResult.open);
+              });
+              onRepeat(buf);
+            }
+          };
+          vim.status = 'func: ';
         } else if (savedReplacement) {
+          if (target === 'f') {
+            var savedFunc = findSurroundingFunction(cm, cm.getCursor());
+            if (!savedFunc) return;
+            /** @type {{ funcNameStart: import("./types").Pos, open: import("./types").Pos, close: import("./types").Pos }} */
+            var savedFuncResult = savedFunc;
+            cm.operation(function() {
+              cm.replaceRange(savedReplacement, savedFuncResult.funcNameStart, savedFuncResult.open);
+            });
+            return;
+          }
           var isBracketTarget = !!surroundBrackets[normalizeSurroundTarget(target)] || customSurroundPairs.has(target);
           var csLoopCount = isBracketTarget ? count : 1;
           var csFindCount = isBracketTarget ? 1 : count;
@@ -5069,8 +5120,9 @@ export function initVim(CM) {
         }
         if (target === 's') {
           var _yssLast = vim.lastEditInputState || undefined;
-          var yssSavedRepl = _yssLast && _yssLast._surroundReplacement;
-          if (yssSavedRepl && _yssLast && _yssLast._surroundType && _yssLast._surroundType !== 'yss') yssSavedRepl = undefined;
+          var yssSavedRepl = _yssLast && _yssLast._surroundType === 'yss'
+            ? _yssLast._surroundReplacement
+            : undefined;
           if (yssSavedRepl) {
             var cursor = cm.getCursor();
             var lineText = cm.getLine(cursor.line);
@@ -5177,8 +5229,9 @@ export function initVim(CM) {
 
       if (pendingOp === 'change') {
         var _csNlLast = vim.lastEditInputState || undefined;
-        var savedReplacement = _csNlLast && _csNlLast._surroundReplacement;
-        if (savedReplacement && _csNlLast && _csNlLast._surroundType && _csNlLast._surroundType !== 'cs') savedReplacement = undefined;
+        var savedReplacement = _csNlLast && _csNlLast._surroundType === 'cs'
+          ? _csNlLast._surroundReplacement
+          : undefined;
         if (savedReplacement) {
           var found = findSurroundingPair(cm, cm.getCursor(), target);
           if (found) changeSurroundPair(cm, found, savedReplacement, true);
@@ -5199,8 +5252,9 @@ export function initVim(CM) {
       } else if (pendingOp === 'yank') {
         if (target === 'S') {
           var _yssNlLast = vim.lastEditInputState || undefined;
-          var savedReplacement = _yssNlLast && _yssNlLast._surroundReplacement;
-          if (savedReplacement && _yssNlLast && _yssNlLast._surroundType && _yssNlLast._surroundType !== 'yss') savedReplacement = undefined;
+          var savedReplacement = _yssNlLast && _yssNlLast._surroundType === 'yss'
+            ? _yssNlLast._surroundReplacement
+            : undefined;
           if (savedReplacement) {
             var cursor = cm.getCursor();
             var lineText = cm.getLine(cursor.line);

@@ -57,6 +57,7 @@ export type vimState = {
         from?: Pos,
         to?: Pos,
         tagResult?: { open: { from: Pos, to: Pos }, close: { from: Pos, to: Pos } },
+        funcResult?: { funcNameStart: Pos, open: Pos, close: Pos },
         linewise?: boolean,
         newline?: boolean,
         count?: number,

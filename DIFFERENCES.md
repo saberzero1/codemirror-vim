@@ -666,8 +666,9 @@ Theme rules for `.cm-vim-linewise-selection` are included in `vimStyle`
 
 Native vim-surround support: `ds{target}`, `cs{target}{replacement}`,
 `ys{motion}{replacement}`, `yss{replacement}`, visual `S{replacement}`,
-tag surround (`dst`, `cst`, `ys<tag>`, `S<tag>`), function wrapping (`f`/`F`),
-newline variants (`cS`, `yS`, `ySS`, `gS`), and count support (`2ds)`, `2cs)`).
+tag surround (`dst`, `cst`, `ys<tag>`, `S<tag>`), function surround (`dsf`,
+`csf`, `f`/`F` in replacement), newline variants (`cS`, `yS`, `ySS`, `gS`),
+and count support (`2ds)`, `2cs)`).
 
 Architecture: `s<character>` keymap entry with `operatorPending: true` fires
 after `d`/`c`/`y` enters operator-pending mode. The pending operator is passed
@@ -851,6 +852,20 @@ contains the cursor position, and the innermost (rightmost `funcNameStart`) is
 selected. `dsf` removes the function name through `(` and the closing `)`,
 leaving the arguments. Handles nested calls, method chains (`obj.method()`),
 and no-arg functions (`func()` → ``).
+
+### Change surrounding function name (`csf`)
+
+`csf` changes the function name around the cursor. Uses the same
+`findSurroundingFunction` as `dsf` to locate the function. Triggers a
+`pendingInput` prompt (`func: `) where the user types the new function name
+and presses Enter. The name range from `funcNameStart` to `open` (the opening
+paren) is replaced with the typed text. Escape cancels the operation. Empty
+input is a no-op. Dot-repeat stores the function name string in
+`_surroundReplacement` with `_surroundType: 'cs'` and re-calls
+`findSurroundingFunction` at the new cursor position.
+
+Single-line only (same limitation as `dsf` — `findSurroundingFunction` uses
+`cm.getLine`).
 
 ### Custom surround pairs (`registerSurroundPair` / `unregisterSurroundPair`)
 
