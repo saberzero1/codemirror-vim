@@ -155,6 +155,25 @@ clears `vim.status` so the chord display also resets. Insert mode is excluded
 (partial sequences like `jk` escape should not be disrupted by transient blur).
 Cleaned up in `destroy()`.
 
+### Focus handler for block cursor redraw
+
+**Files**: `src/index.ts`, `src/block-cursor.ts`
+
+The CM6 ViewPlugin registers a `focus` event listener on `view.contentDOM`
+that calls `blockCursor.scheduleRedraw()` on focus gain. Cleaned up in
+`destroy()`.
+
+`BlockCursorPlugin.update()` now includes `update.focusChanged` in its redraw
+trigger condition. Additionally, when focus is gained (`update.focusChanged &&
+update.view.hasFocus`), the plugin schedules a deferred `requestMeasure` via
+`requestAnimationFrame`. This second measurement runs after the browser has
+reflowed decoration changes triggered by the focus event — specifically,
+Obsidian's live preview re-expanding hidden markdown formatting (e.g. `## `
+in headings) on the active line. Without the deferred pass, `coordsAtPos()`
+reads stale layout coordinates from the pre-reflow DOM and the block cursor
+renders the wrong character. Cleaned up via `cancelAnimationFrame` in
+`destroy()`.
+
 ### `leaveVimMode` cleanup hardening
 
 **File**: `src/vim.js`

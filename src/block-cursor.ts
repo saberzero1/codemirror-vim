@@ -79,6 +79,7 @@ export class BlockCursorPlugin {
   measureReq: {read: () => Measure, write: (value: Measure) => void}
   cursorLayer: HTMLElement
   cm: CodeMirror
+  _pendingDeferred: number = 0
 
   constructor(readonly view: EditorView, cm: CodeMirror) {
     this.cm = cm;
@@ -97,9 +98,16 @@ export class BlockCursorPlugin {
   }
 
   update(update: ViewUpdate) {
-    if (update.selectionSet || update.geometryChanged || update.viewportChanged) {
+    if (update.selectionSet || update.geometryChanged || update.viewportChanged || update.focusChanged) {
       this.view.requestMeasure(this.measureReq)
       this.cursorLayer.style.animationName = this.cursorLayer.style.animationName == "cm-blink" ? "cm-blink2" : "cm-blink"
+    }
+    if (update.focusChanged && update.view.hasFocus) {
+      if (this._pendingDeferred) cancelAnimationFrame(this._pendingDeferred);
+      this._pendingDeferred = requestAnimationFrame(() => {
+        this._pendingDeferred = 0;
+        this.view.requestMeasure(this.measureReq);
+      });
     }
     if (configChanged(update)) this.setBlinkRate();
   }
@@ -134,6 +142,7 @@ export class BlockCursorPlugin {
   }
 
   destroy() {
+    if (this._pendingDeferred) cancelAnimationFrame(this._pendingDeferred);
     this.cursorLayer.remove()
   }
 }

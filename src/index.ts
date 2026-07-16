@@ -63,6 +63,7 @@ const vimPlugin = ViewPlugin.fromClass(
     blockCursor: BlockCursorPlugin;
     _escapeHandler: ((e: KeyboardEvent) => void) | null = null;
     _blurHandler: (() => void) | null = null;
+    _focusHandler: (() => void) | null = null;
     constructor(view: EditorView) {
       this.view = view as EditorViewExtended;
       const cm = (this.cm = new CodeMirror(view));
@@ -110,6 +111,11 @@ const vimPlugin = ViewPlugin.fromClass(
         }
       };
       view.contentDOM.addEventListener("blur", this._blurHandler);
+
+      this._focusHandler = () => {
+        this.blockCursor.scheduleRedraw();
+      };
+      view.contentDOM.addEventListener("focus", this._focusHandler);
 
       this.cm.on("vim-command-done", () => {
         if (cm.state.vim) cm.state.vim.status = "";
@@ -233,6 +239,10 @@ const vimPlugin = ViewPlugin.fromClass(
       if (this._blurHandler) {
         this.view.contentDOM.removeEventListener("blur", this._blurHandler);
         this._blurHandler = null;
+      }
+      if (this._focusHandler) {
+        this.view.contentDOM.removeEventListener("focus", this._focusHandler);
+        this._focusHandler = null;
       }
       Vim.leaveVimMode(this.cm);
       this.updateClass();
