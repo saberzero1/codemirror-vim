@@ -1298,9 +1298,12 @@ export function initVim(CM) {
     },
 
     defineMotion: defineMotion,
+    getMotion: function(name) { return motions[name]; },
     defineAction: defineAction,
     getAction: function(name) { return actions[name]; },
     defineOperator: defineOperator,
+
+    recordLastCharacterSearch: recordLastCharacterSearch,
     mapCommand: mapCommand,
     _mapCommand: _mapCommand,
     removeMapCommand: function(keys) {

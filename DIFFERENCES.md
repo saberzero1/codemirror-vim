@@ -74,6 +74,34 @@ with that name. This enables the save/restore pattern for action overrides:
 a host plugin can capture the original built-in action before replacing it
 via `defineAction()`, and restore it on unload.
 
+### `getMotion` API
+
+**File**: `src/vim.js`
+
+Added `getMotion(name)` to the `vimApi` object. Returns the current motion
+function registered under the given name, or `undefined` if no motion exists
+with that name. This enables the same save/restore pattern as `getAction` but
+for motions — a host plugin can capture the original built-in motion (e.g.
+`moveToCharacter`) before replacing it via `defineMotion()`, and delegate to
+the original when the override is disabled. Used by the flash motions feature
+to capture `moveToCharacter` and `moveTillCharacter` before overriding them.
+
+### `recordLastCharacterSearch` API
+
+**File**: `src/vim.js`
+
+Added `recordLastCharacterSearch(increment, args)` to the `vimApi` object.
+Sets `vimGlobalState.lastCharacterSearch` (the state used by `;` and `,`
+repeat commands) from plugin code. Previously this was an internal function
+called only from the built-in `moveToCharacter` and `moveTillCharacter`
+motions. When a host plugin overrides these motions (e.g. flash-style
+enhanced `f`/`F`/`t`/`T`), it needs to update the repeat state so that `;`
+and `,` continue to work after the override resolves.
+
+Parameters:
+- `increment`: `0` for `f`/`F` motions, `-1` for `t` forward, `1` for `T` backward
+- `args`: `{ forward: boolean, selectedCharacter: string }`
+
 ### `removeMapCommand` API
 
 **File**: `src/vim.js`
