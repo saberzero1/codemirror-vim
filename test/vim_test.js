@@ -7650,6 +7650,75 @@ testVim('gg_G_after_jumplist_with_stale_markers', function(cm, vim, helpers) {
   helpers.assertCursorAt(0, 0);
 }, { value: 'line one\nline two\nline three\nline four\nline five\nline six\nline seven\nline eight\nline nine\nline ten' });
 
+testVim('shadow_resolver_cs_surround_change', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', '"', "'");
+  eq("'hello' world", cm.getValue());
+}, { value: '"hello" world' });
+
+testVim('shadow_resolver_ds_surround_delete', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', '"');
+  eq('hello world', cm.getValue());
+}, { value: '"hello" world' });
+
+testVim('shadow_resolver_ysiw_surround_yank', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('y', 's', 'i', 'w', '"');
+  eq('"hello" world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('shadow_resolver_dd_regression', function(cm, vim, helpers) {
+  cm.setCursor(1, 0);
+  helpers.doKeys('d', 'd');
+  eq('line one\nline three', cm.getValue());
+}, { value: 'line one\nline two\nline three' });
+
+testVim('shadow_resolver_cc_regression', function(cm, vim, helpers) {
+  cm.setCursor(1, 0);
+  helpers.doKeys('c', 'c');
+  eq('insert', cm.state.vim.mode);
+  eq('line one\n\nline three', cm.getValue());
+}, { value: 'line one\nline two\nline three' });
+
+testVim('shadow_resolver_dw_no_activation', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('d', 'w');
+  eq('world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('shadow_resolver_cw_no_activation', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('c', 'w');
+  helpers.doKeys('f', 'o', 'o');
+  eq('insert', cm.state.vim.mode);
+  helpers.doKeys('<Esc>');
+  eq('foo world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('shadow_resolver_escape_clears_timer', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('c');
+  helpers.doKeys('<Esc>');
+  helpers.assertCursorAt(0, 0);
+  eq('"hello" world', cm.getValue());
+  eq(undefined, cm.state.vim.inputState.operator);
+}, { value: '"hello" world' });
+
+testVim('shadow_resolver_g_tilde_regression', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', '~', 'w');
+  eq('HELLO world', cm.getValue());
+}, { value: 'hello world' });
+
+testVim('shadow_resolver_disabled_when_zero', function(cm, vim, helpers) {
+  CodeMirror.Vim.setOption('operatorshadowtimeout', 0);
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', '"', "'");
+  eq("'hello' world", cm.getValue());
+  CodeMirror.Vim.setOption('operatorshadowtimeout', 1000);
+}, { value: '"hello" world' });
+
 }
 
 var typeKey = function() {

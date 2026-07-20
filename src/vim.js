@@ -381,6 +381,10 @@ export function initVim(CM) {
     // Reset input state before nulling vim — clears keyBuffer, pending
     // operator, motion, etc.
     if (vim) {
+      if (vim._shadowTimer) {
+        clearTimeout(vim._shadowTimer);
+        vim._shadowTimer = undefined;
+      }
       vim.inputState = new InputState();
       vim.expectLiteralNext = false;
     }
@@ -1218,6 +1222,11 @@ export function initVim(CM) {
           // All other keys (motions, operators): fall through to normal visual dispatch
         }
 
+        if (vim._shadowTimer) {
+          clearTimeout(vim._shadowTimer);
+          vim._shadowTimer = undefined;
+        }
+
         if (vim.surroundState) {
           var surroundResult = handleSurroundSubState(cm, key, vim);
           if (surroundResult !== false) return surroundResult;
@@ -1240,6 +1249,20 @@ export function initVim(CM) {
         if (match.type == 'none') { clearInputState(cm); return false; }
         else if (match.type == 'partial') {
           if (match.expectLiteralNext) vim.expectLiteralNext = true;
+          if (match._deferredMotion) {
+            var deferredCmd = match._deferredMotion;
+            var shadowTimeout = getOption('operatorshadowtimeout');
+            if (shadowTimeout == null) shadowTimeout = 1000;
+            vim._shadowTimer = window.setTimeout(function() {
+              vim._shadowTimer = undefined;
+              if (!cm.state.vim) return;
+              if (!vim.inputState.operator) return;
+              vim.inputState.keyBuffer.length = 0;
+              cm.operation(function() {
+                commandDispatcher.processCommand(cm, vim, deferredCmd);
+              });
+            }, shadowTimeout);
+          }
           return true;
         }
         else if (match.type == 'clear') { clearInputState(cm); return true; }
@@ -1676,10 +1699,15 @@ export function initVim(CM) {
 
   /** @arg {CodeMirrorV} cm  @arg {string} [reason] */
   function clearInputState(cm, reason) {
-    cm.state.vim.inputState = new InputState();
-    cm.state.vim.expectLiteralNext = false;
-    if (typeof cm.state.vim._commandGeneration === 'number') {
-      cm.state.vim._commandGeneration++;
+    var vim = cm.state.vim;
+    if (vim._shadowTimer) {
+      clearTimeout(vim._shadowTimer);
+      vim._shadowTimer = undefined;
+    }
+    vim.inputState = new InputState();
+    vim.expectLiteralNext = false;
+    if (typeof vim._commandGeneration === 'number') {
+      vim._commandGeneration++;
     }
     CM.signal(cm, 'vim-command-done', reason);
   }
@@ -1987,6 +2015,24 @@ export function initVim(CM) {
           type: 'partial',
           expectLiteralNext: matches.partial.length == 1 && matches.partial[0].keys.slice(-11) == '<character>'
         };
+      }
+      // Operator-prefix shadow resolver: when an operator is pending and
+      // the full match is a motion, but operatorPending actions have
+      // partial matches (e.g. surround's s<character> vs flash's s),
+      // defer to the partials so the more-specific action can complete.
+      // A configurable timeout (operatorshadowtimeout) falls back to
+      // executing the deferred motion if no next key arrives.
+      if (inputState.operator && bestMatch.type === 'motion' &&
+          matches.partial.some(function(p) { return p.operatorPending; })) {
+        var shadowTimeout = getOption('operatorshadowtimeout');
+        if (shadowTimeout == null) shadowTimeout = 1000;
+        if (shadowTimeout > 0) {
+          return {
+            type: 'partial',
+            expectLiteralNext: matches.partial.length == 1 && matches.partial[0].keys.slice(-11) == '<character>',
+            _deferredMotion: bestMatch
+          };
+        }
       }
       if (bestMatch.keys.slice(-11) == '<character>' || bestMatch.keys.slice(-10) == '<register>') {
         var character = lastChar(keys);
@@ -6937,6 +6983,7 @@ export function initVim(CM) {
   defineOption('clipboard', '', 'string', ['clip']);
   defineOption('selectmode', '', 'string', ['slm']);
   defineOption('keymodel', '', 'string', ['km']);
+  defineOption('operatorshadowtimeout', 1000, 'number', ['ost']);
 
   // Search functions
   defineOption('pcre', true, 'boolean');

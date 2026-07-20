@@ -48,6 +48,7 @@ export type vimState = {
     cursorShapes?: import("./block-cursor").CursorShapeConfig,
     surroundInsertClose?: string,
     _commandGeneration: number,
+    _shadowTimer?: ReturnType<typeof setTimeout>,
     _preventReselect?: boolean,
     _suppressModeSignal?: boolean,
     insertModeReturnArgs?: { replace?: boolean, virtualReplace?: boolean },

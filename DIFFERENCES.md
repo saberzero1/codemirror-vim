@@ -1254,3 +1254,21 @@ When an operator-pending async motion (e.g., `d` + EasyMotion target) resolves, 
 - Simple delimiters (`ysiwb`, `ysiw"`, `ysaw'`) work for dot-repeat. Tag (`ysiw<em>`) and function (`ysiwflen`) dot-repeat requires additional `pendingInput` prompt replay which is not yet implemented.
 
 **Type change**: Added `_asyncMotionTarget`, `_ysTextObjectMotion`, `_ysTextObjectChar` to `InputStateInterface` in `src/types.ts`.
+
+## Operator-prefix shadow resolver (`operatorshadowtimeout`)
+
+**Files**: `src/vim.js`, `src/types.ts`
+
+When an operator is pending (`c`/`d`/`y`/etc.) and the next keystroke fully matches a motion but also partially matches an `operatorPending` action (e.g., surround's `s<character>`), the resolver defers to the partial match — waiting for the next character to disambiguate. A configurable timeout (`operatorshadowtimeout`, default 1000ms) falls back to executing the deferred motion if no next key arrives. Set to `0` to disable (immediate motion execution, upstream behavior).
+
+This resolves conflicts between motion mappings registered by plugins (e.g., flash jump's `s`) and the built-in surround `s<character>` action in operator-pending mode. In upstream codemirror-vim, a full match always beats a partial match, so `c` + `s` would execute the motion instead of waiting for the surround target character.
+
+**Implementation**:
+- `matchCommand()`: after the existing `idle` deferral block, a new check defers full motion matches when `inputState.operator` is set and `operatorPending` action partials exist. The deferred motion is stored on the return value as `_deferredMotion`.
+- `handleKeyNonInsertMode()`: when a partial match carries `_deferredMotion`, a `window.setTimeout` is started. On timeout, the deferred motion is dispatched via `processCommand()`. The timer is cleared when any subsequent key arrives.
+- `clearInputState()` and the vim teardown handler: clear the shadow timer to prevent stale execution after Escape or editor destruction.
+- New option: `defineOption('operatorshadowtimeout', 1000, 'number', ['ost'])`
+
+**Type change**: Added `_shadowTimer` to `vimState` in `src/types.ts`.
+
+**Upstream difference**: Upstream codemirror-vim has no timeout-based key disambiguation. Operators enter pending mode immediately and the next key is always resolved as a motion. This fork adds Neovim-style operator-prefix disambiguation, scoped to operator-pending mode only (non-operator prefixes like `g`/`z`/`<C-w>` are unaffected).
