@@ -11,6 +11,16 @@ let getDrawSelectionConfig = View.getDrawSelectionConfig || function() {
   }
 }();
 
+let _cursorSuppressed = false;
+
+export function setCursorSuppressed(suppressed: boolean): void {
+  _cursorSuppressed = suppressed;
+}
+
+export function isCursorSuppressed(): boolean {
+  return _cursorSuppressed;
+}
+
 export type CursorShape = 'block' | 'bar' | 'underline' | 'hollow';
 
 export interface CursorShapeConfig {
@@ -98,9 +108,22 @@ export class BlockCursorPlugin {
   }
 
   update(update: ViewUpdate) {
+    if (_cursorSuppressed) {
+      this.cursorLayer.style.display = "none";
+      this.view.contentDOM.style.caretColor = "transparent";
+      let layers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
+      for (let i = 0; i < layers.length; i++) layers[i].style.display = "none";
+    } else if (this.cursorLayer.style.display === "none") {
+      this.cursorLayer.style.display = "";
+      this.view.contentDOM.style.caretColor = "";
+      let layers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
+      for (let i = 0; i < layers.length; i++) layers[i].style.display = "";
+    }
     if (update.selectionSet || update.geometryChanged || update.viewportChanged || update.focusChanged) {
       this.view.requestMeasure(this.measureReq)
-      this.cursorLayer.style.animationName = this.cursorLayer.style.animationName == "cm-blink" ? "cm-blink2" : "cm-blink"
+      if (!_cursorSuppressed) {
+        this.cursorLayer.style.animationName = this.cursorLayer.style.animationName == "cm-blink" ? "cm-blink2" : "cm-blink"
+      }
     }
     if (update.focusChanged && update.view.hasFocus) {
       if (this._pendingDeferred) cancelAnimationFrame(this._pendingDeferred);
@@ -128,6 +151,13 @@ export class BlockCursorPlugin {
   }
 
   drawSel({cursors}: Measure) {
+    if (_cursorSuppressed) {
+      if (this.cursorLayer.children.length > 0) {
+        this.cursorLayer.textContent = "";
+        this.cursors = [];
+      }
+      return;
+    }
     if (cursors.length != this.cursors.length || cursors.some((c, i) => !c.eq(this.cursors[i]))) {
       let oldCursors = this.cursorLayer.children
       if (oldCursors.length !== cursors.length) {

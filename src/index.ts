@@ -584,6 +584,7 @@ let initialCursorShapes: import("./block-cursor").CursorShapeConfig | undefined;
 
 export { CodeMirror, Vim };
 export { setLivePreviewField } from "./cm_adapter";
+export { setCursorSuppressed } from "./block-cursor";
 export type { CursorShape, CursorShapeConfig } from "./block-cursor";
 
 export function getCM(view: EditorView): CodeMirror | null {

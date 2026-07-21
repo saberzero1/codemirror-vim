@@ -348,6 +348,25 @@ This keeps the fork Obsidian-agnostic — it accepts a generic
 passes `editorLivePreviewField` (Obsidian's official API) during extension
 creation.
 
+### `setCursorSuppressed` API
+
+**Files**: `src/block-cursor.ts`, `src/index.ts`
+
+Added `setCursorSuppressed(suppressed: boolean)` to allow the host plugin to
+suppress all cursor rendering by the fork. When suppressed:
+
+- `BlockCursorPlugin.drawSel()` clears cursor children and returns early.
+- `BlockCursorPlugin.update()` hides the fork's cursor layer
+  (`.cm-vimCursorLayer`), all standard CM6 cursor layers
+  (`.cm-cursorLayer:not(.cm-vimCursorLayer)`), and sets
+  `contentDOM.style.caretColor = "transparent"` — synchronously on every
+  transaction to prevent flicker.
+- When suppression is turned off, all three are restored.
+
+Used by the Vim Motions plugin's animated cursor feature, which renders its
+own cursor on a `<canvas>` overlay and needs the native cursor DOM hidden.
+Follows the same module-level setter pattern as `setLivePreviewField`.
+
 ### Properties navigation (focusBefore adapter)
 
 **File**: `src/cm_adapter.ts`
