@@ -1,4 +1,4 @@
-import { EditorSelection, Text, MapMode, ChangeDesc } from "@codemirror/state"
+import { EditorSelection, Text, MapMode, ChangeDesc, type StateField } from "@codemirror/state"
 import { StringStream, matchBrackets, indentUnit, ensureSyntaxTree, foldCode, foldedRanges } from "@codemirror/language"
 import { EditorView, runScopeHandlers, ViewUpdate, Decoration } from "@codemirror/view"
 import { RegExpCursor, setSearchQuery, SearchQuery } from "@codemirror/search"
@@ -8,6 +8,12 @@ import {
   toggleLineComment
 } from "@codemirror/commands"
 import {vimState, CM5RangeInterface} from "./types"
+
+let _livePreviewField: StateField<boolean> | null = null;
+
+export function setLivePreviewField(field: StateField<boolean>): void {
+  _livePreviewField = field;
+}
 
 function indexFromPos(doc: Text, pos: Pos): number {
   var ch = pos.ch;
@@ -635,9 +641,12 @@ export class CodeMirror {
     }
     // Obsidian compatibility: when moving up into a block widget (e.g. frontmatter
     // properties panel), provide focusBefore so vim can redirect focus to the widget.
-    // Two cases: (1) cursor moved into frontmatter lines, (2) cursor couldn't move
-    // up because it's already adjacent to the frontmatter widget boundary.
-    if (amount < 0 && pos.line <= start.line) {
+    // Only applies in live-preview mode where frontmatter is replaced by a widget.
+    // In source mode, frontmatter is plain text — the cursor moves through it normally.
+    const isLivePreview = _livePreviewField
+      ? cm6.state.field(_livePreviewField, false) ?? false
+      : false;
+    if (isLivePreview && amount < 0 && pos.line <= start.line) {
       const firstLine = doc.line(1).text;
       if (firstLine === '---') {
         let fmEnd = 0;
@@ -655,7 +664,8 @@ export class CodeMirror {
           const container = cm6.dom.closest('.markdown-source-view');
           const focusTarget = (
             container?.querySelector('.metadata-container .metadata-add-button') ??
-            container?.querySelector('.metadata-container .metadata-properties-heading')
+            container?.querySelector('.metadata-container .metadata-properties-heading') ??
+            container?.querySelector('.metadata-container')
           ) as HTMLElement | null;
           if (focusTarget) {
             pos.focusBefore = () => focusTarget.focus();

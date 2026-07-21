@@ -333,6 +333,21 @@ in `block-cursor.ts` to be scoped to `.cm-vimMode:not(.cm-vimVisual)`, so that
 visual mode shows the browser's native selection highlight instead of hiding it
 behind the block cursor overlay.
 
+### `setLivePreviewField` API
+
+**Files**: `src/cm_adapter.ts`, `src/index.ts`
+
+Added `setLivePreviewField(field: StateField<boolean>)` to configure a
+host-provided state field that indicates whether the editor is in live-preview
+mode. The field reference is stored module-level and read by `findPosV` to
+gate frontmatter widget navigation (see below). When the field is not set or
+the field value is `false`, frontmatter interception is skipped entirely.
+
+This keeps the fork Obsidian-agnostic — it accepts a generic
+`StateField<boolean>` without importing from `obsidian`. The host plugin
+passes `editorLivePreviewField` (Obsidian's official API) during extension
+creation.
+
 ### Properties navigation (focusBefore adapter)
 
 **File**: `src/cm_adapter.ts`
@@ -354,12 +369,19 @@ the frontmatter properties widget. Two cases trigger `focusBefore`:
    first content line would fire `focusBefore` immediately instead of
    navigating through the wrapped display lines first.
 
-In both cases, a `focusBefore` callback is attached to the result position.
-The callback queries the DOM for Obsidian's metadata container
+The entire frontmatter interception block is gated on the `_livePreviewField`
+state field (set via `setLivePreviewField`). When the field is absent or
+`false` (source mode), the block is skipped and the cursor moves through
+raw frontmatter text normally. This prevents the cursor from getting stuck
+below the frontmatter in source mode, where no properties widget exists to
+receive focus.
+
+In live-preview mode, a `focusBefore` callback is attached to the result
+position. The callback queries the DOM for Obsidian's metadata container
 (`.metadata-container`) and focuses the "Add property" button
-(`.metadata-add-button`), implementing the same `focusBefore` protocol that
-Obsidian's built-in vim mode uses. Both `k` (`moveByLines`) and `gk`
-(`moveByDisplayLines`) check for `focusBefore` on the `findPosV` result.
+(`.metadata-add-button`), falling back to the container element itself.
+Both `k` (`moveByLines`) and `gk` (`moveByDisplayLines`) check for
+`focusBefore` on the `findPosV` result.
 
 ### Frontmatter-aware `O` (open line above)
 

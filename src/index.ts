@@ -583,6 +583,7 @@ export function vim(options: { status?: boolean; cursorShapes?: import("./block-
 let initialCursorShapes: import("./block-cursor").CursorShapeConfig | undefined;
 
 export { CodeMirror, Vim };
+export { setLivePreviewField } from "./cm_adapter";
 export type { CursorShape, CursorShapeConfig } from "./block-cursor";
 
 export function getCM(view: EditorView): CodeMirror | null {
