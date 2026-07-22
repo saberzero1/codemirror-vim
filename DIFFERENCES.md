@@ -372,10 +372,16 @@ override is set, the editor falls back to the global value.
 
 The per-view override is automatically cleaned up in `BlockCursorPlugin.destroy()`.
 
+Added `isCursorSuppressedForView(view: EditorView): boolean` to query the
+effective suppression state for a specific view (per-view override if set,
+otherwise global default). Used by the host plugin's animated cursor
+controller to skip canvas drawing when per-view suppression is active.
+
 Used by the Vim Motions plugin's animated cursor feature: the global flag
 suppresses cursors in main editors (which render their own canvas cursor),
-while textarea vim overlays and other short-lived editors use per-view
-overrides to restore the native cursor.
+while textarea vim overlays and table cell editors use per-view overrides to
+restore the native cursor. Table navigation mode uses per-view suppression to
+hide all cursors (both native and canvas) while navigating cells.
 
 ### Properties navigation (focusBefore adapter)
 
