@@ -26,7 +26,7 @@ export function clearCursorSuppressedForView(view: EditorView): void {
   _viewOverrides.delete(view);
 }
 
-function isSuppressed(view: EditorView): boolean {
+export function isCursorSuppressedForView(view: EditorView): boolean {
   const override = _viewOverrides.get(view);
   if (override !== undefined) return override;
   return _cursorSuppressed;
@@ -123,7 +123,7 @@ export class BlockCursorPlugin {
   }
 
   update(update: ViewUpdate) {
-    let suppressed = isSuppressed(this.view);
+    let suppressed = isCursorSuppressedForView(this.view);
     if (suppressed) {
       this.cursorLayer.style.display = "none";
       this.view.contentDOM.style.caretColor = "transparent";
@@ -167,7 +167,7 @@ export class BlockCursorPlugin {
   }
 
   drawSel({cursors}: Measure) {
-    if (isSuppressed(this.view)) {
+    if (isCursorSuppressedForView(this.view)) {
       if (this.cursorLayer.children.length > 0) {
         this.cursorLayer.textContent = "";
         this.cursors = [];
