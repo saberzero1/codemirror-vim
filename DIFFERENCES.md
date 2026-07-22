@@ -845,10 +845,19 @@ This enables Markdown-specific pairs without custom key assignments:
 
 ### Insert mode surround (`<C-G>s` / `<C-G>S`)
 
-`<C-G>s<character>` in insert mode inserts the open delimiter at cursor.
-The close delimiter is stored on `vim.surroundInsertClose` and appended
-automatically when insert mode exits (in `exitInsertMode`, before cursor
-adjustment). `<C-G>S<character>` does the same with newlines and indentation.
+`<C-G>s<character>` in insert mode inserts both the open and close delimiters
+at once, placing the cursor between them. The user types between the delimiters.
+On `Esc`, the standard `ch-1` cursor adjustment places the cursor on the last
+typed character, matching vim-surround behavior. `<C-G>S<character>` does the
+same with newlines and indentation.
+
+The delimiter insertion uses `maybeReset` to clear itself from the insert-mode
+change stream, so `lastInsertModeChanges.changes` contains only the user's
+typed text. This prevents dot-repeat from producing garbled output.
+
+Known limitation: dot-repeat (`.`) replays only the typed text, not the
+surrounding delimiters. Macro recording of insert-mode surround keys is also
+not supported (pre-existing limitation of insert-mode macro key logging).
 
 Insert mode partial match buffering was fixed to support this: when the key
 buffer contains a non-char key (e.g. `<C-g>`), subsequent single-char keys
@@ -1194,7 +1203,7 @@ the "display" selection.
 - `OperatorArgs`: Added `cursorCol?: number`, `surroundNewline?: boolean`, `surroundCharRepeat?: number`
 - `InputStateInterface`: Added `_surroundReplacement`, `_surroundSelOffset`, `_surroundNewline`
 - `SurroundReplacementSpec`: Union type for tag and function specs
-- `vimState`: Added `surroundInsertClose?: string`, `_commandGeneration: number`, `blockInsertLeft?: number`
+- `vimState`: Added `_commandGeneration: number`, `blockInsertLeft?: number`
 - `surroundState`: Added `tagResult`, `from`, `to`, `newline`, `count`, `charRepeat`, `pendingInput`
 - `allCommands`: Added `_isDefault?: boolean`
 - `moveByLines` return: `Pos | null`

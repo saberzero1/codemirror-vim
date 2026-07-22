@@ -7236,6 +7236,77 @@ testVim('custom_surround_builtin_unaffected', function(cm, vim, helpers) {
   CodeMirror.Vim.unregisterSurroundPair('l');
 }, { value: '(hello) world' });
 
+// --- Insert-mode surround (<C-g>s) ---
+
+testVim('insert_surround_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', '"', 'h', 'e', 'l', 'l', 'o', '<Esc>');
+  eq('world"hello" test', cm.getValue());
+  helpers.assertCursorAt(0, 10);
+}, { value: 'world test' });
+
+testVim('insert_surround_parens_unspaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', ')', 'a', 'b', 'c', '<Esc>');
+  eq('world(abc) test', cm.getValue());
+  helpers.assertCursorAt(0, 8);
+}, { value: 'world test' });
+
+testVim('insert_surround_parens_spaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', '(', 'a', 'b', 'c', '<Esc>');
+  eq('world( abc ) test', cm.getValue());
+  helpers.assertCursorAt(0, 9);
+}, { value: 'world test' });
+
+testVim('insert_surround_brackets_unspaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', ']', 'a', 'b', 'c', '<Esc>');
+  eq('world[abc] test', cm.getValue());
+  helpers.assertCursorAt(0, 8);
+}, { value: 'world test' });
+
+testVim('insert_surround_brackets_spaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', '[', 'a', 'b', 'c', '<Esc>');
+  eq('world[ abc ] test', cm.getValue());
+  helpers.assertCursorAt(0, 9);
+}, { value: 'world test' });
+
+testVim('insert_surround_braces_unspaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', '}', 'a', 'b', 'c', '<Esc>');
+  eq('world{abc} test', cm.getValue());
+  helpers.assertCursorAt(0, 8);
+}, { value: 'world test' });
+
+testVim('insert_surround_braces_spaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', '{', 'a', 'b', 'c', '<Esc>');
+  eq('world{ abc } test', cm.getValue());
+  helpers.assertCursorAt(0, 9);
+}, { value: 'world test' });
+
+testVim('insert_surround_empty_unspaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', ')', '<Esc>');
+  eq('world() test', cm.getValue());
+  helpers.assertCursorAt(0, 5);
+}, { value: 'world test' });
+
+testVim('insert_surround_empty_spaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', '(', '<Esc>');
+  eq('world(  ) test', cm.getValue());
+  helpers.assertCursorAt(0, 6);
+}, { value: 'world test' });
+
+testVim('insert_surround_undo', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('i', '<C-g>', 's', ')', 'a', 'b', 'c', '<Esc>', 'u');
+  eq('world test', cm.getValue());
+}, { value: 'world test' });
+
 async function delay(t) {
   return await new Promise(resolve => setTimeout(resolve, t));
 }
