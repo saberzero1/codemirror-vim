@@ -1042,6 +1042,20 @@ export function initVim(CM) {
         return command();
       }
     },
+    /**
+     * Feed a key sequence into the Vim key handler, respecting noremap.
+     * Unlike handleKey (which processes one key and only controls macro
+     * recording via origin), feedKeys delegates to doKeyToKey which
+     * correctly manages the internal noremap flag and keyToKeyStack
+     * recursion protection.
+     * @param {CodeMirrorV} cm
+     * @param {string} keys - Key sequence, e.g. "gk" or "<C-w>v"
+     * @param {{ noremap?: boolean }} [options]
+     */
+    feedKeys: function(cm, keys, options) {
+      var opts = options || {};
+      doKeyToKey(cm, keys, { noremap: opts.noremap !== false });
+    },
     multiSelectHandleKey: multiSelectHandleKey,
 
     /**

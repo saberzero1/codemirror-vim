@@ -102,6 +102,24 @@ Parameters:
 - `increment`: `0` for `f`/`F` motions, `-1` for `t` forward, `1` for `T` backward
 - `args`: `{ forward: boolean, selectedCharacter: string }`
 
+### `feedKeys` API
+
+**File**: `src/vim.js`
+
+Added `feedKeys(cm, keys, options)` to the `vimApi` object. Feeds a key
+sequence into the vim key handler with correct noremap semantics. Unlike
+`handleKey(cm, key, origin)` — which processes one key at a time and whose
+`origin` parameter only controls macro recording, not remapping —
+`feedKeys` delegates to the internal `doKeyToKey` function which manages
+the `noremap` flag and `keyToKeyStack` recursion protection.
+
+Parameters:
+- `cm`: The CodeMirror adapter instance
+- `keys`: Key sequence string, e.g. `"gk"` or `"<C-w>v"` (parsed by `doKeyToKey`'s `/<(?:[CSMA]-)*\w+>|./gi` regex)
+- `options`: Optional object with `{ noremap?: boolean }`. When `noremap` is `true` (default), returned keys bypass user mappings. When `false`, keys are subject to remapping.
+
+Used by the host plugin's expr mapping implementation: when a Lua `{ expr = true }` keymap callback returns a string like `"gj"`, the plugin calls `feedKeys(cm, "gj", { noremap })` to inject the result with the mapping's noremap flag respected.
+
 ### `removeMapCommand` API
 
 **File**: `src/vim.js`
