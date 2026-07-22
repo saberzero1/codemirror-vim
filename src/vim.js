@@ -5437,9 +5437,19 @@ export function initVim(CM) {
       if (!ch) return;
       var pair = getSurroundPair(ch);
       var cursor = cm.getCursor();
-      cm.replaceRange(pair.open, cursor);
+      // Insert both delimiters at once (single undo step).
+      cm.replaceRange(pair.open + pair.close, cursor);
+      // Position cursor between the delimiters.
       cm.setCursor(cursor.line, cursor.ch + pair.open.length);
-      vim.surroundInsertClose = pair.close;
+      // Clear delimiter text from the insert-mode change stream.
+      // Without this, dot-repeat would replay "()" + typed text as
+      // sequential inserts producing "()hello" instead of "hello".
+      // Setting maybeReset causes onChange (L8880) to clear changes[]
+      // on the user's first keystroke, so only typed text is recorded.
+      var lastChange = vimGlobalState.macroModeState.lastInsertModeChanges;
+      lastChange.maybeReset = true;
+      if (vim.insertEnd) vim.insertEnd.clear();
+      vim.insertEnd = cm.setBookmark(cm.getCursor(), {insertLeft: true});
     },
     surroundInsertNewline: function(cm, actionArgs, vim) {
       var ch = actionArgs.selectedCharacter;
@@ -5452,8 +5462,14 @@ export function initVim(CM) {
       var indentMatch = lineText.match(/^(\s*)/);
       var baseIndent = indentMatch ? indentMatch[1] : '';
       var innerIndent = baseIndent + '  ';
-      cm.replaceRange(nlOpen + '\n' + innerIndent, cursor);
-      vim.surroundInsertClose = '\n' + baseIndent + nlClose;
+      var fullText = nlOpen + '\n' + innerIndent + '\n' + baseIndent + nlClose;
+      cm.replaceRange(fullText, cursor);
+      cm.setCursor(cursor.line + 1, innerIndent.length);
+      // Clear delimiter text from change stream (same as surroundInsert).
+      var lastChange = vimGlobalState.macroModeState.lastInsertModeChanges;
+      lastChange.maybeReset = true;
+      if (vim.insertEnd) vim.insertEnd.clear();
+      vim.insertEnd = cm.setBookmark(cm.getCursor(), {insertLeft: true});
     }
   };
 
@@ -8691,11 +8707,6 @@ export function initVim(CM) {
       vim.lastEditInputState.repeatOverride = vim.insertModeRepeat;
     }
     delete vim.insertModeRepeat;
-    if (vim.surroundInsertClose) {
-      var closeText = vim.surroundInsertClose;
-      delete vim.surroundInsertClose;
-      cm.replaceRange(closeText, cm.getCursor());
-    }
     vim.insertMode = false;
     vim.virtualReplace = false;
     vim.replaceStack = [];
