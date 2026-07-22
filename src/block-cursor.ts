@@ -12,9 +12,24 @@ let getDrawSelectionConfig = View.getDrawSelectionConfig || function() {
 }();
 
 let _cursorSuppressed = false;
+const _viewOverrides = new Map<EditorView, boolean>();
 
 export function setCursorSuppressed(suppressed: boolean): void {
   _cursorSuppressed = suppressed;
+}
+
+export function setCursorSuppressedForView(view: EditorView, suppressed: boolean): void {
+  _viewOverrides.set(view, suppressed);
+}
+
+export function clearCursorSuppressedForView(view: EditorView): void {
+  _viewOverrides.delete(view);
+}
+
+function isSuppressed(view: EditorView): boolean {
+  const override = _viewOverrides.get(view);
+  if (override !== undefined) return override;
+  return _cursorSuppressed;
 }
 
 export function isCursorSuppressed(): boolean {
@@ -108,7 +123,8 @@ export class BlockCursorPlugin {
   }
 
   update(update: ViewUpdate) {
-    if (_cursorSuppressed) {
+    let suppressed = isSuppressed(this.view);
+    if (suppressed) {
       this.cursorLayer.style.display = "none";
       this.view.contentDOM.style.caretColor = "transparent";
       let layers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
@@ -121,7 +137,7 @@ export class BlockCursorPlugin {
     }
     if (update.selectionSet || update.geometryChanged || update.viewportChanged || update.focusChanged) {
       this.view.requestMeasure(this.measureReq)
-      if (!_cursorSuppressed) {
+      if (!suppressed) {
         this.cursorLayer.style.animationName = this.cursorLayer.style.animationName == "cm-blink" ? "cm-blink2" : "cm-blink"
       }
     }
@@ -151,7 +167,7 @@ export class BlockCursorPlugin {
   }
 
   drawSel({cursors}: Measure) {
-    if (_cursorSuppressed) {
+    if (isSuppressed(this.view)) {
       if (this.cursorLayer.children.length > 0) {
         this.cursorLayer.textContent = "";
         this.cursors = [];
@@ -173,6 +189,7 @@ export class BlockCursorPlugin {
 
   destroy() {
     if (this._pendingDeferred) cancelAnimationFrame(this._pendingDeferred);
+    _viewOverrides.delete(this.view);
     this.cursorLayer.remove()
   }
 }

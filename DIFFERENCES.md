@@ -352,8 +352,8 @@ creation.
 
 **Files**: `src/block-cursor.ts`, `src/index.ts`
 
-Added `setCursorSuppressed(suppressed: boolean)` to allow the host plugin to
-suppress all cursor rendering by the fork. When suppressed:
+Added `setCursorSuppressed(suppressed: boolean)` to set the global default for
+cursor suppression across all editors. When suppressed:
 
 - `BlockCursorPlugin.drawSel()` clears cursor children and returns early.
 - `BlockCursorPlugin.update()` hides the fork's cursor layer
@@ -363,9 +363,19 @@ suppress all cursor rendering by the fork. When suppressed:
   transaction to prevent flicker.
 - When suppression is turned off, all three are restored.
 
-Used by the Vim Motions plugin's animated cursor feature, which renders its
-own cursor on a `<canvas>` overlay and needs the native cursor DOM hidden.
-Follows the same module-level setter pattern as `setLivePreviewField`.
+#### Per-view overrides
+
+Added `setCursorSuppressedForView(view: EditorView, suppressed: boolean)` and
+`clearCursorSuppressedForView(view: EditorView)` for per-editor control. A
+per-view override takes precedence over the global flag. When no per-view
+override is set, the editor falls back to the global value.
+
+The per-view override is automatically cleaned up in `BlockCursorPlugin.destroy()`.
+
+Used by the Vim Motions plugin's animated cursor feature: the global flag
+suppresses cursors in main editors (which render their own canvas cursor),
+while textarea vim overlays and other short-lived editors use per-view
+overrides to restore the native cursor.
 
 ### Properties navigation (focusBefore adapter)
 
