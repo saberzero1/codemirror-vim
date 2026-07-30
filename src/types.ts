@@ -453,6 +453,8 @@ export type InsertModeChanges = {
     maybeReset?: boolean,
     ignoreCount?: number,
     repeatOverride?: number,
+    _surroundInsertChar?: string | null,
+    _surroundInsertNewline?: boolean,
 }
 
 export type ExParams = {

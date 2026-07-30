@@ -884,13 +884,27 @@ On `Esc`, the standard `ch-1` cursor adjustment places the cursor on the last
 typed character, matching vim-surround behavior. `<C-G>S<character>` does the
 same with newlines and indentation.
 
-The delimiter insertion uses `maybeReset` to clear itself from the insert-mode
-change stream, so `lastInsertModeChanges.changes` contains only the user's
-typed text. This prevents dot-repeat from producing garbled output.
+Dot-repeat (`.`) replays the full surround + typed text. The surround character
+is stored on `lastInsertModeChanges._surroundInsertChar` (with
+`_surroundInsertNewline` for the `<C-G>S` variant). During replay,
+`replaySurroundAwareInsert` (inside `repeatLastEdit`) strips the delimiter
+entry from `changes[0]`, inserts `pair.open`, replays the typed text via
+`repeatInsert`, then inserts `pair.close`. The replay is wrapped in
+`cm.operation()` for undo atomicity. Counted dot-repeat (`2.`) repeats the
+text inside one set of delimiters. This exceeds both vim-surround and
+nvim-surround, where insert-mode surround dot-repeat is broken (delimiters
+are lost because `getchar()` consumes the delimiter character outside the
+redo-recording path; see [nvim-surround #301](https://github.com/kylechui/nvim-surround/issues/301)).
 
-Known limitation: dot-repeat (`.`) replays only the typed text, not the
-surrounding delimiters. Macro recording of insert-mode surround keys is also
-not supported (pre-existing limitation of insert-mode macro key logging).
+Surround metadata is cleared in three places to prevent cross-session leakage:
+`recordLastEdit` (when a new editing session starts), `onCursorActivity` (when
+the cursor moves unexpectedly during insert mode), and `createInsertModeChanges`
+(default initialization). Text typed before `<C-G>s` in the same insert session
+is not preserved in dot-repeat (cleared by `maybeReset`), matching the canonical
+behavior of both vim-surround and nvim-surround.
+
+Known limitation: macro recording of insert-mode surround keys is not supported
+(pre-existing limitation of insert-mode macro key logging).
 
 Insert mode partial match buffering was fixed to support this: when the key
 buffer contains a non-char key (e.g. `<C-g>`), subsequent single-char keys

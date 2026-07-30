@@ -702,17 +702,18 @@ export function initVim(CM) {
    */
   var createInsertModeChanges = function(c) {
     if (c) {
-      // Copy construction
       return {
         changes: c.changes,
-        expectCursorActivityForChange: c.expectCursorActivityForChange
+        expectCursorActivityForChange: c.expectCursorActivityForChange,
+        _surroundInsertChar: c._surroundInsertChar,
+        _surroundInsertNewline: c._surroundInsertNewline
       };
     }
     return {
-      // Change list
       changes: [],
-      // Set to true on change, false on cursorActivity.
-      expectCursorActivityForChange: false
+      expectCursorActivityForChange: false,
+      _surroundInsertChar: null,
+      _surroundInsertNewline: false
     };
   };
 
@@ -2777,6 +2778,8 @@ export function initVim(CM) {
       macroModeState.lastInsertModeChanges.expectCursorActivityForChange = false;
       macroModeState.lastInsertModeChanges.visualBlock = vim.visualBlock ? vim.sel.head.line - vim.sel.anchor.line : 0;
       macroModeState.lastInsertModeChanges.blockInsertLeft = vim.visualBlock ? Math.min(vim.sel.head.ch, vim.sel.anchor.ch) : undefined;
+      macroModeState.lastInsertModeChanges._surroundInsertChar = null;
+      macroModeState.lastInsertModeChanges._surroundInsertNewline = false;
     }
   };
 
@@ -5475,6 +5478,8 @@ export function initVim(CM) {
       // on the user's first keystroke, so only typed text is recorded.
       var lastChange = vimGlobalState.macroModeState.lastInsertModeChanges;
       lastChange.maybeReset = true;
+      lastChange._surroundInsertChar = ch;
+      lastChange._surroundInsertNewline = false;
       if (vim.insertEnd) vim.insertEnd.clear();
       vim.insertEnd = cm.setBookmark(cm.getCursor(), {insertLeft: true});
     },
@@ -5495,6 +5500,8 @@ export function initVim(CM) {
       // Clear delimiter text from change stream (same as surroundInsert).
       var lastChange = vimGlobalState.macroModeState.lastInsertModeChanges;
       lastChange.maybeReset = true;
+      lastChange._surroundInsertChar = ch;
+      lastChange._surroundInsertNewline = true;
       if (vim.insertEnd) vim.insertEnd.clear();
       vim.insertEnd = cm.setBookmark(cm.getCursor(), {insertLeft: true});
     }
@@ -8962,8 +8969,9 @@ export function initVim(CM) {
       if (lastChange.expectCursorActivityForChange) {
         lastChange.expectCursorActivityForChange = false;
       } else {
-        // Cursor moved outside the context of an edit. Reset the change.
         lastChange.maybeReset = true;
+        lastChange._surroundInsertChar = null;
+        lastChange._surroundInsertNewline = false;
         if (vim.insertEnd) vim.insertEnd.clear();
         vim.insertEnd = cm.setBookmark(cm.getCursor(), {insertLeft: true});
       }
@@ -9096,30 +9104,75 @@ export function initVim(CM) {
     /** @arg {number} repeat */
     function repeatInsert(repeat) {
       if (macroModeState.lastInsertModeChanges.changes.length > 0) {
-        // For some reason, repeat cw in desktop VIM does not repeat
-        // insert mode changes. Will conform to that behavior.
         repeat = !vim.lastEditActionCommand ? 1 : repeat;
         var changeObject = macroModeState.lastInsertModeChanges;
         repeatInsertModeChanges(cm, changeObject.changes, repeat);
       }
     }
+    /** @arg {number} repeat */
+    function replaySurroundAwareInsert(repeat) {
+      var surroundChar = macroModeState.lastInsertModeChanges._surroundInsertChar;
+      if (!surroundChar) {
+        repeatInsert(repeat);
+        return;
+      }
+      var pair = getSurroundPair(surroundChar);
+      var isNewline = macroModeState.lastInsertModeChanges._surroundInsertNewline;
+      var originalChanges = macroModeState.lastInsertModeChanges.changes;
+      var strippedChanges = originalChanges;
+      if (originalChanges.length > 0 && typeof originalChanges[0] === 'string') {
+        if (!isNewline) {
+          var delimText = pair.open + pair.close;
+          if (originalChanges[0] === delimText) {
+            strippedChanges = originalChanges.slice(1);
+          }
+        } else {
+          if (originalChanges[0].indexOf(pair.open.trimEnd()) === 0) {
+            strippedChanges = originalChanges.slice(1);
+          }
+        }
+      }
+      var savedChanges = macroModeState.lastInsertModeChanges.changes;
+      macroModeState.lastInsertModeChanges.changes = strippedChanges;
+      cm.operation(function() {
+        if (isNewline) {
+          var cursor = cm.getCursor();
+          var lineText = cm.getLine(cursor.line);
+          var indentMatch = lineText.match(/^(\s*)/);
+          var baseIndent = indentMatch ? indentMatch[1] : '';
+          var innerIndent = baseIndent + '  ';
+          var nlOpen = pair.open.trimEnd();
+          var nlClose = pair.close.trimStart();
+          cm.replaceRange(nlOpen + '\n' + innerIndent, cursor);
+          cm.setCursor(cursor.line + 1, innerIndent.length);
+          repeatInsert(repeat);
+          var endCursor = cm.getCursor();
+          cm.replaceRange('\n' + baseIndent + nlClose, endCursor);
+          cm.setCursor(endCursor.line, endCursor.ch);
+        } else {
+          var cursor = cm.getCursor();
+          cm.replaceRange(pair.open, cursor);
+          cm.setCursor(cursor.line, cursor.ch + pair.open.length);
+          repeatInsert(repeat);
+          var endCursor = cm.getCursor();
+          cm.replaceRange(pair.close, endCursor);
+          cm.setCursor(endCursor.line, endCursor.ch);
+        }
+      });
+      macroModeState.lastInsertModeChanges.changes = savedChanges;
+    }
     // @ts-ignore
     vim.inputState = vim.lastEditInputState;
     if (lastAction && lastAction.interlaceInsertRepeat) {
-      // o and O repeat have to be interlaced with insert repeats so that the
-      // insertions appear on separate lines instead of the last line.
       for (var i = 0; i < repeat; i++) {
         repeatCommand();
-        repeatInsert(1);
+        replaySurroundAwareInsert(1);
       }
     } else {
       if (!repeatForInsert) {
-        // Hack to get the cursor to end up at the right place. If I is
-        // repeated in insert mode repeat, cursor will be 1 insert
-        // change set left of where it should be.
         repeatCommand();
       }
-      repeatInsert(repeat);
+      replaySurroundAwareInsert(repeat);
     }
     vim.inputState = cachedInputState;
     if (vim.insertMode && !repeatForInsert) {

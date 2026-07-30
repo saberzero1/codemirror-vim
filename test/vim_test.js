@@ -7340,6 +7340,89 @@ testVim('insert_surround_undo', function(cm, vim, helpers) {
   eq('world test', cm.getValue());
 }, { value: 'world test' });
 
+testVim('dot_insert_surround_unspaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', '<C-g>', 's', ')', 'h', 'e', 'l', 'l', 'o', '<Esc>');
+  eq('(hello)\nworld', cm.getValue());
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('(hello)\n(hello)world', cm.getValue());
+}, { value: '\nworld' });
+
+testVim('dot_insert_surround_spaced', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', '<C-g>', 's', '(', 'h', 'e', 'l', 'l', 'o', '<Esc>');
+  eq('( hello )\nworld', cm.getValue());
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('( hello )\n( hello )world', cm.getValue());
+}, { value: '\nworld' });
+
+testVim('dot_insert_surround_quotes', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', '<C-g>', 's', '"', 'h', 'i', '<Esc>');
+  eq('"hi"\nworld', cm.getValue());
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('"hi"\n"hi"world', cm.getValue());
+}, { value: '\nworld' });
+
+testVim('dot_insert_surround_empty', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', '<C-g>', 's', ')', '<Esc>');
+  eq('()\nworld', cm.getValue());
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('()\n()world', cm.getValue());
+}, { value: '\nworld' });
+
+testVim('dot_insert_surround_counted', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', '<C-g>', 's', ')', 'a', 'b', '<Esc>');
+  eq('(ab)\nworld', cm.getValue());
+  cm.setCursor(1, 0);
+  helpers.doKeys('2', '.');
+  eq('(ab)\n(abab)world', cm.getValue());
+}, { value: '\nworld' });
+
+testVim('dot_insert_surround_no_cross_session_leak', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', '<C-g>', 's', ')', 'a', 'b', 'c', '<Esc>');
+  helpers.doKeys('A', 'x', 'y', 'z', '<Esc>');
+  eq('(abc)xyz\nworld', cm.getValue());
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('(abc)xyz\nworldxyz', cm.getValue());
+}, { value: '\nworld' });
+
+testVim('dot_insert_surround_no_leak_after_o', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', '<C-g>', 's', ')', 'a', 'b', 'c', '<Esc>');
+  helpers.doKeys('o', 'x', 'y', 'z', '<Esc>');
+  eq('(abc)\nxyz\nworld', cm.getValue());
+  cm.setCursor(2, 0);
+  helpers.doKeys('.');
+  eq('(abc)\nxyz\nworld\nxyz', cm.getValue());
+}, { value: '\nworld' });
+
+testVim('dot_insert_surround_before_text_lost', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', 'b', 'e', 'f', '<C-g>', 's', ')', 'a', 'f', 't', '<Esc>');
+  eq('bef(aft)\nworld', cm.getValue());
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('bef(aft)\n(aft)world', cm.getValue());
+}, { value: '\nworld' });
+
+testVim('dot_insert_surround_alias_b', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', '<C-g>', 's', 'b', 'o', 'k', '<Esc>');
+  eq('(ok)\nworld', cm.getValue());
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('(ok)\n(ok)world', cm.getValue());
+}, { value: '\nworld' });
+
 async function delay(t) {
   return await new Promise(resolve => setTimeout(resolve, t));
 }
