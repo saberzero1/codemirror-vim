@@ -3774,23 +3774,34 @@ export function initVim(CM) {
       };
     }
     var line = cm.getLine(pos.line);
-    var positions = [];
-    for (var i = 0; i < line.length; i++) {
-      if (line.charAt(i) === quote) positions.push(i);
+    // Expand outward from cursor: find nearest quote at/before cursor (open),
+    // then nearest quote after it (close). Handles both adjacent ("a" "b")
+    // and doubled/nested ($$a$$) symmetric delimiters.
+    var openCh = -1;
+    var closeCh = -1;
+    for (var j = pos.ch; j >= 0; j--) {
+      if (line.charAt(j) === quote) { openCh = j; break; }
     }
-    if (positions.length < 2) return null;
-    var best = null;
-    for (var i = 0; i < positions.length - 1; i += 2) {
-      var start = positions[i];
-      var end = positions[i + 1];
-      if (start === undefined || end === undefined) continue;
-      if (pos.ch >= start && pos.ch <= end) {
-        if (!best || (end - start) < (best.close.ch - best.open.ch)) {
-          best = { open: new Pos(pos.line, start), close: new Pos(pos.line, end) };
+    if (openCh === -1) return null;
+    for (var k = openCh + 1; k < line.length; k++) {
+      if (line.charAt(k) === quote) { closeCh = k; break; }
+    }
+    if (closeCh === -1 || pos.ch > closeCh) {
+      // Cursor is on or past a quote with no closing quote after it.
+      // Try treating the found quote as the close and search for an open before it.
+      if (openCh > 0) {
+        closeCh = openCh;
+        openCh = -1;
+        for (var m = closeCh - 1; m >= 0; m--) {
+          if (line.charAt(m) === quote) { openCh = m; break; }
+        }
+        if (openCh !== -1) {
+          return { open: new Pos(pos.line, openCh), close: new Pos(pos.line, closeCh) };
         }
       }
+      return null;
     }
-    return best;
+    return { open: new Pos(pos.line, openCh), close: new Pos(pos.line, closeCh) };
   }
 
   function findSurroundingMultiChar(cm, pos, open, close, count) {

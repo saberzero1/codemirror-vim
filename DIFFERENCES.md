@@ -966,6 +966,30 @@ replacement position triggers tag prompting (breaking change — use `>` for
 no-space angle brackets). `f`/`F` in replacement position triggers function
 wrapping.
 
+### Symmetric surround quote matching
+
+**File**: `src/vim.js` — `findSurroundingQuotes`
+
+`findSurroundingQuotes` (used by `ds$`, `ds"`, `cs"`, etc.) now finds pairs
+by expanding outward from the cursor: search backward for the nearest quote
+character, then forward for the next one. This replaces the previous
+sequential pairing algorithm that collected all quote positions and paired
+them at even/odd indices (0→1, 2→3, etc.).
+
+The old algorithm failed for doubled symmetric delimiters like `$$example$$`:
+positions `[0, 1, 9, 10]` were paired as `(0,1)` and `(9,10)` — the two
+adjacent `$$` on each side — leaving the cursor between them with no match.
+`ds$` did nothing.
+
+The cursor-expansion approach finds `(1, 9)` as the tightest enclosing pair,
+so `ds$` correctly produces `$example$`. Adjacent non-nested pairs like
+`"hello" "world"` continue to work — cursor in `hello` finds `(0, 6)`.
+
+When the cursor is on the closing delimiter (e.g., ch=6 on `"hello"`), the
+backward search lands on the cursor position itself and no closing quote
+exists after it. A fallback path treats the found quote as the close and
+searches backward from before it for the open, correctly returning `(0, 6)`.
+
 ### Space preservation for closing bracket targets
 
 `deleteSurroundPair` accepts an optional `target` parameter indicating the
@@ -1062,10 +1086,14 @@ Custom pairs integrate with all surround operations:
      `open` occurrences and decrementing on `close`. Count > 1 iterates to
      find the Nth outer pair.
    - **Symmetric pairs** (`open === close`): same-line pair matching. All
-     occurrences of the delimiter on the cursor line are collected and paired
-     sequentially (0→1, 2→3, etc.). The pair containing the cursor is returned.
-     Count > 1 builds a repeated needle (`open` × count) for matching
-     count-prefix delimiters (e.g., `2ds` with `$$` → searches for `$$$$`).
+      occurrences of the delimiter on the cursor line are collected and paired
+      sequentially (0→1, 2→3, etc.). The pair containing the cursor is returned.
+      Count > 1 builds a repeated needle (`open` × count) for matching
+      count-prefix delimiters (e.g., `2ds` with `$$` → searches for `$$$$`).
+
+   **Note**: `findSurroundingQuotes` (for built-in single-char symmetric
+   delimiters like `$`, `"`, `'`, `` ` ``) uses cursor-expansion instead
+   of sequential pairing — see "Symmetric surround quote matching" below.
    - Returns `{ open: Pos, close: Pos, openWidth, closeWidth }`. The `Pos`
      values point to the first character of each delimiter.
 

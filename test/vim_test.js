@@ -7269,6 +7269,44 @@ testVim('custom_surround_builtin_unaffected', function(cm, vim, helpers) {
   CodeMirror.Vim.unregisterSurroundPair('l');
 }, { value: '(hello) world' });
 
+// --- Doubled/nested symmetric surround (ds/cs on $$, "", etc.) ---
+
+testVim('ds_doubled_dollar_deletes_inner', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('d', 's', '$');
+  eq('$example$ world', cm.getValue());
+}, { value: '$$example$$ world' });
+
+testVim('ds_doubled_quote_deletes_inner', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', '"');
+  eq('"hi" world', cm.getValue());
+}, { value: '""hi"" world' });
+
+testVim('cs_doubled_dollar_changes_inner', function(cm, vim, helpers) {
+  cm.setCursor(0, 5);
+  helpers.doKeys('c', 's', '$', ')');
+  eq('$(example)$ world', cm.getValue());
+}, { value: '$$example$$ world' });
+
+testVim('ds_single_dollar_pair', function(cm, vim, helpers) {
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', '$');
+  eq('hello world', cm.getValue());
+}, { value: '$hello$ world' });
+
+testVim('ds_adjacent_dollar_pairs', function(cm, vim, helpers) {
+  cm.setCursor(0, 9);
+  helpers.doKeys('d', 's', '$');
+  eq('$hello$ world', cm.getValue());
+}, { value: '$hello$ $world$' });
+
+testVim('ds_dollar_cursor_on_delimiter', function(cm, vim, helpers) {
+  cm.setCursor(0, 1);
+  helpers.doKeys('d', 's', '$');
+  eq('$example$ world', cm.getValue());
+}, { value: '$$example$$ world' });
+
 // --- Insert-mode surround (<C-g>s) ---
 
 testVim('insert_surround_quotes', function(cm, vim, helpers) {
