@@ -120,6 +120,21 @@ Parameters:
 
 Used by the host plugin's expr mapping implementation: when a Lua `{ expr = true }` keymap callback returns a string like `"gj"`, the plugin calls `feedKeys(cm, "gj", { noremap })` to inject the result with the mapping's noremap flag respected.
 
+### `undefineEx` API
+
+**File**: `src/vim.js`
+
+Added `undefineEx(name)` to the `vimApi` object. Removes an ex command
+previously registered via `defineEx`. Cleans both the `exCommands` function
+map and the `commandMap_` prefix lookup (iterates all prefix entries and
+deletes any whose `.name` matches). Returns `true` if the command existed and
+was removed, `false` otherwise.
+
+Used by the Vim Motions plugin's vimrc soft-reload: when a user removes an
+`exmap` definition from their vimrc and saves, the plugin calls `undefineEx`
+to clean up the stale handler before re-applying the updated vimrc. Without
+this, stale `exmap` handlers persisted until full plugin reload.
+
 ### `removeMapCommand` API
 
 **File**: `src/vim.js`

@@ -5802,6 +5802,39 @@ testVim('ex_special_names', function(cm, vim, helpers) {
     }
   });
 });
+testVim('ex_undefineEx', function(cm, vim, helpers) {
+  var called = false;
+  CodeMirror.Vim.defineEx('myexcmd','mye',function(cm,params){
+    called = true;
+  });
+  helpers.doEx(':mye');
+  is(called, 'defineEx command should be callable');
+
+  var removed = CodeMirror.Vim.undefineEx('myexcmd');
+  is(removed, 'undefineEx should return true for existing command');
+
+  called = false;
+  helpers.doEx(':mye');
+  is(!called, 'command should not run after undefineEx');
+});
+testVim('ex_undefineEx_nonexistent', function(cm, vim, helpers) {
+  var removed = CodeMirror.Vim.undefineEx('nosuchcommand');
+  is(!removed, 'undefineEx should return false for nonexistent command');
+});
+testVim('ex_undefineEx_short_name', function(cm, vim, helpers) {
+  var called = false;
+  CodeMirror.Vim.defineEx('longname','lon',function(cm,params){
+    called = true;
+  });
+  helpers.doEx(':lon');
+  is(called, 'short name should work before undefineEx');
+
+  CodeMirror.Vim.undefineEx('longname');
+
+  called = false;
+  helpers.doEx(':lon');
+  is(!called, 'short name should not resolve after undefineEx');
+});
 // For now, this test needs to be last because it messes up : for future tests.
 testVim('ex_map_key2key_from_colon', function(cm, vim, helpers) {
   helpers.doEx('map : x');

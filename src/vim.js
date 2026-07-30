@@ -1035,6 +1035,19 @@ export function initVim(CM) {
       exCommands[name]=func;
       exCommandDispatcher.commandMap_[prefix]={name:name, shortName:prefix, type:'api'};
     },
+    /**@type {(name: string) => boolean} */
+    undefineEx: function(name) {
+      if (exCommands[name]) {
+        delete exCommands[name];
+        for (var key in exCommandDispatcher.commandMap_) {
+          if (exCommandDispatcher.commandMap_[key].name === name) {
+            delete exCommandDispatcher.commandMap_[key];
+          }
+        }
+        return true;
+      }
+      return false;
+    },
     /**@type {(cm: CodeMirror, key: string, origin: string) => undefined | boolean} */
     handleKey: function (cm, key, origin) {
       var command = this.findKey(cm, key, origin);
