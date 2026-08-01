@@ -752,10 +752,11 @@ which was typically line 0 regardless of the sort range.
 
 After a block visual delete (`CTRL-V` selection + `d`), the cursor column is
 now clamped to the remaining line length. Previously, `cursorMin(head, anchor)`
-preserved the original anchor column, which could exceed the shortened line
-length after deletion — e.g., `CTRL-V jj $ d` on `abc\nde\nfghij` from `ch:1`
-left the cursor at `ch:1` on the resulting line `a` (length 1), one position
-past the last character. The cursor is now clamped to `Math.max(0, lineLen - 1)`.
+preserved the original anchor column, which could equal or exceed the shortened
+line length after deletion — e.g., `CTRL-V jj $ d` on `abc\nde\nfghij` from
+`ch:1` left the cursor at `ch:1` on the resulting line `a` (length 1), one
+position past the last character. The cursor is now clamped to
+`Math.max(0, lineLen - 1)` when `finalHead.ch >= lineLen`.
 
 ### `scanForBracket` string and comment awareness
 

@@ -3420,7 +3420,7 @@ export function initVim(CM) {
         cm.replaceSelections(replacement);
         finalHead = cursorMin(ranges[0].head, ranges[0].anchor);
         var lineLen = lineLength(cm, finalHead.line);
-        if (finalHead.ch > lineLen) {
+        if (finalHead.ch >= lineLen) {
           finalHead = new Pos(finalHead.line, Math.max(0, lineLen - 1));
         }
       }
