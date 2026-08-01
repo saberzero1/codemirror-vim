@@ -737,6 +737,26 @@ idle when no sub-commands exist (preventing browser-level interception).
 - Golden recorder: `redraw` after `setCursor` prevents stale Neovim state in recordings
 - Golden recorder: `set columns=80 lines=24` viewport simulation for accurate display-line motion recording
 
+### `:sort` cursor positioning
+
+**File**: `src/vim.js` — `exCommands.sort`
+
+After `:sort` (and ranged `:2,3sort`), the cursor is now positioned at the
+first line of the sorted range via `cm.setCursor(new Pos(lineStart, 0))`.
+Previously, the cursor stayed wherever CM6 left it after `replaceRange`,
+which was typically line 0 regardless of the sort range.
+
+### Block visual delete cursor clamping
+
+**File**: `src/vim.js` — `operators.delete`
+
+After a block visual delete (`CTRL-V` selection + `d`), the cursor column is
+now clamped to the remaining line length. Previously, `cursorMin(head, anchor)`
+preserved the original anchor column, which could exceed the shortened line
+length after deletion — e.g., `CTRL-V jj $ d` on `abc\nde\nfghij` from `ch:1`
+left the cursor at `ch:1` on the resulting line `a` (length 1), one position
+past the last character. The cursor is now clamped to `Math.max(0, lineLen - 1)`.
+
 ### `scanForBracket` string and comment awareness
 
 **File**: `src/cm_adapter.ts` — `scanForBracket()`

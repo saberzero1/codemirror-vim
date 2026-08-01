@@ -3419,6 +3419,10 @@ export function initVim(CM) {
         var replacement = fillArray('', ranges.length);
         cm.replaceSelections(replacement);
         finalHead = cursorMin(ranges[0].head, ranges[0].anchor);
+        var lineLen = lineLength(cm, finalHead.line);
+        if (finalHead.ch > lineLen) {
+          finalHead = new Pos(finalHead.line, Math.max(0, lineLen - 1));
+        }
       }
       vimGlobalState.registerController.pushText(
           args.registerName, 'delete', text,
@@ -8233,6 +8237,7 @@ export function initVim(CM) {
         }
       }
       cm.replaceRange(text.join('\n'), curStart, curEnd);
+      cm.setCursor(new Pos(lineStart, 0));
     },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     vglobal: function(cm, params) {
