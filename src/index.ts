@@ -61,7 +61,7 @@ const vimPlugin = ViewPlugin.fromClass(
     public cm: CodeMirror;
     public status = "";
     blockCursor: BlockCursorPlugin;
-    _escapeHandler: ((e: KeyboardEvent) => void) | null = null;
+    _keyHandler: ((e: KeyboardEvent) => void) | null = null;
     _blurHandler: (() => void) | null = null;
     _focusHandler: (() => void) | null = null;
     constructor(view: EditorView) {
@@ -81,7 +81,7 @@ const vimPlugin = ViewPlugin.fromClass(
       // Obsidian intercepts Escape at the app level before CM6 ViewPlugin
       // event handlers see it.  Install a capture-phase listener on document
       // so the vim layer processes Escape before the host swallows it.
-      this._escapeHandler = (e: KeyboardEvent) => {
+      this._keyHandler = (e: KeyboardEvent) => {
         if (e.key !== "Escape") return;
         if (!view.hasFocus) return;
         const vimState = this.cm.state.vim;
@@ -97,7 +97,7 @@ const vimPlugin = ViewPlugin.fromClass(
           }
         }
       };
-      view.dom.ownerDocument.addEventListener("keydown", this._escapeHandler, true);
+      view.dom.ownerDocument.addEventListener("keydown", this._keyHandler, true);
 
       // Reset partial key sequences (e.g. a buffered 'g') on blur to prevent
       // stale prefixes from combining with later keystrokes after refocus.
@@ -232,9 +232,9 @@ const vimPlugin = ViewPlugin.fromClass(
     }
 
     destroy() {
-      if (this._escapeHandler) {
-        this.view.dom.ownerDocument.removeEventListener("keydown", this._escapeHandler, true);
-        this._escapeHandler = null;
+      if (this._keyHandler) {
+        this.view.dom.ownerDocument.removeEventListener("keydown", this._keyHandler, true);
+        this._keyHandler = null;
       }
       if (this._blurHandler) {
         this.view.contentDOM.removeEventListener("blur", this._blurHandler);
@@ -359,6 +359,23 @@ const vimPlugin = ViewPlugin.fromClass(
     compositionText = ''
   },
   {
+    eventObservers: {
+      keydown: function(e: KeyboardEvent, view: EditorView) {
+        if (_keyInterceptActive) return;
+        CodeMirror.signal(this.cm, 'inputEvent', e);
+        this.lastKeydown = e.key;
+        if (
+          this.lastKeydown == "Unidentified"
+          || this.lastKeydown == "Process"
+          || this.lastKeydown == "Dead"
+        ) {
+          this.useNextTextInput = true;
+        } else {
+          this.useNextTextInput = false;
+          this.handleKey(e, view);
+        }
+      },
+    },
     eventHandlers: {
       copy: function(e: ClipboardEvent, view: EditorView) {
         if (!this.waitForCopy) return;
@@ -391,20 +408,6 @@ const vimPlugin = ViewPlugin.fromClass(
         CodeMirror.signal(this.cm, 'inputEvent', e);
         if (this.lastKeydown == "Dead")
           this.handleKey(e, view);
-      },
-      keydown: function(e: KeyboardEvent, view: EditorView) {
-        CodeMirror.signal(this.cm, 'inputEvent', e);
-        this.lastKeydown = e.key;
-        if (
-          this.lastKeydown == "Unidentified"
-          || this.lastKeydown == "Process"
-          || this.lastKeydown == "Dead"
-        ) {
-          this.useNextTextInput = true;
-        } else {
-          this.useNextTextInput = false;
-          this.handleKey(e, view);
-        }
       },
     },
     provide: () => {
@@ -581,6 +584,21 @@ export function vim(options: { status?: boolean; cursorShapes?: import("./block-
 }
 
 let initialCursorShapes: import("./block-cursor").CursorShapeConfig | undefined;
+
+let _keyInterceptActive = false;
+
+/**
+ * When set to `true`, the capture-phase keydown handler skips vim processing
+ * and lets the event propagate to the host plugin's own capture-phase
+ * handlers (flash labels, EasyMotion labels, hint mode, etc.).
+ *
+ * The host plugin must call `setKeyInterceptActive(true)` before entering
+ * a modal key-interception state and `setKeyInterceptActive(false)` when
+ * the modal exits.
+ */
+export function setKeyInterceptActive(active: boolean): void {
+  _keyInterceptActive = active;
+}
 
 export { CodeMirror, Vim };
 export { setLivePreviewField } from "./cm_adapter";

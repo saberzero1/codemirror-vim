@@ -17,6 +17,41 @@ The ViewPlugin constructor installs a capture-phase `keydown` listener on
 `document` that catches Escape while the editor has focus and vim is in insert,
 visual, or operator-pending mode. Removed in `destroy()`.
 
+### Observer-based keydown dispatch
+
+**File**: `src/index.ts`
+
+Vim's keydown processing is registered as a CM6 `eventObservers.keydown`
+(DOM event observer) instead of `eventHandlers.keydown` (DOM event handler).
+In CM6's dispatch order, `InputState.keydown()` bookkeeping runs first, then
+all observers, then handlers. This guarantees the vim key handler fires before
+any other CM6 extension's `keydown` handler (e.g., obsidian-latex-suite),
+regardless of `Prec` ordering or plugin load order — observers always run
+before handlers.
+
+When vim consumes a key, `handleKey()` calls `e.preventDefault()`. The
+subsequent handler loop in CM6's `runHandlers` sees `event.defaultPrevented`
+and breaks — other extensions' handlers never fire for that key. Unconsumed
+keys propagate to the handler chain normally.
+
+This approach preserves CM6's internal state management (`InputState.keydown()`
+runs `observer.forceFlush()`, updates `lastKeyCode`/`lastKeyTime`, and handles
+platform quirks) while solving the precedence problem.
+
+### `setKeyInterceptActive` API
+
+**File**: `src/index.ts`
+
+Added `setKeyInterceptActive(active: boolean)` as a module-level export.
+When `true`, the `eventObservers.keydown` observer skips vim processing
+entirely and lets the event reach the handler chain unmodified.
+
+The host plugin calls `setKeyInterceptActive(true)` when entering a modal
+key-interception state (e.g., flash label selection, EasyMotion label
+selection, hint mode) and `setKeyInterceptActive(false)` when the modal
+exits. Without this, the observer would call `preventDefault` on label
+keypresses before the host's modal capture-phase handlers can process them.
+
 ### Testing API surface
 
 **File**: `src/vim.js`
