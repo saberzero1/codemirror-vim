@@ -416,6 +416,29 @@ This keeps the fork Obsidian-agnostic — it accepts a generic
 passes `editorLivePreviewField` (Obsidian's official API) during extension
 creation.
 
+### `setPropertiesSource` API
+
+**Files**: `src/cm_adapter.ts`, `src/index.ts`
+
+Added `setPropertiesSource(fn: () => boolean)` to configure a host-provided
+callback that indicates whether frontmatter properties are rendered as source
+text. The callback is stored module-level and called by `findPosV` on each
+upward cursor movement near frontmatter. When the callback returns `true`,
+the frontmatter interception block is skipped entirely — the cursor moves
+through the raw frontmatter text as in source mode.
+
+This addresses an edge case where the editor is in live-preview mode but the
+host application renders frontmatter as plain text instead of a widget (e.g.
+Obsidian's "Properties in document" setting set to "Source"). In this
+configuration, the `.metadata-container` DOM element exists but is hidden
+(`display: none`). Without this gate, `focusBefore` would focus the invisible
+element and `moveByLines`/`moveByDisplayLines` would return the original
+cursor position, leaving the cursor stuck.
+
+The host plugin passes a callback that reads the relevant configuration at
+call time, so runtime setting changes take effect immediately without
+re-registering extensions.
+
 ### `setCursorSuppressed` API
 
 **Files**: `src/block-cursor.ts`, `src/index.ts`
@@ -472,12 +495,19 @@ the frontmatter properties widget. Two cases trigger `focusBefore`:
    first content line would fire `focusBefore` immediately instead of
    navigating through the wrapped display lines first.
 
-The entire frontmatter interception block is gated on the `_livePreviewField`
-state field (set via `setLivePreviewField`). When the field is absent or
-`false` (source mode), the block is skipped and the cursor moves through
-raw frontmatter text normally. This prevents the cursor from getting stuck
-below the frontmatter in source mode, where no properties widget exists to
-receive focus.
+The entire frontmatter interception block is gated on two conditions:
+
+1. The `_livePreviewField` state field (set via `setLivePreviewField`) must
+   be present and `true`. When absent or `false` (source mode), the block is
+   skipped and the cursor moves through raw frontmatter text normally.
+2. The `_propertiesSourceFn` callback (set via `setPropertiesSource`) must
+   be absent or return `false`. When it returns `true`, frontmatter is
+   rendered as source text despite the editor being in live-preview mode —
+   the block is skipped so the cursor moves through the raw text normally.
+
+This two-level gate prevents the cursor from getting stuck below the
+frontmatter both in source mode and in live-preview mode with source-rendered
+properties (where the `.metadata-container` exists but is hidden).
 
 In live-preview mode, a `focusBefore` callback is attached to the result
 position. The callback queries the DOM for Obsidian's metadata container

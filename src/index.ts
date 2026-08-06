@@ -601,7 +601,7 @@ export function setKeyInterceptActive(active: boolean): void {
 }
 
 export { CodeMirror, Vim };
-export { setLivePreviewField } from "./cm_adapter";
+export { setLivePreviewField, setPropertiesSource } from "./cm_adapter";
 export { setCursorSuppressed, setCursorSuppressedForView, clearCursorSuppressedForView, isCursorSuppressedForView } from "./block-cursor";
 export type { CursorShape, CursorShapeConfig } from "./block-cursor";
 

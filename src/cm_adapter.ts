@@ -10,9 +10,14 @@ import {
 import {vimState, CM5RangeInterface} from "./types"
 
 let _livePreviewField: StateField<boolean> | null = null;
+let _propertiesSourceFn: (() => boolean) | null = null;
 
 export function setLivePreviewField(field: StateField<boolean>): void {
   _livePreviewField = field;
+}
+
+export function setPropertiesSource(fn: () => boolean): void {
+  _propertiesSourceFn = fn;
 }
 
 function indexFromPos(doc: Text, pos: Pos): number {
@@ -646,7 +651,8 @@ export class CodeMirror {
     const isLivePreview = _livePreviewField
       ? cm6.state.field(_livePreviewField, false) ?? false
       : false;
-    if (isLivePreview && amount < 0 && pos.line <= start.line) {
+    const isPropertiesSource = _propertiesSourceFn ? _propertiesSourceFn() : false;
+    if (isLivePreview && !isPropertiesSource && amount < 0 && pos.line <= start.line) {
       const firstLine = doc.line(1).text;
       if (firstLine === '---') {
         let fmEnd = 0;
