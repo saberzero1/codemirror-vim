@@ -638,6 +638,24 @@ clipboard (the `*` register is now treated equivalently to `+`).
 All changes below match verified Neovim behavior. Fork test expectations
 updated accordingly.
 
+### Unmatched angle-bracket keys consumed in normal mode
+
+**File**: `src/vim.js` — `findKey`
+
+When a multi-key sequence fails to match any command (e.g. pressing an
+unmapped key after `<leader><leader>`), `findKey` returns a no-op handler
+for single-character keys so they are consumed without inserting text. The
+guard `key.length === 1` failed for keys in the `specialKey` map —
+`vimKeyFromEvent` converts Space to `"<Space>"` (7 characters), which
+bypassed the guard and returned `undefined`. CM6 then treated the key as
+unhandled and inserted it as text.
+
+Fixed by replacing `key.length === 1 || (CM.isMac && /<A-.>/.test(key))`
+with `key.length === 1 || /^<.+>$/.test(key)`, which matches both plain
+characters and all angle-bracket notation keys (`<Space>`, `<BS>`, `<CR>`,
+`<A-x>`, etc.). The Mac-specific `<A-.>` case is subsumed by the general
+pattern.
+
 ### Linewise delete cursor column preservation
 
 **File**: `src/vim.js` — `operators.delete`, `applyOperator`
