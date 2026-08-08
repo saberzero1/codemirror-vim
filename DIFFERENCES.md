@@ -689,11 +689,18 @@ guard `key.length === 1` failed for keys in the `specialKey` map —
 bypassed the guard and returned `undefined`. CM6 then treated the key as
 unhandled and inserted it as text.
 
-Fixed by replacing `key.length === 1 || (CM.isMac && /<A-.>/.test(key))`
-with `key.length === 1 || /^<.+>$/.test(key)`, which matches both plain
-characters and all angle-bracket notation keys (`<Space>`, `<BS>`, `<CR>`,
-`<A-x>`, etc.). The Mac-specific `<A-.>` case is subsumed by the general
-pattern.
+Fixed by extending the guard to also match text-producing special keys
+(`<Space>`, `<BS>`, `<Del>`, `<CR>`) via
+`/^<(Space|BS|Del|CR)>$/.test(key)`. The Mac-specific Alt character guard
+(`CM.isMac && /^<A-.>$/.test(key)`) is preserved from upstream PR #194 —
+on Mac, `vimKeyFromEvent` can produce `<A-x>` for non-ASCII Alt combos on
+non-US keyboard layouts, and these must be consumed to prevent text
+insertion in normal mode.
+
+Functional and navigation keys (`<Tab>`, `<S-Tab>`, `<F1>`–`<F12>`,
+modifier combos like `<C-S-I>`) are intentionally NOT consumed — they
+return `undefined` so the host application (e.g. Obsidian) can handle them
+natively.
 
 ### Linewise delete cursor column preservation
 

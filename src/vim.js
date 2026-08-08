@@ -1312,7 +1312,7 @@ export function initVim(CM) {
         : handleKeyNonInsertMode();
 
       if (command === false) {
-        return !vim.insertMode && (key.length === 1 || /^<.+>$/.test(key))? function() { return true; } : undefined;
+        return !vim.insertMode && (key.length === 1 || /^<(Space|BS|Del|CR)>$/.test(key) || (CM.isMac && /^<A-.>$/.test(key)))? function() { return true; } : undefined;
       } else if (command === true) {
         // TODO: Look into using CodeMirror's multi-key handling.
         // Return no-op since we are caching the key. Counts as handled, but
