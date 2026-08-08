@@ -633,6 +633,45 @@ instead of the internal register when no explicit register is specified and
 the option is set. Explicit `"+y` and `"*y` also sync to the system
 clipboard (the `*` register is now treated equivalently to `+`).
 
+### Non-text clipboard paste fallback
+
+**File**: `src/vim.js` — `actions.paste`, `actions.fallbackToNativePaste`
+
+When `clipboard=unnamed`/`unnamedplus` is set and the system clipboard
+contains non-text content (e.g., an image), `navigator.clipboard.readText()`
+returns an empty string or rejects. Previously, `continuePaste()` bailed
+silently on the empty string and the `readText()` promise had no `.catch()`
+handler — pressing `p` did nothing with no feedback.
+
+The `paste` action now:
+1. Adds a `.catch()` handler to the `readText()` promise.
+2. When `readText()` returns empty or rejects, calls
+   `fallbackToNativePaste(cm, actionArgs)`.
+
+`fallbackToNativePaste` triggers the host application's native paste pipeline
+via `document.execCommand('paste')`. In Obsidian, this creates an attachment
+file and inserts an image embed (e.g., `![[Pasted image …]]`). The method:
+
+- Positions the cursor correctly for `p` (`actionArgs.after: true` — offset
+  +1) vs `P` / `[p` (`after: false` — no offset), matching `continuePaste`'s
+  cursor logic.
+- Exits visual mode (if active) via `exitVisualMode(cm, false)`, preserving
+  the CM6 selection so the native paste replaces the selected text.
+- Does **not** enter insert mode — CM6's `contentDOM` is always
+  `contenteditable`, so `execCommand('paste')` works without a mode change.
+  The editor remains in normal mode after the fallback.
+
+A module-level `programmaticPaste` flag is set before `execCommand` and
+reset on the next microtask (`Promise.resolve().then(...)`). The
+`getOnPasteFn` paste event listener checks this flag and returns early
+when `true`, preventing the listener from entering insert mode during
+the programmatic paste.
+
+Covers `p`, `]p`, `[p`, `:put`, and explicit `"+p` / `"*p`. Repeat count
+is ignored for the native fallback (native paste fires once). Dot-repeat
+(`.`) replays the `p` key, which re-enters the `paste` action and
+re-evaluates the clipboard.
+
 ## Behavioral fixes (Neovim parity)
 
 All changes below match verified Neovim behavior. Fork test expectations

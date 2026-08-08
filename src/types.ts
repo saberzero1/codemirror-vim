@@ -168,6 +168,7 @@ export type ActionFn = (cm: CodeMirrorV, actionArgs: ActionArgs, vim: vimState) 
 export type vimActions  = {
     jumpListWalk(cm: CodeMirrorV, actionArgs: ActionArgs, vim: vimState): void,
     continuePaste(cm: CodeMirrorV, actionArgs: ActionArgs, vim: vimState, text: string, register: Register): void
+    fallbackToNativePaste(cm: CodeMirrorV, actionArgs: ActionArgs): void,
     enterInsertMode(cm: CodeMirrorV, actionArgs: ActionArgsPartial, vum: vimState): void,
 } & {
     [key: string]: ActionFn

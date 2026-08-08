@@ -338,6 +338,8 @@ export function initVim(CM) {
    */
   var langmap = parseLangmap('');
 
+  var programmaticPaste = false;
+
   /** @arg {CodeMirror} cm */
   function enterVimMode(cm) {
     cm.setOption('disableInput', true);
@@ -402,6 +404,7 @@ export function initVim(CM) {
     var vim = cm.state.vim;
     if (!vim.onPasteFn) {
       vim.onPasteFn = function() {
+        if (programmaticPaste) return;
         if (!vim.insertMode) {
           cm.setCursor(offsetCursor(cm.getCursor(), 0, 1));
           actions.enterInsertMode(cm, {}, vim);
@@ -4803,13 +4806,41 @@ export function initVim(CM) {
       var useSystemClipboard = actionArgs.registerName === '+' || actionArgs.registerName === '*' ||
           (!actionArgs.registerName && (clipOption === 'unnamed' || clipOption === 'unnamedplus'));
       if (useSystemClipboard) {
-        navigator.clipboard.readText().then((value) => {
-          this.continuePaste(cm, actionArgs, vim, value, register);
-        })
+        var self = this;
+        navigator.clipboard.readText().then(function(value) {
+          if (value) {
+            self.continuePaste(cm, actionArgs, vim, value, register);
+          } else {
+            self.fallbackToNativePaste(cm, actionArgs);
+          }
+        }).catch(function() {
+          self.fallbackToNativePaste(cm, actionArgs);
+        });
       } else {
         var text = register.toString();
         this.continuePaste(cm, actionArgs, vim, text, register);
       }
+    },
+    fallbackToNativePaste: function(cm, actionArgs) {
+      var inputField = cm.getInputField();
+      if (!inputField) return;
+
+      if (actionArgs && actionArgs.after) {
+        var cur = cm.getCursor();
+        var len = lineLength(cm, cur.line);
+        if (cur.ch < len) {
+          cm.setCursor(new Pos(cur.line, cur.ch + 1));
+        }
+      }
+
+      if (cm.state.vim.visualMode) {
+        exitVisualMode(cm, false);
+      }
+
+      programmaticPaste = true;
+      inputField.focus();
+      document.execCommand('paste');
+      Promise.resolve().then(function() { programmaticPaste = false; });
     },
     continuePaste: function(cm, actionArgs, vim, text, register) {
       var cur = copyCursor(cm.getCursor());
