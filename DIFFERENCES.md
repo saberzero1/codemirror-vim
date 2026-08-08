@@ -690,8 +690,13 @@ bypassed the guard and returned `undefined`. CM6 then treated the key as
 unhandled and inserted it as text.
 
 Fixed by extending the guard to also match text-producing special keys
-(`<Space>`, `<BS>`, `<Del>`, `<CR>`) via
-`/^<(Space|BS|Del|CR)>$/.test(key)`. The Mac-specific Alt character guard
+and keys that must not propagate to the host (`<Space>`, `<BS>`, `<Del>`,
+`<CR>`, `<Esc>`, `<Ins>`) via `/^<(Space|BS|Del|CR|Esc|Ins)>$/.test(key)`.
+`<Esc>` is included because `handleEsc()` returns `undefined` in idle
+normal mode (intentionally a no-op), but the key must still be consumed to
+prevent it from propagating to the host application and triggering scope
+pops, modal closes, or other DOM-level side effects. `<Ins>` prevents CM6
+from toggling overwrite mode. The Mac-specific Alt character guard
 (`CM.isMac && /^<A-.>$/.test(key)`) is preserved from upstream PR #194 —
 on Mac, `vimKeyFromEvent` can produce `<A-x>` for non-ASCII Alt combos on
 non-US keyboard layouts, and these must be consumed to prevent text
