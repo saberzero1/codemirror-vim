@@ -2768,7 +2768,7 @@ export function initVim(CM) {
         exitVisualMode(cm, operatorMoveTo != null);
       }
       if (operatorMoveTo) {
-        cm.setCursor(operatorMoveTo);
+        cm.setCursor(clipCursorToContent(cm, operatorMoveTo));
       }
     },
     /**@arg {vimState} vim  @arg {InputStateInterface} inputState, @arg {import("./types").actionCommand} [actionCommand] */

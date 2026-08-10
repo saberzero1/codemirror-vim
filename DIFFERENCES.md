@@ -862,6 +862,23 @@ before the second keystroke arrived. With this fix, `<C-w>` defers to
 partial matches when sub-commands are registered, while still firing as
 idle when no sub-commands exist (preventing browser-level interception).
 
+### Visual operator cursor re-clamping after `exitVisualMode`
+
+**File**: `src/vim.js` — `applyOperator`
+
+After a visual-mode operator executes and returns `operatorMoveTo`, the cursor
+position is now re-clamped through `clipCursorToContent(cm, operatorMoveTo)`
+before `setCursor`. Previously, the operator's `clipCursorToContent` call ran
+while `vim.visualMode` was still `true` (line 2767 calls `exitVisualMode` after
+the operator returns). With `vim.visualMode = true`, `clipCursorToContent` uses
+`maxCh = text.length` (includes line break position), allowing the cursor to
+land one past the last character. After `exitVisualMode` clears the visual
+flags, the cursor was set at this too-far position without re-clamping.
+
+Manifested as: `v$d` on `hello world` from ch:5 left cursor at ch:5 instead
+of ch:4 after deleting ` world` (leaving 5-char `hello`). Neovim clamps to
+ch:4 (last char).
+
 ### Other fixes
 
 - `operators.indent`: Cursor at column 0 after `>>` / `<<` (was first non-blank)
