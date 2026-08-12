@@ -2196,12 +2196,16 @@ export function initVim(CM) {
       actionArgs.registerName = inputState.registerName;
       actionArgs.pendingOperator = inputState.operator;
       actionArgs.pendingOperatorArgs = inputState.operatorArgs;
+      var statusBeforeClear = vim.status || '';
       clearInputState(cm);
       vim.lastMotion = null;
       if (command.isEdit) {
         this.recordLastEdit(vim, inputState, command);
       }
       actions[command.action](cm, actionArgs, vim);
+      if (vim.surroundState) {
+        vim.status = statusBeforeClear;
+      }
     },
     /** @arg {CodeMirrorV} cm @arg {vimState} vim @arg {import("./types").searchCommand} command*/
     processSearch: function(cm, vim, command) {
@@ -4095,6 +4099,7 @@ export function initVim(CM) {
     if (state.type === 'ys_motion') {
       var motionChar = state.target;
       var ysOpArgs = state.operatorArgs || {};
+      var savedStatus = vim.status || '';
       vim.surroundState = null;
       vim.inputState.operator = 'surround';
       vim.inputState.operatorArgs = ysOpArgs;
@@ -4125,6 +4130,7 @@ export function initVim(CM) {
         var savedMotionChar = motionChar;
         var savedMotionKey = motionKey;
         clearInputState(cm);
+        vim.status = savedStatus;
         vim.surroundState = {
           type: 'ys_replacement',
           from: sFrom,
@@ -4162,6 +4168,7 @@ export function initVim(CM) {
 
     var nl = state.newline;
     vim.surroundState = null;
+    vim.status = '';
     if (state.type === 'change') {
       if (state.tagResult) {
         changeTagSurround(cm, state.tagResult, ch);

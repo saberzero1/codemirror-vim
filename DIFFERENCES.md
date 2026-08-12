@@ -1178,6 +1178,27 @@ after deletion to prevent the cursor from landing past end-of-line when
 delimiters are at the end of a line (e.g., `function()` → `function`, cursor
 on the final `n` at ch:7 rather than ch:8).
 
+### Chord display preservation during surround sub-state
+
+**Files**: `src/vim.js` — `processAction`, `handleSurroundSubState`
+
+Multi-key surround commands (`ys{motion}{char}`, `cs{target}{char}`, `yss{char}`)
+use a `vim.surroundState` interceptor that spans multiple keystrokes.
+`processAction` calls `clearInputState` before executing the action, which fires
+`vim-command-done` — and the CM6 adapter's `vim-command-done` handler clears
+`vim.status` to `""`. This caused the host's chord display to go blank after
+the first surround key, even though the command was still pending more input.
+
+The fix saves `vim.status` before `clearInputState` and restores it after the
+action executes if `vim.surroundState` is set (indicating the surround flow
+is still pending). When `handleSurroundSubState` completes the surround
+operation (`vim.surroundState = null`), it explicitly clears `vim.status = ""`
+so the chord display empties after the command finishes.
+
+The same pattern applies to the `ys_motion` text object path: `clearInputState`
+at the end of text object resolution clears `vim.status`, but the saved status
+is restored because a new `ys_replacement` sub-state is immediately installed.
+
 ### Linewise motion detection for `ys`
 
 The surround operator branch in `evalInput` checks `motionArgs.linewise`. When
