@@ -468,11 +468,23 @@ effective suppression state for a specific view (per-view override if set,
 otherwise global default). Used by the host plugin's animated cursor
 controller to skip canvas drawing when per-view suppression is active.
 
+#### Table cell override
+
+`BlockCursorPlugin.update()` and `drawSel()` include a table-widget override:
+when per-view suppression is active but the editor is inside a
+`.cm-table-widget` (native table cell editor), the suppression is ignored and
+the native vim cursor renders normally. This is necessary because the host
+plugin's canvas-based animated cursor uses `position: fixed` on
+`.app-container` with a global z-index, which renders behind table cell
+content due to CSS stacking contexts created by the table widget's DOM
+hierarchy. The native `BlockCursorPlugin` cursor — part of the cell editor's
+own DOM — renders reliably above cell content.
+
 Used by the Vim Motions plugin's animated cursor feature: the global flag
 suppresses cursors in main editors (which render their own canvas cursor),
-while textarea vim overlays and table cell editors use per-view overrides to
-restore the native cursor. Table navigation mode uses per-view suppression to
-hide all cursors (both native and canvas) while navigating cells.
+while table cell editors rely on this override to show the native cursor as
+the steady-state renderer. Textarea vim overlays use per-view overrides to
+restore the native cursor independently.
 
 ### Properties navigation (focusBefore adapter)
 

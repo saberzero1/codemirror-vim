@@ -28,7 +28,7 @@ const Vim = initVim(CodeMirror);
 const HighlightMargin = 250;
 
 const vimStyle = EditorView.baseTheme({
-  ".cm-vimMode .cm-cursorLayer:not(.cm-vimCursorLayer)": {
+  ".cm-vimMode > .cm-cursorLayer:not(.cm-vimCursorLayer)": {
     display: "none",
   },
   ".cm-vim-panel": {

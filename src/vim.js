@@ -1352,7 +1352,7 @@ export function initVim(CM) {
     },
 
     defineMotion: defineMotion,
-    getMotion: function(name) { return motions[name]; },
+    getMotion: function(name) { var fn = motions[name]; return fn ? fn.bind(motions) : fn; },
     defineAction: defineAction,
     getAction: function(name) { return actions[name]; },
     defineOperator: defineOperator,
@@ -2504,7 +2504,7 @@ export function initVim(CM) {
       var preDispatchGeneration = vim._commandGeneration;
       clearInputState(cm);
       if (motion) {
-        var motionResultRaw = motions[motion](cm, origHead, motionArgs, vim, inputState);
+        var motionResultRaw = motions[motion].call(motions, cm, origHead, motionArgs, vim, inputState);
         vim.lastMotion = motions[motion];
 
         if (motionResultRaw && typeof (/** @type {any} */ (motionResultRaw)).then === 'function') {

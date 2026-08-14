@@ -124,16 +124,25 @@ export class BlockCursorPlugin {
 
   update(update: ViewUpdate) {
     let suppressed = isCursorSuppressedForView(this.view);
+    let inTableCell = this.view.dom.closest('.cm-table-widget') !== null;
+    if (suppressed && inTableCell) suppressed = false;
     if (suppressed) {
       this.cursorLayer.style.display = "none";
       this.view.contentDOM.style.caretColor = "transparent";
       let layers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
       for (let i = 0; i < layers.length; i++) layers[i].style.display = "none";
-    } else if (this.cursorLayer.style.display === "none") {
-      this.cursorLayer.style.display = "";
-      this.view.contentDOM.style.caretColor = "";
+    } else {
+      if (this.cursorLayer.style.display === "none") this.cursorLayer.style.display = "";
+      if (this.view.contentDOM.style.caretColor === "transparent") this.view.contentDOM.style.caretColor = "";
       let layers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
-      for (let i = 0; i < layers.length; i++) layers[i].style.display = "";
+      for (let i = 0; i < layers.length; i++) {
+        if (layers[i].style.display === "none") layers[i].style.display = "";
+      }
+    }
+    if (update.focusChanged && !this.view.hasFocus) {
+      this.cursorLayer.textContent = "";
+      this.cursors = [];
+      return;
     }
     if (update.selectionSet || update.geometryChanged || update.viewportChanged || update.focusChanged) {
       this.view.requestMeasure(this.measureReq)
@@ -141,7 +150,7 @@ export class BlockCursorPlugin {
         this.cursorLayer.style.animationName = this.cursorLayer.style.animationName == "cm-blink" ? "cm-blink2" : "cm-blink"
       }
     }
-    if (update.focusChanged && update.view.hasFocus) {
+    if (update.focusChanged && this.view.hasFocus) {
       if (this._pendingDeferred) cancelAnimationFrame(this._pendingDeferred);
       this._pendingDeferred = requestAnimationFrame(() => {
         this._pendingDeferred = 0;
@@ -167,7 +176,9 @@ export class BlockCursorPlugin {
   }
 
   drawSel({cursors}: Measure) {
-    if (isCursorSuppressedForView(this.view)) {
+    let drawSuppressed = isCursorSuppressedForView(this.view);
+    if (drawSuppressed && this.view.dom.closest('.cm-table-widget')) drawSuppressed = false;
+    if (drawSuppressed) {
       if (this.cursorLayer.children.length > 0) {
         this.cursorLayer.textContent = "";
         this.cursors = [];
@@ -198,11 +209,11 @@ function configChanged(update: ViewUpdate) {
 }
 
  const themeSpec = {
-  ".cm-vimMode:not(.cm-vimVisual) .cm-line, .cm-vimMode.cm-vimVisualLine .cm-line": {
+  ".cm-vimMode:not(.cm-vimVisual) > .cm-content > .cm-line, .cm-vimMode.cm-vimVisualLine > .cm-content > .cm-line": {
     "& ::selection": {backgroundColor: "transparent !important"},
     "&::selection": {backgroundColor: "transparent !important"},
   },
-  ".cm-vimMode .cm-line": {
+  ".cm-vimMode > .cm-content > .cm-line": {
     caretColor: "transparent !important",
   },
   ".cm-fat-cursor": {
@@ -223,11 +234,6 @@ function configChanged(update: ViewUpdate) {
   ".cm-fat-cursor.cm-cursor-hollow": {
     background: "transparent",
     outline: "solid 1px var(--interactive-accent, #ff9696)",
-  },
-  "&:not(.cm-focused) .cm-fat-cursor": {
-    background: "none",
-    outline: "solid 1px var(--interactive-accent, #ff9696)",
-    color: "transparent !important",
   },
 }
 
