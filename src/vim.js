@@ -828,6 +828,7 @@ export function initVim(CM) {
     }
   */
   var vimGlobalState;
+  var _idleEscapeCallback = null;
   function resetVimGlobalState() {
     vimGlobalState = {
       // The current search query.
@@ -946,6 +947,10 @@ export function initVim(CM) {
     // Testing hook: returns the global macro mode state.
     getMacroState: function() {
       return vimGlobalState.macroModeState;
+    },
+
+    setIdleEscapeCallback: function(fn) {
+      _idleEscapeCallback = fn || null;
     },
 
     suppressErrorLogging: false,
@@ -1307,12 +1312,24 @@ export function initVim(CM) {
         return match.command;
       }
 
+      var wasIdleNormal = !vim.insertMode && !vim.visualMode
+        && !vim.inputState.operator && !vim.surroundState
+        && (!vim.inputState.keyBuffer || vim.inputState.keyBuffer.length === 0)
+        && !vim.expectLiteralNext;
+
       var command = vim.insertMode
         ? handleKeyInsertMode()
         : handleKeyNonInsertMode();
 
       if (command === false) {
-        return !vim.insertMode && (key.length === 1 || /^<(Space|BS|Del|CR|Esc|Ins)>$/.test(key) || (CM.isMac && /^<A-.>$/.test(key)))? function() { return true; } : undefined;
+        if (key === "<Esc>" && !vim.insertMode) {
+          if (wasIdleNormal && _idleEscapeCallback) {
+            var callback = _idleEscapeCallback;
+            return function() { callback(cm); return true; };
+          }
+          return function() { return true; };
+        }
+        return !vim.insertMode && (key.length === 1 || /^<(Space|BS|Del|CR|Ins)>$/.test(key) || (CM.isMac && /^<A-.>$/.test(key)))? function() { return true; } : undefined;
       } else if (command === true) {
         // TODO: Look into using CodeMirror's multi-key handling.
         // Return no-op since we are caching the key. Counts as handled, but

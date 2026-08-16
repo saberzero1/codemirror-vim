@@ -129,11 +129,12 @@ export class BlockCursorPlugin {
     // Always hide native CM6 cursor layers — the fork renders its own cursor for every mode.
     let nativeLayers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
     for (let i = 0; i < nativeLayers.length; i++) nativeLayers[i].style.display = "none";
-    let vimMode = this.view.scrollDOM.classList.contains("cm-vimMode");
-    if (vimMode || suppressed) {
-      this.view.contentDOM.style.caretColor = "transparent";
+    let vim = this.cm.state.vim;
+    let inInsertMode = vim && vim.insertMode && !this.cm.state.overwrite;
+    if (!inInsertMode || suppressed) {
+      this.view.contentDOM.style.setProperty("caret-color", "transparent", "important");
     } else {
-      this.view.contentDOM.style.caretColor = "var(--interactive-accent, #ff9696)";
+      this.view.contentDOM.style.setProperty("caret-color", "var(--interactive-accent, #ff9696)", "important");
     }
     if (suppressed) {
       this.cursorLayer.style.display = "none";

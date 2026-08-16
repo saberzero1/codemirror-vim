@@ -52,6 +52,35 @@ selection, hint mode) and `setKeyInterceptActive(false)` when the modal
 exits. Without this, the observer would call `preventDefault` on label
 keypresses before the host's modal capture-phase handlers can process them.
 
+### `setIdleEscapeCallback` API
+
+**File**: `src/vim.js`
+
+Added `Vim.setIdleEscapeCallback(fn)` to register a callback that fires when
+Escape is pressed in idle normal mode — no pending operator, surround state,
+visual mode, insert mode, or partial key buffer. The callback receives the
+CodeMirror adapter instance (`cm`) as its sole argument.
+
+When a callback is registered, `findKey` returns a handler that calls the
+callback and then returns `true` (consuming the event). When no callback is
+registered, `findKey` returns `undefined` for idle Escape, letting the event
+propagate to the host application.
+
+The idle state is captured *before* `handleKeyNonInsertMode` runs because
+that function clears the pending input state (operators, key buffer) as a
+side effect. Without pre-capture, Escape after an operator (`d` then Escape)
+would appear idle and incorrectly trigger the callback.
+
+Used by the Vim Motions plugin's escape guard: the callback checks whether
+the editor is inside a workspace leaf (main editor — do nothing, Escape is
+consumed silently) or a secondary context (popover, modal — dismiss the
+popover via `HoverPopover.hide()` or blur the editor). This enables Escape
+to close footnote popovers, hover editors, and third-party plugin editors
+generically — without popover-specific code in the fork.
+
+Pass `null` to clear the callback and restore the default behavior (Escape
+consumed silently in idle normal mode).
+
 ### Testing API surface
 
 **File**: `src/vim.js`
@@ -449,9 +478,20 @@ cursor suppression across all editors. When suppressed:
 - `BlockCursorPlugin.drawSel()` clears cursor children and returns early.
 - `BlockCursorPlugin.update()` hides the fork's cursor layer
   (`.cm-vimCursorLayer`) and sets `contentDOM.style.caretColor = "transparent"`
-  — synchronously on every transaction to prevent flicker.
+  via `setProperty("caret-color", ..., "important")` — synchronously on every
+  transaction to prevent flicker.
 - When suppression is turned off, the fork's cursor layer and caretColor are
   restored.
+
+#### Vim-state-based caretColor
+
+`BlockCursorPlugin.update()` determines insert mode by checking
+`this.cm.state.vim.insertMode` directly instead of the `.cm-vimMode` DOM class.
+The DOM class is toggled by a separate CM6 ViewPlugin — when both plugins update
+in the same transaction, the class may not yet reflect the current mode.
+Checking the vim state object avoids this timing dependency. `caretColor` uses
+`setProperty("caret-color", ..., "important")` to override any host application
+stylesheet rules with equal or lower specificity.
 
 Native CM6 cursor layers (`.cm-cursorLayer:not(.cm-vimCursorLayer)`) are
 hidden unconditionally on every update, regardless of suppression state. The
@@ -712,16 +752,21 @@ unhandled and inserted it as text.
 
 Fixed by extending the guard to also match text-producing special keys
 and keys that must not propagate to the host (`<Space>`, `<BS>`, `<Del>`,
-`<CR>`, `<Esc>`, `<Ins>`) via `/^<(Space|BS|Del|CR|Esc|Ins)>$/.test(key)`.
-`<Esc>` is included because `handleEsc()` returns `undefined` in idle
-normal mode (intentionally a no-op), but the key must still be consumed to
-prevent it from propagating to the host application and triggering scope
-pops, modal closes, or other DOM-level side effects. `<Ins>` prevents CM6
-from toggling overwrite mode. The Mac-specific Alt character guard
-(`CM.isMac && /^<A-.>$/.test(key)`) is preserved from upstream PR #194 —
-on Mac, `vimKeyFromEvent` can produce `<A-x>` for non-ASCII Alt combos on
-non-US keyboard layouts, and these must be consumed to prevent text
-insertion in normal mode.
+`<CR>`, `<Ins>`) via `/^<(Space|BS|Del|CR|Ins)>$/.test(key)`.
+`<Ins>` prevents CM6 from toggling overwrite mode. The Mac-specific Alt
+character guard (`CM.isMac && /^<A-.>$/.test(key)`) is preserved from
+upstream PR #194 — on Mac, `vimKeyFromEvent` can produce `<A-x>` for
+non-ASCII Alt combos on non-US keyboard layouts, and these must be consumed
+to prevent text insertion in normal mode.
+
+`<Esc>` in idle normal mode is handled separately (see
+`setIdleEscapeCallback` below). When no callback is set, Escape is consumed
+silently (same as original behavior). When a callback is set, the callback
+fires before the event is consumed. In non-idle normal mode (operator-pending,
+surround state, key buffer), Escape is always consumed silently — the
+pending state was already cleared by `handleKeyNonInsertMode`, and the event
+must not propagate. The idle-vs-non-idle distinction is captured before
+`handleKeyNonInsertMode` runs (since it clears the pending state).
 
 Functional and navigation keys (`<Tab>`, `<S-Tab>`, `<F1>`–`<F12>`,
 modifier combos like `<C-S-I>`) are intentionally NOT consumed — they
