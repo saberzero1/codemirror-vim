@@ -448,11 +448,20 @@ cursor suppression across all editors. When suppressed:
 
 - `BlockCursorPlugin.drawSel()` clears cursor children and returns early.
 - `BlockCursorPlugin.update()` hides the fork's cursor layer
-  (`.cm-vimCursorLayer`), all standard CM6 cursor layers
-  (`.cm-cursorLayer:not(.cm-vimCursorLayer)`), and sets
-  `contentDOM.style.caretColor = "transparent"` — synchronously on every
-  transaction to prevent flicker.
-- When suppression is turned off, all three are restored.
+  (`.cm-vimCursorLayer`) and sets `contentDOM.style.caretColor = "transparent"`
+  — synchronously on every transaction to prevent flicker.
+- When suppression is turned off, the fork's cursor layer and caretColor are
+  restored.
+
+Native CM6 cursor layers (`.cm-cursorLayer:not(.cm-vimCursorLayer)`) are
+hidden unconditionally on every update, regardless of suppression state. The
+fork renders its own cursor for every vim mode (block, bar, underline, hollow),
+so the native CM6 cursor layer is always redundant. Hiding it via inline
+`display: none` rather than relying on the CSS baseTheme rule
+(`.cm-vimMode > .cm-cursorLayer:not(.cm-vimCursorLayer) { display: none }`)
+is necessary because CM6's `drawSelection` extension and mode transitions
+(insert removes `.cm-vimMode`, normal re-adds it) can leave the native layer
+visible due to CSS specificity conflicts.
 
 #### Per-view overrides
 

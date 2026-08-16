@@ -126,18 +126,19 @@ export class BlockCursorPlugin {
     let suppressed = isCursorSuppressedForView(this.view);
     let inTableCell = this.view.dom.closest('.cm-table-widget') !== null;
     if (suppressed && inTableCell) suppressed = false;
+    // Always hide native CM6 cursor layers — the fork renders its own cursor for every mode.
+    let nativeLayers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
+    for (let i = 0; i < nativeLayers.length; i++) nativeLayers[i].style.display = "none";
+    let vimMode = this.view.scrollDOM.classList.contains("cm-vimMode");
+    if (vimMode || suppressed) {
+      this.view.contentDOM.style.caretColor = "transparent";
+    } else {
+      this.view.contentDOM.style.caretColor = "var(--interactive-accent, #ff9696)";
+    }
     if (suppressed) {
       this.cursorLayer.style.display = "none";
-      this.view.contentDOM.style.caretColor = "transparent";
-      let layers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
-      for (let i = 0; i < layers.length; i++) layers[i].style.display = "none";
     } else {
       if (this.cursorLayer.style.display === "none") this.cursorLayer.style.display = "";
-      if (this.view.contentDOM.style.caretColor === "transparent") this.view.contentDOM.style.caretColor = "";
-      let layers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
-      for (let i = 0; i < layers.length; i++) {
-        if (layers[i].style.display === "none") layers[i].style.display = "";
-      }
     }
     if (update.focusChanged && !this.view.hasFocus) {
       this.cursorLayer.textContent = "";
