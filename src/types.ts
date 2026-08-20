@@ -321,8 +321,8 @@ export type operatorMotionCommand = allCommands & {
     },
 }
 export type idleCommand = allCommands & { type: 'idle' }
-export type exCommand = allCommands & { type: 'ex' }
-export type keyToExCommand = allCommands & { type: 'keyToEx', exArgs: ExParams }
+export type exCommand = allCommands & { type: 'ex', exArgs?: exCommandArgs }
+export type keyToExCommand = allCommands & { type: 'keyToEx', exArgs: exCommandArgs & { input: string } }
 export type keyToKeyCommand = allCommands & { toKeys: string, type: 'keyToKey' }
 
 export type vimKey =
@@ -348,6 +348,7 @@ export type KeymapEntry = {
     motionArgs?: MotionArgsPartial;
     action?: string;
     actionArgs?: ActionArgsPartial;
+    exArgs?: exCommandArgs;
     toKeys?: string;
     isEdit?: boolean;
     searchArgs?: SearchArgs;

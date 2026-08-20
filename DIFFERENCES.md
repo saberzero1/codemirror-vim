@@ -1530,10 +1530,48 @@ the "display" selection.
 - Third-party code that reads CM6 selection state during visual-line will not
   see the selection; the canonical API is `window.CodeMirrorAdapter.Vim`
 
+## New default keymap entries
+
+### `@:` — repeat last ex command
+
+**File**: `src/vim.js`
+
+Added `repeatLastExCommand` action and `{ keys: '@:', type: 'action', action: 'repeatLastExCommand' }` to `defaultKeymap`. Reads the last input from `vimGlobalState.exCommandHistoryController.historyBuffer` and replays it via `exCommandDispatcher.processCommand(cm, lastInput)`. When no prior ex command exists, shows a confirmation message and returns.
+
+### `&` — repeat last substitute on current line
+
+**File**: `src/vim.js`
+
+Added `repeatLastSubstitute` action and `{ keys: '&', type: 'action', action: 'repeatLastSubstitute' }` to `defaultKeymap`. Reads the last search query from `getSearchState(cm).getQuery()` and the last replacement from `vimGlobalState.lastSubstituteReplacePart`. Calls `doReplace(cm, false, vimGlobalState.lastSubstituteGlobal, lineStart, lineEnd, cursor, query, replacePart)` scoped to the current line only. When no prior substitute exists, shows a confirmation message and returns.
+
+### `ZZ` / `ZQ` — write+quit and quit
+
+**File**: `src/vim.js`
+
+Added `{ keys: 'ZZ', type: 'ex', exArgs: { input: 'wq' } }` and `{ keys: 'ZQ', type: 'ex', exArgs: { input: 'q' } }` to `defaultKeymap`. These map directly to the `:wq` and `:q` ex commands registered by the host plugin. The `exArgs.input` field triggers `exCommandDispatcher.processCommand` with the specified input string.
+
+### Insert `<C-a>` — re-insert previously inserted text
+
+**File**: `src/vim.js`
+
+Added `reinsertPreviousInsert` action and `{ keys: '<C-a>', type: 'action', action: 'reinsertPreviousInsert', context: 'insert', isEdit: true }` to `defaultKeymap`. Reads `vimGlobalState.macroModeState.lastInsertModeChanges.changes`, reconstructs the inserted text from string entries and array entries, and inserts it at the current cursor position via `cm.replaceRange()`. When no previous insert text exists, the action is a no-op.
+
+### Insert `<C-e>` / `<C-y>` — copy character from adjacent line
+
+**File**: `src/vim.js`
+
+Added `copySameColumnBelow` and `copySameColumnAbove` actions with `{ keys: '<C-e>', type: 'action', action: 'copySameColumnBelow', context: 'insert', isEdit: true }` and `{ keys: '<C-y>', type: 'action', action: 'copySameColumnAbove', context: 'insert', isEdit: true }` to `defaultKeymap`.
+
+`copySameColumnBelow` reads the character at `cursor.ch` from `cm.getLine(cursor.line + 1)` and inserts it at the cursor. Returns early when the cursor is on the last line or the column exceeds the adjacent line's length.
+
+`copySameColumnAbove` reads the character at `cursor.ch` from `cm.getLine(cursor.line - 1)` and inserts it at the cursor. Returns early when the cursor is on the first line or the column exceeds the adjacent line's length.
+
 ## Type changes
 
 **File**: `src/types.ts`
 
+- `exCommand`: `exArgs` field type permits `{ input: string }` for `ex`-type keymap entries that delegate to an ex command by name (used by `ZZ`/`ZQ`)
+- `keyToExCommand`: Added type with required `exArgs.input` field
 - `OperatorArgs`: Added `cursorCol?: number`, `surroundNewline?: boolean`, `surroundCharRepeat?: number`
 - `InputStateInterface`: Added `_surroundReplacement`, `_surroundSelOffset`, `_surroundNewline`
 - `SurroundReplacementSpec`: Union type for tag and function specs

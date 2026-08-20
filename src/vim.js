@@ -108,6 +108,9 @@ export function initVim(CM) {
     { keys: '<Ins>', type: 'action', action: 'toggleOverwrite', context: 'insert' },
     { keys: '<C-g>s<character>', type: 'action', action: 'surroundInsert', context: 'insert' },
     { keys: '<C-g>S<character>', type: 'action', action: 'surroundInsertNewline', context: 'insert' },
+    { keys: '<C-a>', type: 'action', action: 'reinsertPreviousInsert', context: 'insert', isEdit: true },
+    { keys: '<C-e>', type: 'action', action: 'copySameColumnBelow', context: 'insert', isEdit: true },
+    { keys: '<C-y>', type: 'action', action: 'copySameColumnAbove', context: 'insert', isEdit: true },
     // Motions
     { keys: 'H', type: 'motion', motion: 'moveToTopLine', motionArgs: { linewise: true, toJumplist: true }},
     { keys: 'M', type: 'motion', motion: 'moveToMiddleLine', motionArgs: { linewise: true, toJumplist: true }},
@@ -229,6 +232,7 @@ export function initVim(CM) {
     { keys: 'S<character>', type: 'action', action: 'surroundVisual', context: 'visual', isEdit: true },
     { keys: 'gS<character>', type: 'action', action: 'surroundVisualNewline', context: 'visual', isEdit: true },
     { keys: 'S<character>', type: 'action', action: 'surroundActionNewline', operatorPending: true, isEdit: true },
+    { keys: '@:', type: 'action', action: 'repeatLastExCommand' },
     { keys: '@<register>', type: 'action', action: 'replayMacro' },
     { keys: 'q<register>', type: 'action', action: 'enterMacroRecordMode' },
     // Handle Replace-mode as a special case of insert mode.
@@ -243,6 +247,8 @@ export function initVim(CM) {
     { keys: '"<register>', type: 'action', action: 'setRegister' },
     { keys: '<C-r><register>', type: 'action', action: 'insertRegister', context: 'insert', isEdit: true },
     { keys: '<C-o>', type: 'action', action: 'oneNormalCommand', context: 'insert' },
+    { keys: 'ZZ', type: 'ex', exArgs: { input: 'wq' } },
+    { keys: 'ZQ', type: 'ex', exArgs: { input: 'q' } },
     { keys: 'zz', type: 'action', action: 'scrollToCursor', actionArgs: { position: 'center' }},
     { keys: 'z.', type: 'action', action: 'scrollToCursor', actionArgs: { position: 'center' }, motion: 'moveToFirstNonWhiteSpaceCharacter' },
     { keys: 'zt', type: 'action', action: 'scrollToCursor', actionArgs: { position: 'top' }},
@@ -250,6 +256,7 @@ export function initVim(CM) {
     { keys: 'zb', type: 'action', action: 'scrollToCursor', actionArgs: { position: 'bottom' }},
     { keys: 'z-', type: 'action', action: 'scrollToCursor', actionArgs: { position: 'bottom' }, motion: 'moveToFirstNonWhiteSpaceCharacter' },
     { keys: '.', type: 'action', action: 'repeatLastEdit' },
+    { keys: '&', type: 'action', action: 'repeatLastSubstitute' },
     { keys: '<C-a>', type: 'action', action: 'incrementNumberToken', isEdit: true, actionArgs: {increase: true, backtrack: false}},
     { keys: '<C-x>', type: 'action', action: 'incrementNumberToken', isEdit: true, actionArgs: {increase: false, backtrack: false}},
     { keys: '<C-t>', type: 'action', action: 'indent', actionArgs: { indentRight: true }, context: 'insert' },
@@ -2452,7 +2459,10 @@ export function initVim(CM) {
         }
       }
       if (command.type == 'keyToEx') {
-        // Handle user defined Ex to Ex mappings
+        // Handle user defined Ex to Ex mappings.
+        exCommandDispatcher.processCommand(cm, command.exArgs.input || '');
+      } else if (command.exArgs && command.exArgs.input) {
+        // Handle key-to-ex commands.
         exCommandDispatcher.processCommand(cm, command.exArgs.input);
       } else {
         /**@type{import("./types").PromptOptions} */
@@ -4532,6 +4542,32 @@ export function initVim(CM) {
         executeMacroRegister(cm, vim, macroModeState, registerName);
       }
     },
+    repeatLastExCommand: function(cm) {
+      var history = vimGlobalState.exCommandHistoryController.historyBuffer;
+      var lastInput = history[history.length - 1];
+      if (!lastInput) {
+        showConfirm(cm, 'No previous ex command');
+        return;
+      }
+      exCommandDispatcher.processCommand(cm, lastInput);
+    },
+    repeatLastSubstitute: function(cm) {
+      if (!cm.getSearchCursor) {
+        throw new Error('Search feature not available. Requires searchcursor.js or ' +
+            'any other getSearchCursor implementation.');
+      }
+      var query = getSearchState(cm).getQuery();
+      var replacePart = vimGlobalState.lastSubstituteReplacePart;
+      if (!query || replacePart === undefined) {
+        showConfirm(cm, 'No previous substitute regular expression');
+        return;
+      }
+      var lineStart = cm.getCursor().line;
+      var lineEnd = lineStart;
+      var startPos = clipCursorToContent(cm, new Pos(lineStart, 0));
+      var cursor = cm.getSearchCursor(query, startPos);
+      doReplace(cm, false, vimGlobalState.lastSubstituteGlobal, lineStart, lineEnd, cursor, query, replacePart);
+    },
     enterMacroRecordMode: function(cm, actionArgs) {
       var macroModeState = vimGlobalState.macroModeState;
       var registerName = actionArgs.selectedCharacter;
@@ -5030,6 +5066,40 @@ export function initVim(CM) {
       if (text) {
         cm.replaceSelection(text);
       }
+    },
+    reinsertPreviousInsert: function(cm) {
+      var lastChange = vimGlobalState.macroModeState.lastInsertModeChanges;
+      var changes = lastChange && lastChange.changes;
+      if (!changes || changes.length === 0) return;
+      var text = '';
+      for (var i = 0; i < changes.length; i++) {
+        var change = changes[i];
+        if (typeof change === 'string') {
+          text += change;
+        } else if (Array.isArray(change) && typeof change[0] === 'string') {
+          text += change[0];
+        }
+      }
+      if (!text) return;
+      cm.replaceRange(text, cm.getCursor());
+    },
+    copySameColumnBelow: function(cm) {
+      var cursor = cm.getCursor();
+      if (cursor.line >= cm.lastLine()) return;
+      var lineText = cm.getLine(cursor.line + 1);
+      if (cursor.ch >= lineText.length) return;
+      var ch = lineText.charAt(cursor.ch);
+      if (!ch) return;
+      cm.replaceRange(ch, cursor);
+    },
+    copySameColumnAbove: function(cm) {
+      var cursor = cm.getCursor();
+      if (cursor.line <= cm.firstLine()) return;
+      var lineText = cm.getLine(cursor.line - 1);
+      if (cursor.ch >= lineText.length) return;
+      var ch = lineText.charAt(cursor.ch);
+      if (!ch) return;
+      cm.replaceRange(ch, cursor);
     },
     oneNormalCommand: function(cm, actionArgs, vim) {
       // Save what mode we were in before Ctrl-O
