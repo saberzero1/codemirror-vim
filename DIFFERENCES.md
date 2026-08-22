@@ -1523,6 +1523,32 @@ the "display" selection.
   ensures Obsidian commands (Tab/indent, formatting toggles) operate on
   all selected lines.
 
+### Visual-line paste fix
+
+`continuePaste` used `getSelectedAreaRange(cm, vim)` and `cm.getSelection()`
+to determine the replacement range and replaced text. Both read the CM6
+selection — which is cursor-only in visual-line mode (see above). The result
+was that `p`/`P` in visual-line mode inserted text at the cursor instead of
+replacing the selected lines.
+
+The fix adds a `vim.visualLine && vim.sel` guard before the `selectedText`
+computation. When true, `selectionStart` and `selectionEnd` are derived from
+`vim.sel` (the vim-level selection) instead of the collapsed CM6 selection:
+
+- `selectionStart = Pos(min(anchor.line, head.line), 0)`
+- `selectionEnd = Pos(max(...) + 1, 0)` when not on the last line, or
+  `Pos(max(...), lineLength)` on the last line
+
+`selectedText` uses `cm.getRange(selectionStart, selectionEnd)` instead of
+`cm.getSelection()` to read the actual text in the (possibly corrected) range.
+
+The linewise text preparation (`text.slice(0, -1)` for visual-line) was also
+adjusted: in visual-line mode the replacement range already spans whole lines
+including the trailing newline, so the paste text keeps its trailing newline
+(a no-op — the text is left as-is). The exception is when the selection is on
+the last line of the document, where the range does NOT include a trailing
+newline — in that case the trailing newline is stripped to match.
+
 ### Trade-offs
 
 - `cm.somethingSelected()` returns `false` in visual-line mode

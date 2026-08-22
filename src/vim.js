@@ -4956,7 +4956,19 @@ export function initVim(CM) {
         cur.ch = Math.min(lineLength(cm, cur.line), cur.ch);
       } else if (linewise) {
         if (vim.visualMode) {
-          text = vim.visualLine ? text.slice(0, -1) : '\n' + text.slice(0, text.length - 1) + '\n';
+          if (vim.visualLine) {
+            // In visual-line mode, the replacement range spans whole lines.
+            // When the selection is on the last line the range does NOT
+            // include a trailing newline, so strip it from the paste text.
+            if (vim.sel) {
+              var eL = Math.max(vim.sel.anchor.line, vim.sel.head.line);
+              if (eL >= cm.lastLine() && text.charAt(text.length - 1) === '\n') {
+                text = text.slice(0, -1);
+              }
+            }
+          } else {
+            text = '\n' + text.slice(0, text.length - 1) + '\n';
+          }
         } else if (actionArgs.after) {
           // Move the newline at the end to the start instead, and paste just
           // before the newline character of the line we are on right now.
@@ -4969,14 +4981,25 @@ export function initVim(CM) {
         cur.ch += actionArgs.after ? 1 : 0;
       }
       var curPosFinal;
-      if (vim.visualMode) {
+       if (vim.visualMode) {
         //  save the pasted text for reselection if the need arises
         vim.lastPastedText = text;
         var lastSelectionCurEnd;
         var selectedArea = getSelectedAreaRange(cm, vim);
         var selectionStart = selectedArea[0];
         var selectionEnd = selectedArea[1];
-        var selectedText = cm.getSelection();
+        // In visual-line mode the CM6 selection may be collapsed to a cursor
+        // (to avoid Live-Preview markup uncollapsing).  Derive the actual
+        // selected range from vim.sel so the paste replaces correctly.
+        if (vim.visualLine && vim.sel) {
+          var sL = Math.min(vim.sel.anchor.line, vim.sel.head.line);
+          var eL = Math.max(vim.sel.anchor.line, vim.sel.head.line);
+          selectionStart = new Pos(sL, 0);
+          selectionEnd = eL < cm.lastLine()
+            ? new Pos(eL + 1, 0)
+            : new Pos(eL, lineLength(cm, eL));
+        }
+        var selectedText = cm.getRange(selectionStart, selectionEnd);
         var selections = cm.listSelections();
         var emptyStrings = new Array(selections.length).join('1').split('1');
         // save the curEnd marker before it get cleared due to cm.replaceRange.
