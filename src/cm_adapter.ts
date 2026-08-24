@@ -451,6 +451,12 @@ export class CodeMirror {
         cursorCharBackward(this.cm6);
       }
     }
+    else if (name == "goDisplayLineStart") {
+      let view = this.cm6;
+      let sel = view.state.selection.main;
+      let target = view.moveToLineBoundary(sel, false);
+      view.dispatch({ selection: EditorSelection.cursor(target.head) });
+    }
     else console.log(name + " is not implemented");
   };
 

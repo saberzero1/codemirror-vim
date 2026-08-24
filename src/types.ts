@@ -219,10 +219,12 @@ export type vimMotions = {
     moveToColumn(cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs, vim: vimState): Pos
     moveToEol(cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs, vim: vimState): Pos
     moveToFirstNonWhiteSpaceCharacter(cm: CodeMirrorV, head: Pos): Pos
+    moveToLastNonWhiteSpaceCharacter(cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs): Pos
     moveToMatchedSymbol(cm: CodeMirrorV, head: Pos): Pos | undefined
     moveToStartOfLine(_cm: CodeMirrorV, head: Pos, motionArgs?: MotionArgs, vim?: vimState): Pos
     moveToLineOrEdgeOfDocument(cm: CodeMirrorV, _head: Pos, motionArgs: MotionArgs): Pos
     moveToStartOfDisplayLine(cm: CodeMirrorV): Pos
+    moveToFirstNonBlankOfDisplayLine(cm: CodeMirrorV): Pos
     moveToEndOfDisplayLine(cm: CodeMirrorV): Pos
     textObjectManipulation(cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs, vim: vimState): Pos | [Pos, Pos] | null
     repeatLastCharacterSearch(cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs): Pos

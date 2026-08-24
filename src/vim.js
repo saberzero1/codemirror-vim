@@ -140,8 +140,9 @@ export function initVim(CM) {
     { keys: 'gg', type: 'motion', motion: 'moveToLineOrEdgeOfDocument', motionArgs: { forward: false, explicitRepeat: true, linewise: true, toJumplist: true }},
     { keys: 'G', type: 'motion', motion: 'moveToLineOrEdgeOfDocument', motionArgs: { forward: true, explicitRepeat: true, linewise: true, toJumplist: true }},
     { keys: "g$", type: "motion", motion: "moveToEndOfDisplayLine" },
-    { keys: "g^", type: "motion", motion: "moveToStartOfDisplayLine" },
+    { keys: "g^", type: "motion", motion: "moveToFirstNonBlankOfDisplayLine" },
     { keys: "g0", type: "motion", motion: "moveToStartOfDisplayLine" },
+    { keys: "g_", type: "motion", motion: "moveToLastNonWhiteSpaceCharacter", motionArgs: { inclusive: true }},
     { keys: '0', type: 'motion', motion: 'moveToStartOfLine' },
     { keys: '^', type: 'motion', motion: 'moveToFirstNonWhiteSpaceCharacter' },
     { keys: '+', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true }},
@@ -3153,6 +3154,14 @@ export function initVim(CM) {
       return new Pos(cursor.line,
                   findFirstNonWhiteSpaceCharacter(cm.getLine(cursor.line)));
     },
+    moveToLastNonWhiteSpaceCharacter: function(cm, head, motionArgs) {
+      var line = head.line + motionArgs.repeat - 1;
+      line = Math.min(line, cm.lastLine());
+      var text = cm.getLine(line);
+      var lastNonWS = text.search(/\S\s*$/);
+      var ch = lastNonWS === -1 ? 0 : lastNonWS;
+      return new Pos(line, ch);
+    },
     moveToMatchedSymbol: function(cm, head) {
       var cursor = head;
       var line = cursor.line;
@@ -3191,8 +3200,16 @@ export function initVim(CM) {
                   findFirstNonWhiteSpaceCharacter(cm.getLine(lineNum)));
     },
     moveToStartOfDisplayLine: function(cm) {
-      cm.execCommand("goLineLeft");
+      cm.execCommand("goDisplayLineStart");
       return cm.getCursor();
+    },
+    moveToFirstNonBlankOfDisplayLine: function(cm) {
+      cm.execCommand("goDisplayLineStart");
+      var head = cm.getCursor();
+      var lineText = cm.getLine(head.line);
+      var startCh = head.ch;
+      var firstNonBlank = findFirstNonWhiteSpaceCharacter(lineText.substring(startCh));
+      return new Pos(head.line, startCh + firstNonBlank);
     },
     moveToEndOfDisplayLine: function(cm) {
       cm.execCommand("goLineRight");

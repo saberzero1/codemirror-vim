@@ -945,6 +945,32 @@ Manifested as: `v$d` on `hello world` from ch:5 left cursor at ch:5 instead
 of ch:4 after deleting ` world` (leaving 5-char `hello`). Neovim clamps to
 ch:4 (last char).
 
+### `g0` / `g^` display-line motions
+
+**Files**: `src/vim.js`, `src/cm_adapter.ts`, `src/types.ts`
+
+Both `g^` and `g0` were mapped to the same motion handler
+(`moveToStartOfDisplayLine`), which called CM6's `cursorLineBoundaryBackward`.
+That command implements Home-key toggle behavior (first non-blank ↔ column 0),
+so neither motion was correct:
+
+- `g0` went to first non-blank instead of always going to column 0.
+- `g^` toggled between first non-blank and column 0 instead of always going
+  to first non-blank.
+
+**`moveToStartOfDisplayLine`** now uses a new `goDisplayLineStart` exec
+command in the CM6 adapter. `goDisplayLineStart` calls
+`view.moveToLineBoundary(sel, false)` to unconditionally move to column 0 of
+the visual line — no toggle behavior.
+
+**`moveToFirstNonBlankOfDisplayLine`** is a new motion handler for `g^`. It
+calls `goDisplayLineStart` to reach the visual line start, then advances past
+leading whitespace via `findFirstNonWhiteSpaceCharacter` on the substring
+from the visual line start.
+
+The `g^` keybinding now maps to `moveToFirstNonBlankOfDisplayLine`. The `g0`
+keybinding continues to map to `moveToStartOfDisplayLine` (now corrected).
+
 ### Other fixes
 
 - `operators.indent`: Cursor at column 0 after `>>` / `<<` (was first non-blank)
@@ -1591,6 +1617,17 @@ Added `copySameColumnBelow` and `copySameColumnAbove` actions with `{ keys: '<C-
 `copySameColumnBelow` reads the character at `cursor.ch` from `cm.getLine(cursor.line + 1)` and inserts it at the cursor. Returns early when the cursor is on the last line or the column exceeds the adjacent line's length.
 
 `copySameColumnAbove` reads the character at `cursor.ch` from `cm.getLine(cursor.line - 1)` and inserts it at the cursor. Returns early when the cursor is on the first line or the column exceeds the adjacent line's length.
+
+### `g_` — last non-blank character of line
+
+**File**: `src/vim.js`, `src/types.ts`
+
+Added `moveToLastNonWhiteSpaceCharacter` motion and
+`{ keys: 'g_', type: 'motion', motion: 'moveToLastNonWhiteSpaceCharacter', motionArgs: { inclusive: true } }`
+to `defaultKeymap`. Moves to the last non-blank character of the current line
+(or `count - 1` lines forward). On empty or all-whitespace lines, moves to
+column 0. Inclusive motion — `dg_` deletes through the last non-blank
+character, preserving trailing whitespace.
 
 ## Type changes
 
