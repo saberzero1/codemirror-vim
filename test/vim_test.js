@@ -2315,6 +2315,15 @@ testVim('insert_ctrl_u', function(cm, vim, helpers) {
   eqCursorPos(curEnd, cm.getCursor());
   eq('vim-insert', cm.getOption('keyMap'));
 }, { value: 'word1/word2' });
+testVim('insert_ctrl_u_with_typed_text', function(cm, vim, helpers) {
+  cm.setCursor(0, 6);
+  helpers.doKeys('A');
+  cm.replaceSelection(' suffix');
+  helpers.doKeys('<C-u>');
+  eq('prefix', cm.getValue());
+  eqCursorPos(makeCursor(0, 6), cm.getCursor());
+  eq('vim-insert', cm.getOption('keyMap'));
+}, { value: 'prefix' });
 testVim('insert_ctrl_w', function(cm, vim, helpers) {
   var curStart = makeCursor(0, 10);
   cm.setCursor(curStart);

@@ -1629,6 +1629,118 @@ to `defaultKeymap`. Moves to the last non-blank character of the current line
 column 0. Inclusive motion — `dg_` deletes through the last non-blank
 character, preserving trailing whitespace.
 
+### `gM` — go to middle of text line
+
+**File**: `src/vim.js`
+
+Added `moveToMiddleOfTextLine` motion and
+`{ keys: 'gM', type: 'motion', motion: 'moveToMiddleOfTextLine' }`
+to `defaultKeymap`. Moves the cursor to the middle character of the text line
+by character count (`Math.floor(line.length / 2)`). Distinct from `gm` (middle
+of *screen* line, implemented by the host plugin). On a 10-character line, `gM`
+moves to ch 5; on a 3-character line, to ch 1.
+
+### `g&` — repeat last substitute on all lines
+
+**File**: `src/vim.js`
+
+Added `repeatLastSubstituteGlobal` action and
+`{ keys: 'g&', type: 'action', action: 'repeatLastSubstituteGlobal' }`
+to `defaultKeymap`. Repeats the last `:s` substitution across all lines in
+the buffer (equivalent to `:%s//~/&`). Uses the same search query and
+replacement as `&` (repeat on current line) but scopes the replace range
+from `cm.firstLine()` to `cm.lastLine()`.
+
+### `:d` count argument
+
+**File**: `src/vim.js` — `exCommands.delete`
+
+`:d{count}` now parses the count from `params.args` and extends the deletion
+range. `:d3` deletes 3 lines starting from the current line. Previously,
+the count was ignored.
+
+### Insert `<C-U>` — delete to insert-start position
+
+**Files**: `src/vim.js`, `src/types.ts`
+
+`<C-U>` in insert mode now deletes back to the position where insert mode
+was entered (`vim._insertStartPos`) instead of deleting to the start of the
+line. Falls back to line start when the cursor is already at or before the
+insert-start position, matching Neovim's behavior.
+
+`_insertStartPos` is set in `enterInsertMode` from the computed `head`
+position (after `insertAt` adjustments for `a`/`A`/`I`/`o`/`O`). It is
+only set on fresh insert-mode entry — re-entry via `<C-O>` return
+(`oneNormalCommand`) preserves the original position because
+`exitInsertMode(cm, true)` passes `keepCursor=true`, which skips the
+`_insertStartPos = null` cleanup.
+
+The new `moveToInsertStart` motion reads `_insertStartPos` and returns it
+when the cursor is on the same line and past the insert-start column.
+Otherwise returns `Pos(head.line, 0)` (line start fallback).
+
+### Visual `*` / `#` — search from selection
+
+**File**: `src/vim.js`
+
+Added `{ keys: '*', ..., querySrc: 'selectedText', context: 'visual' }` and
+`{ keys: '#', ..., querySrc: 'selectedText', context: 'visual' }` to
+`defaultKeymap`. In visual mode, `*` and `#` search for the selected text
+instead of the word under the cursor (Neovim default since 0.10).
+
+The `selectedText` case in `processSearch` reads the visual selection via
+`cm.getSelection()`, exits visual mode, escapes the text as a regex literal,
+and feeds it to the search handler. No whole-word boundary wrapping is applied
+(the selected text is searched literally).
+
+### Ex command name parsing with trailing digits
+
+**File**: `src/vim.js` — `matchCommand_`, `_processCommand`
+
+`matchCommand_` now has a fallback pass that matches commands by progressively
+shorter alphabetic prefixes when the initial exact-prefix pass fails. This
+allows `:d3` to match the `delete` command (via prefix `d`) and `:m0` to
+match `move` (via prefix `m`), where the trailing digits are treated as
+arguments.
+
+`_processCommand` detects when the matched command's short name is shorter
+than the parsed `commandName` and extracts the unmatched suffix into
+`params.argString` / `params.args`. This makes the trailing digits available
+to the command handler (e.g., `exCommands.delete` reads `params.args[0]`
+for the count).
+
+This also fixes `:g/pattern/m0` — the `:global` command dispatches
+subcommands via `processCommand`, and `m0` now correctly resolves to
+`:move 0`.
+
+### `:d` cursor positioning after delete
+
+**File**: `src/vim.js` — `exCommands.delete`
+
+After deleting lines, the cursor is now positioned at the first non-blank
+character of `min(startLine, lastLine())`. Previously, the cursor position
+was left wherever `operators.delete` placed it, which differed from Neovim
+for `:$d` (deleting the last line).
+
+### `g<C-A>` / `g<C-X>` — sequential increment in visual mode
+
+**Files**: `src/vim.js`, `src/types.ts`
+
+Added visual-context keymap entries for `g<C-A>` and `g<C-X>` with
+`actionArgs: { sequential: true }`. In visual mode (charwise, linewise, or
+blockwise), these scan each selected line for the first number and increment
+(or decrement) it sequentially: the first match gets ±1×count, the second
+±2×count, the third ±3×count, etc.
+
+Typical use: select `0\n0\n0` lines, press `g<C-A>` → `1\n2\n3`. With
+count `2g<C-A>` → `2\n4\n6`.
+
+Lines without a number are skipped (the sequence counter only advances on
+lines that contain a match). After the operation, visual mode is exited and
+the cursor is placed at the start of the selection.
+
+The `sequential` flag is added to `ActionArgsPartial` in `src/types.ts`.
+
 ## Type changes
 
 **File**: `src/types.ts`
@@ -1638,7 +1750,8 @@ character, preserving trailing whitespace.
 - `OperatorArgs`: Added `cursorCol?: number`, `surroundNewline?: boolean`, `surroundCharRepeat?: number`
 - `InputStateInterface`: Added `_surroundReplacement`, `_surroundSelOffset`, `_surroundNewline`
 - `SurroundReplacementSpec`: Union type for tag and function specs
-- `vimState`: Added `_commandGeneration: number`, `blockInsertLeft?: number`
+- `ActionArgsPartial`: Added `sequential?: boolean`
+- `vimState`: Added `_commandGeneration: number`, `blockInsertLeft?: number`, `_insertStartPos?: { line: number, ch: number } | null`
 - `surroundState`: Added `tagResult`, `from`, `to`, `newline`, `count`, `charRepeat`, `pendingInput`
 - `allCommands`: Added `_isDefault?: boolean`
 - `moveByLines` return: `Pos | null`

@@ -143,6 +143,7 @@ export function initVim(CM) {
     { keys: "g^", type: "motion", motion: "moveToFirstNonBlankOfDisplayLine" },
     { keys: "g0", type: "motion", motion: "moveToStartOfDisplayLine" },
     { keys: "g_", type: "motion", motion: "moveToLastNonWhiteSpaceCharacter", motionArgs: { inclusive: true }},
+    { keys: "gM", type: "motion", motion: "moveToMiddleOfTextLine" },
     { keys: '0', type: 'motion', motion: 'moveToStartOfLine' },
     { keys: '^', type: 'motion', motion: 'moveToFirstNonWhiteSpaceCharacter' },
     { keys: '+', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true }},
@@ -199,7 +200,7 @@ export function initVim(CM) {
     { keys: 'C', type: 'operator', operator: 'change', operatorArgs: { linewise: true }, context: 'visual'},
     { keys: '~', type: 'operatorMotion', operator: 'changeCase', motion: 'moveByCharacters', motionArgs: { forward: true }, operatorArgs: { shouldMoveCursor: true }, context: 'normal'},
     { keys: '~', type: 'operator', operator: 'changeCase', context: 'visual'},
-    { keys: '<C-u>', type: 'operatorMotion', operator: 'delete', motion: 'moveToStartOfLine', context: 'insert' },
+    { keys: '<C-u>', type: 'operatorMotion', operator: 'delete', motion: 'moveToInsertStart', context: 'insert' },
     { keys: '<C-w>', type: 'operatorMotion', operator: 'delete', motion: 'moveByWords', motionArgs: { forward: false, wordEnd: false }, context: 'insert' },
     //ignore C-w in normal mode
     { keys: '<C-w>', type: 'idle', context: 'normal' },
@@ -258,8 +259,11 @@ export function initVim(CM) {
     { keys: 'z-', type: 'action', action: 'scrollToCursor', actionArgs: { position: 'bottom' }, motion: 'moveToFirstNonWhiteSpaceCharacter' },
     { keys: '.', type: 'action', action: 'repeatLastEdit' },
     { keys: '&', type: 'action', action: 'repeatLastSubstitute' },
+    { keys: 'g&', type: 'action', action: 'repeatLastSubstituteGlobal' },
     { keys: '<C-a>', type: 'action', action: 'incrementNumberToken', isEdit: true, actionArgs: {increase: true, backtrack: false}},
     { keys: '<C-x>', type: 'action', action: 'incrementNumberToken', isEdit: true, actionArgs: {increase: false, backtrack: false}},
+    { keys: 'g<C-a>', type: 'action', action: 'incrementNumberToken', isEdit: true, actionArgs: {increase: true, backtrack: false, sequential: true}, context: 'visual' },
+    { keys: 'g<C-x>', type: 'action', action: 'incrementNumberToken', isEdit: true, actionArgs: {increase: false, backtrack: false, sequential: true}, context: 'visual' },
     { keys: '<C-t>', type: 'action', action: 'indent', actionArgs: { indentRight: true }, context: 'insert' },
     { keys: '<C-d>', type: 'action', action: 'indent', actionArgs: { indentRight: false }, context: 'insert' },
     // Text object motions
@@ -268,6 +272,8 @@ export function initVim(CM) {
     // Search
     { keys: '/', type: 'search', searchArgs: { forward: true, querySrc: 'prompt', toJumplist: true }},
     { keys: '?', type: 'search', searchArgs: { forward: false, querySrc: 'prompt', toJumplist: true }},
+    { keys: '*', type: 'search', searchArgs: { forward: true, querySrc: 'selectedText', toJumplist: true }, context: 'visual' },
+    { keys: '#', type: 'search', searchArgs: { forward: false, querySrc: 'selectedText', toJumplist: true }, context: 'visual' },
     { keys: '*', type: 'search', searchArgs: { forward: true, querySrc: 'wordUnderCursor', wholeWordOnly: true, toJumplist: true }},
     { keys: '#', type: 'search', searchArgs: { forward: false, querySrc: 'wordUnderCursor', wholeWordOnly: true, toJumplist: true }},
     { keys: 'g*', type: 'search', searchArgs: { forward: true, querySrc: 'wordUnderCursor', toJumplist: true }},
@@ -2387,6 +2393,16 @@ export function initVim(CM) {
 
           handleQuery(query, true /** ignoreCase */, false /** smartCase */);
           break;
+        case 'selectedText':
+          var sel = cm.getSelection();
+          if (!sel) {
+            showConfirm(cm, 'No selection');
+            clearInputState(cm);
+            return;
+          }
+          exitVisualMode(cm);
+          handleQuery(escapeRegex(sel), true /** ignoreCase */, false /** smartCase */);
+          break;
       }
     },
     /**
@@ -3162,6 +3178,11 @@ export function initVim(CM) {
       var ch = lastNonWS === -1 ? 0 : lastNonWS;
       return new Pos(line, ch);
     },
+    moveToMiddleOfTextLine: function(cm, head) {
+      var line = cm.getLine(head.line);
+      var ch = Math.floor(line.length / 2);
+      return new Pos(head.line, ch);
+    },
     moveToMatchedSymbol: function(cm, head) {
       var cursor = head;
       var line = cursor.line;
@@ -3189,6 +3210,13 @@ export function initVim(CM) {
       }
     },
     moveToStartOfLine: function(_cm, head) {
+      return new Pos(head.line, 0);
+    },
+    moveToInsertStart: function(cm, head) {
+      var vim = cm.state.vim;
+      if (vim && vim._insertStartPos && vim._insertStartPos.line === head.line && head.ch > vim._insertStartPos.ch) {
+        return new Pos(vim._insertStartPos.line, vim._insertStartPos.ch);
+      }
       return new Pos(head.line, 0);
     },
     moveToLineOrEdgeOfDocument: function(cm, _head, motionArgs) {
@@ -4585,6 +4613,23 @@ export function initVim(CM) {
       var cursor = cm.getSearchCursor(query, startPos);
       doReplace(cm, false, vimGlobalState.lastSubstituteGlobal, lineStart, lineEnd, cursor, query, replacePart);
     },
+    repeatLastSubstituteGlobal: function(cm) {
+      if (!cm.getSearchCursor) {
+        throw new Error('Search feature not available. Requires searchcursor.js or ' +
+            'any other getSearchCursor implementation.');
+      }
+      var query = getSearchState(cm).getQuery();
+      var replacePart = vimGlobalState.lastSubstituteReplacePart;
+      if (!query || replacePart === undefined) {
+        showConfirm(cm, 'No previous substitute regular expression');
+        return;
+      }
+      var lineStart = cm.firstLine();
+      var lineEnd = cm.lastLine();
+      var startPos = clipCursorToContent(cm, new Pos(lineStart, 0));
+      var cursor = cm.getSearchCursor(query, startPos);
+      doReplace(cm, false, vimGlobalState.lastSubstituteGlobal, lineStart, lineEnd, cursor, query, replacePart);
+    },
     enterMacroRecordMode: function(cm, actionArgs) {
       var macroModeState = vimGlobalState.macroModeState;
       var registerName = actionArgs.selectedCharacter;
@@ -4683,6 +4728,9 @@ export function initVim(CM) {
         cm.toggleOverwrite(false);
         cm.setOption('keyMap', 'vim-insert');
         CM.signal(cm, "vim-mode-change", {mode: "insert"});
+      }
+      if (!vim._insertStartPos) {
+        vim._insertStartPos = copyCursor(head);
       }
       if (!vimGlobalState.macroModeState.isPlaying) {
         // Only record if not replaying.
@@ -5239,20 +5287,56 @@ export function initVim(CM) {
         }
       }
     },
-    incrementNumberToken: function(cm, actionArgs) {
-      var cur = cm.getCursor();
-      var lineStr = cm.getLine(cur.line);
+    incrementNumberToken: function(cm, actionArgs, vim) {
       var re = /(-?)(?:(0x)([\da-f]+)|(0b|0|)(\d+))/gi;
-      var match;
-      var start;
-      var end;
-      var numberStr;
+      var match = /** @type {RegExpExecArray|null} */ (null);
+      var start = 0;
+      var end = 0;
+      var numberStr = '';
+      var lineStr = '';
+
+      if (actionArgs.sequential && vim && vim.visualMode) {
+        var sel = vim.sel;
+        var startLine = Math.min(sel.anchor.line, sel.head.line);
+        var endLine = Math.max(sel.anchor.line, sel.head.line);
+        var direction = actionArgs.increase ? 1 : -1;
+        var count = actionArgs.repeat || 1;
+        var seqIndex = 0;
+        exitVisualMode(cm, false);
+        for (var i = startLine; i <= endLine; i++) {
+          lineStr = cm.getLine(i);
+          re.lastIndex = 0;
+          match = re.exec(lineStr);
+          if (match) {
+            seqIndex++;
+            start = match.index;
+            end = start + match[0].length;
+            var baseStr = match[2] || match[4];
+            var digits = match[3] || match[5];
+            var base = {'0b': 2, '0': 10, '': 10, '0x': 16}[baseStr.toLowerCase()];
+            var number = parseInt(match[1] + digits, base) + (direction * count * seqIndex);
+            numberStr = number.toString(base);
+            var zeroPadding = baseStr ? new Array(Math.max(0, digits.length - numberStr.length + 1 + match[1].length)).join('0') : '';
+            if (numberStr.charAt(0) === '-') {
+              numberStr = '-' + baseStr + zeroPadding + numberStr.substr(1);
+            } else {
+              numberStr = baseStr + zeroPadding + numberStr;
+            }
+            cm.replaceRange(numberStr, new Pos(i, start), new Pos(i, end));
+          }
+        }
+        cm.setCursor(new Pos(startLine, 0));
+        return;
+      }
+
+      var cur = cm.getCursor();
+      lineStr = cm.getLine(cur.line);
+      re.lastIndex = 0;
       while ((match = re.exec(lineStr)) !== null) {
         start = match.index;
         end = start + match[0].length;
         if (cur.ch < end)break;
       }
-      // @ts-ignore
       if (!actionArgs.backtrack && (end <= cur.ch))return;
       if (match) {
         var baseStr = match[2] || match[4]
@@ -5267,15 +5351,10 @@ export function initVim(CM) {
         } else {
           numberStr = baseStr + zeroPadding + numberStr;
         }
-        // @ts-ignore
-        var from = new Pos(cur.line, start);
-        // @ts-ignore
-        var to = new Pos(cur.line, end);
-        cm.replaceRange(numberStr, from, to);
+        cm.replaceRange(numberStr, new Pos(cur.line, start), new Pos(cur.line, end));
       } else {
         return;
       }
-      // @ts-ignore
       cm.setCursor(new Pos(cur.line, start + numberStr.length - 1));
     },
     repeatLastEdit: function(cm, actionArgs, vim) {
@@ -7853,6 +7932,16 @@ export function initVim(CM) {
           if (command.excludeFromCommandHistory) {
             commandHistoryRegister.setText(previousCommand);
           }
+          // When the matched command name is shorter than the parsed
+          // commandName (e.g. :d3 matched 'delete' via prefix 'd'),
+          // extract the unmatched suffix as arguments.
+          var shortName = command.shortName || command.name;
+          var cmdInput = params.commandName;
+          if (cmdInput.length > shortName.length && commandName.indexOf(cmdInput) !== 0) {
+            var extraArgs = cmdInput.substring(shortName.length);
+            /** @type {any} */ (params).argString = extraArgs + (/** @type {any} */ (params).argString ? ' ' + /** @type {any} */ (params).argString : '');
+            /** @type {any} */ (params).args = /** @type {any} */ (params).argString.trim().split(/\s+/);
+          }
           this.parseCommandArgs_(inputStream, params, command);
           if (command.type == 'exToKey') {
             // Handle Ex to Key mapping.
@@ -8033,6 +8122,18 @@ export function initVim(CM) {
           if (command.name.indexOf(commandName) === 0) {
             return command;
           }
+        }
+      }
+      // Retry with progressively shorter alpha prefixes, treating the
+      // remainder as arguments (e.g. :d3 → command 'd'elete, args '3';
+      // :m0 → command 'm'ove, args '0').
+      for (var i = commandName.length - 1; i > 0; i--) {
+        var prefix = commandName.substring(0, i);
+        if (!/^[a-zA-Z]+$/.test(prefix)) continue;
+        var rest = commandName.charAt(i);
+        if (/[a-zA-Z]/.test(rest)) continue;
+        if (this.commandMap_[prefix]) {
+          return this.commandMap_[prefix];
         }
       }
     }
@@ -8665,10 +8766,20 @@ export function initVim(CM) {
     delete: function(cm, params) {
       var line = params.selectionLine;
       var lineEnd = isNaN(params.selectionLineEnd) ? line : params.selectionLineEnd;
+      // :d{count} — delete {count} lines from the current line
+      var args = params.args;
+      if (args && args.length > 0) {
+        var count = parseInt(args[0], 10);
+        if (!isNaN(count) && count > 0) {
+          lineEnd = Math.min(line + count - 1, cm.lastLine());
+        }
+      }
       operators.delete(cm, {linewise: true}, [
         { anchor: new Pos(line, 0),
           head: new Pos(lineEnd + 1, 0) }
       ]);
+      var finalLine = Math.min(line, cm.lastLine());
+      cm.setCursor(new Pos(finalLine, findFirstNonWhiteSpaceCharacter(cm.getLine(finalLine))));
     },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     join: function(cm, params) {
@@ -8913,6 +9024,9 @@ export function initVim(CM) {
       if (vim.insertEnd) vim.insertEnd.clear();
       vim.insertEnd = undefined;
       CM.off(cm.getInputField(), 'keydown', onKeyEventTargetKeyDown);
+    }
+    if (!keepCursor) {
+      vim._insertStartPos = null;
     }
     if (!isPlaying && vim.insertModeRepeat && vim.insertModeRepeat > 1) {
       // Perform insert mode repeat for commands like 3,a and 3,o.

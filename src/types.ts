@@ -48,6 +48,7 @@ export type vimState = {
     cursorShapes?: import("./block-cursor").CursorShapeConfig,
 
     _commandGeneration: number,
+    _insertStartPos?: { line: number, ch: number } | null,
     _shadowTimer?: ReturnType<typeof setTimeout>,
     _preventReselect?: boolean,
     _suppressModeSignal?: boolean,
@@ -160,6 +161,7 @@ export type ActionArgsPartial = {
     keepCursor?: boolean,
     pendingOperator?: string | null,
     pendingOperatorArgs?: OperatorArgs | null,
+    sequential?: boolean,
 }
 export type ActionArgs = ActionArgsPartial & {repeat: number};
 
