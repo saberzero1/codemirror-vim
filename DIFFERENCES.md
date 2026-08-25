@@ -1167,8 +1167,12 @@ the cursor moves unexpectedly during insert mode), and `createInsertModeChanges`
 is not preserved in dot-repeat (cleared by `maybeReset`), matching the canonical
 behavior of both vim-surround and nvim-surround.
 
-Known limitation: macro recording of insert-mode surround keys is not supported
-(pre-existing limitation of insert-mode macro key logging).
+Macro recording of insert-mode surround keys (`<C-g>s{char}`, `<C-g>S{char}`)
+is now supported. `handleKeyInsertMode` calls `logKey` when a full insert-mode
+command match is found (`match.type == 'full'`), recording the complete key
+sequence to the macro register. Previously, `logKey` was only called from
+`handleKeyNonInsertMode`, so insert-mode commands were silently dropped from
+macro recording.
 
 Insert mode partial match buffering was fixed to support this: when the key
 buffer contains a non-char key (e.g. `<C-g>`), subsequent single-char keys

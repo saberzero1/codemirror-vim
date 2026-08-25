@@ -1192,6 +1192,10 @@ export function initVim(CM) {
           return !keysAreChars;
         }
         else if (match.type == 'full') {
+          var macroModeState = vimGlobalState.macroModeState;
+          if (macroModeState.isRecording) {
+            logKey(macroModeState, keys);
+          }
           vim.inputState.keyBuffer.length = 0;
         }
         vim.expectLiteralNext = false;
