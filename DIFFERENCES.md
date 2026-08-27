@@ -627,35 +627,35 @@ line.
 **File**: `src/cm_adapter.ts`
 
 `charCoords(pos, 'local')` and `coordsChar(coords, 'local')` now use
-`scrollDOM.getBoundingClientRect()` as the coordinate reference instead of
-`contentDOM.getBoundingClientRect()`, and include `scrollDOM.scrollTop` in
-the offset calculation.
+split coordinate references: `contentDOM` for horizontal (`left`) and
+`scrollDOM` for vertical (`top`/`bottom`), with `scrollDOM.scrollTop`
+included in the vertical offset for scroll-independent coordinates.
 
 In CM5, `charCoords(pos, 'local')` returns coordinates in the scroll
 container's content space — the same coordinate system as `scrollTo()`.
-The original CM6 adapter used `contentDOM.getBoundingClientRect().top` as
-the reference point with `d = -rect.top`, which is only correct when
-`contentDOM` starts at the same position as `scrollDOM`'s scroll content.
+The original CM6 adapter used `contentDOM.getBoundingClientRect()` as
+the sole reference for both axes with `d = -rect.top`.
 
 In Obsidian's Live Preview, YAML frontmatter is rendered as a widget
 decoration inside the scroll container but outside `contentDOM` (the
 `.metadata-container` element is a sibling of `contentDOM` within the
 `.cm-sizer` wrapper). This creates a vertical offset between `scrollDOM`'s
 scroll content origin and `contentDOM`'s top edge. The original formula
-produced coordinates that were off by the metadata container's height,
-causing `scrollToCursor` (the `zz`/`zt`/`zb` action) to scroll to wrong
-positions — `zt` landed at center instead of top, `zz` overshot, etc.
+produced vertical coordinates that were off by the metadata container's
+height, causing `scrollToCursor` (the `zz`/`zt`/`zb` action) to scroll
+to wrong positions — `zt` landed at center instead of top, `zz`
+overshot, etc.
 
-The fix changes `charCoords` to:
-- Reference: `scrollDOM.getBoundingClientRect().top` (scroll container, not content)
-- Offset: `d = -rect.top + scrollDOM.scrollTop` (scroll-independent)
+The fix splits the reference in `charCoords`:
+- Horizontal (`left`): uses `contentDOM.getBoundingClientRect().left` (unchanged — contentDOM is the correct reference for goalColumn tracking used by `gj`/`gk`/`moveByDisplayLines`)
+- Vertical (`top`/`bottom`): uses `scrollDOM.getBoundingClientRect().top` + `scrollDOM.scrollTop` (scroll-content-space coordinates matching CM5 `local` mode)
 
-And `coordsChar` (the inverse) to:
-- Reference: `scrollDOM.getBoundingClientRect()` (matching `charCoords`)
-- Y conversion: `coords.top + rect.top - scrollDOM.scrollTop` (reverse of the offset)
+And `coordsChar` (the inverse):
+- Horizontal: `coords.left + contentDOM.rect.left` (unchanged)
+- Vertical: `coords.top + scrollDOM.rect.top - scrollDOM.scrollTop` (reverse of the vertical offset)
 
 Without widget decorations above `contentDOM`, the two reference points
-coincide and the behavior is identical to before.
+coincide vertically and the behavior is identical to before.
 
 ### Per-mode cursor shapes
 

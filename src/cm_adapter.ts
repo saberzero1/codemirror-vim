@@ -716,18 +716,20 @@ export class CodeMirror {
     return false;
   };
   charCoords(pos: Pos, mode: "div" | "local") {
-    var rect = this.cm6.scrollDOM.getBoundingClientRect();
+    var contentRect = this.cm6.contentDOM.getBoundingClientRect();
+    var scrollRect = this.cm6.scrollDOM.getBoundingClientRect();
     var offset = indexFromPos(this.cm6.state.doc, pos)
     var coords = this.cm6.coordsAtPos(offset)
     var scrollTop = this.cm6.scrollDOM.scrollTop;
-    var d = -rect.top + scrollTop
-    return { left: (coords?.left || 0) - rect.left, top: (coords?.top || 0) + d, bottom: (coords?.bottom || 0) + d }
+    var dy = -scrollRect.top + scrollTop
+    return { left: (coords?.left || 0) - contentRect.left, top: (coords?.top || 0) + dy, bottom: (coords?.bottom || 0) + dy }
   };
   coordsChar(coords: { left: number, top: number }, mode: "div" | "local") {
-    var rect = this.cm6.scrollDOM.getBoundingClientRect()
+    var contentRect = this.cm6.contentDOM.getBoundingClientRect()
+    var scrollRect = this.cm6.scrollDOM.getBoundingClientRect()
     var scrollTop = this.cm6.scrollDOM.scrollTop;
 
-    var offset = this.cm6.posAtCoords({ x: coords.left + rect.left, y: coords.top + rect.top - scrollTop }) || 0
+    var offset = this.cm6.posAtCoords({ x: coords.left + contentRect.left, y: coords.top + scrollRect.top - scrollTop }) || 0
     return posFromIndex(this.cm6.state.doc, offset)
   };
 
