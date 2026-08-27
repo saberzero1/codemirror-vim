@@ -716,16 +716,18 @@ export class CodeMirror {
     return false;
   };
   charCoords(pos: Pos, mode: "div" | "local") {
-    var rect = this.cm6.contentDOM.getBoundingClientRect();
+    var rect = this.cm6.scrollDOM.getBoundingClientRect();
     var offset = indexFromPos(this.cm6.state.doc, pos)
     var coords = this.cm6.coordsAtPos(offset)
-    var d = -rect.top
+    var scrollTop = this.cm6.scrollDOM.scrollTop;
+    var d = -rect.top + scrollTop
     return { left: (coords?.left || 0) - rect.left, top: (coords?.top || 0) + d, bottom: (coords?.bottom || 0) + d }
   };
   coordsChar(coords: { left: number, top: number }, mode: "div" | "local") {
-    var rect = this.cm6.contentDOM.getBoundingClientRect()
+    var rect = this.cm6.scrollDOM.getBoundingClientRect()
+    var scrollTop = this.cm6.scrollDOM.scrollTop;
 
-    var offset = this.cm6.posAtCoords({ x: coords.left + rect.left, y: coords.top + rect.top }) || 0
+    var offset = this.cm6.posAtCoords({ x: coords.left + rect.left, y: coords.top + rect.top - scrollTop }) || 0
     return posFromIndex(this.cm6.state.doc, offset)
   };
 

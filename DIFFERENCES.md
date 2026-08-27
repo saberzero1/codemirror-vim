@@ -622,6 +622,41 @@ Folded ranges are excluded from the multi-line clamp via `foldedRanges()` —
 folds legitimately collapse multiple document lines into a single visual
 line.
 
+### Scroll-space `charCoords` / `coordsChar`
+
+**File**: `src/cm_adapter.ts`
+
+`charCoords(pos, 'local')` and `coordsChar(coords, 'local')` now use
+`scrollDOM.getBoundingClientRect()` as the coordinate reference instead of
+`contentDOM.getBoundingClientRect()`, and include `scrollDOM.scrollTop` in
+the offset calculation.
+
+In CM5, `charCoords(pos, 'local')` returns coordinates in the scroll
+container's content space — the same coordinate system as `scrollTo()`.
+The original CM6 adapter used `contentDOM.getBoundingClientRect().top` as
+the reference point with `d = -rect.top`, which is only correct when
+`contentDOM` starts at the same position as `scrollDOM`'s scroll content.
+
+In Obsidian's Live Preview, YAML frontmatter is rendered as a widget
+decoration inside the scroll container but outside `contentDOM` (the
+`.metadata-container` element is a sibling of `contentDOM` within the
+`.cm-sizer` wrapper). This creates a vertical offset between `scrollDOM`'s
+scroll content origin and `contentDOM`'s top edge. The original formula
+produced coordinates that were off by the metadata container's height,
+causing `scrollToCursor` (the `zz`/`zt`/`zb` action) to scroll to wrong
+positions — `zt` landed at center instead of top, `zz` overshot, etc.
+
+The fix changes `charCoords` to:
+- Reference: `scrollDOM.getBoundingClientRect().top` (scroll container, not content)
+- Offset: `d = -rect.top + scrollDOM.scrollTop` (scroll-independent)
+
+And `coordsChar` (the inverse) to:
+- Reference: `scrollDOM.getBoundingClientRect()` (matching `charCoords`)
+- Y conversion: `coords.top + rect.top - scrollDOM.scrollTop` (reverse of the offset)
+
+Without widget decorations above `contentDOM`, the two reference points
+coincide and the behavior is identical to before.
+
 ### Per-mode cursor shapes
 
 **File**: `src/block-cursor.ts`
