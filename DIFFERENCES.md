@@ -1096,6 +1096,28 @@ The fix uses two mechanisms:
 Theme rules for `.cm-vim-linewise-selection` are included in `vimStyle`
 (both light and dark variants).
 
+### Visual-line change operator (`Vc`)
+
+**File**: `src/vim.js` — `operators.change`
+
+The `change` operator's catch-all visual branch (`else` at the end of the
+conditional chain) used `cm.replaceSelections([''])` with the CM6 selection
+that had been expanded by `applyOperator` to include the start of the next
+line (`ranges[0].head = Pos(head.line + 1, 0)`). This deleted the trailing
+newline along with the line content, merging the current line with the next.
+When the next line was empty, it was deleted entirely.
+
+Added a dedicated `args.linewise` branch before the catch-all `else`. For
+linewise visual change, the fix:
+
+1. Computes the actual selected line range, compensating for the head
+   expansion (`head.ch == 0 && head.line > startLine` → decrement endLine)
+2. Uses `cm.replaceRange('', from, to)` to clear line content only — from
+   column 0 to end of last selected line — preserving newlines
+3. Positions the cursor at `(startLine, 0)` before entering insert mode
+
+Charwise visual change (`vc`) continues through the existing catch-all path.
+
 ## Surround operators (vim-surround)
 
 **Files**: `src/vim.js`, `src/types.ts`

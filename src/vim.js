@@ -3446,6 +3446,22 @@ export function initVim(CM) {
           text = cm.getSelection();
           cm.replaceSelection("");
           finalHead = anchor;
+      } else if (args.linewise) {
+        // Visual-line change: clear selected lines but keep one empty line.
+        // anchor is at start of first selected line, head is at (lastLine+1, 0)
+        // due to linewise expansion in applyOperator.
+        var startLine = Math.min(anchor.line, head.line);
+        var endLine = Math.max(anchor.line, head.line);
+        // head was expanded to (endLine+1, 0), so actual last selected line
+        // is endLine - 1 (if head.ch == 0 and head.line > anchor.line).
+        if (head.ch == 0 && head.line > startLine) {
+          endLine = head.line - 1;
+        }
+        var from = new Pos(startLine, 0);
+        var to = new Pos(endLine, lineLength(cm, endLine));
+        text = cm.getRange(from, to);
+        cm.replaceRange('', from, to);
+        finalHead = new Pos(startLine, 0);
       } else {
         text = cm.getSelection();
         var replacement = fillArray('', ranges.length);
