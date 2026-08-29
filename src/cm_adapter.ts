@@ -920,7 +920,7 @@ export class CodeMirror {
     let cursor = this.getCursor();
     let line = this.getLine(cursor.line);
 
-    if (cursor.ch >= Math.max(0, line.length - 1)) {
+    if (cursor.ch >= line.length) {
       let insertCh = Math.min(cursor.ch + 1, line.length);
       vim.replaceStack.push({ original: '', vcols: 0 });
       this.replaceRange(key,

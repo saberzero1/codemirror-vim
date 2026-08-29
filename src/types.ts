@@ -52,6 +52,7 @@ export type vimState = {
     _shadowTimer?: ReturnType<typeof setTimeout>,
     _preventReselect?: boolean,
     _suppressModeSignal?: boolean,
+    _suppressUndoBreakOnMove?: boolean,
     insertModeReturnArgs?: { replace?: boolean, virtualReplace?: boolean },
     surroundState?: {
         type: string,

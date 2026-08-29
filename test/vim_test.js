@@ -1551,7 +1551,7 @@ testVim('vreplace_eol_appends', function(cm, vim, helpers) {
   helpers.doKeys('g', 'R');
   helpers.doKeys('x');
   helpers.doKeys('<Esc>');
-  eq('hellox', cm.getValue());
+  eq('hellx', cm.getValue());
 }, { value: 'hello' });
 
 testVim('vreplace_exit_clears_state', function(cm, vim, helpers) {

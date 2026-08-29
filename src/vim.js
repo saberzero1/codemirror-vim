@@ -108,6 +108,12 @@ export function initVim(CM) {
     { keys: '<Ins>', type: 'action', action: 'toggleOverwrite', context: 'insert' },
     { keys: '<C-g>s<character>', type: 'action', action: 'surroundInsert', context: 'insert' },
     { keys: '<C-g>S<character>', type: 'action', action: 'surroundInsertNewline', context: 'insert' },
+    { keys: '<C-g>u', type: 'action', action: 'insertUndoBreak', context: 'insert' },
+    { keys: '<C-g>U', type: 'action', action: 'insertSuppressUndoBreak', context: 'insert' },
+    { keys: '<C-g>j', type: 'action', action: 'insertMoveDown', context: 'insert' },
+    { keys: '<C-g><C-j>', type: 'action', action: 'insertMoveDown', context: 'insert' },
+    { keys: '<C-g>k', type: 'action', action: 'insertMoveUp', context: 'insert' },
+    { keys: '<C-g><C-k>', type: 'action', action: 'insertMoveUp', context: 'insert' },
     { keys: '<C-a>', type: 'action', action: 'reinsertPreviousInsert', context: 'insert', isEdit: true },
     { keys: '<C-e>', type: 'action', action: 'copySameColumnBelow', context: 'insert', isEdit: true },
     { keys: '<C-y>', type: 'action', action: 'copySameColumnAbove', context: 'insert', isEdit: true },
@@ -189,6 +195,7 @@ export function initVim(CM) {
     { keys: 'gq', type: 'operator', operator: 'hardWrap' },
     { keys: 'gw', type: 'operator', operator: 'hardWrap', operatorArgs: {keepCursor: true}},
     { keys: 'g?', type: 'operator', operator: 'rot13'},
+    { keys: 'g@', type: 'operator', operator: 'operatorfunc' },
     // Operator-Motion dual commands
     { keys: 'x', type: 'operatorMotion', operator: 'delete', motion: 'moveByCharacters', motionArgs: { forward: true }, operatorMotionArgs: { visualLine: false }},
     { keys: 'X', type: 'operatorMotion', operator: 'delete', motion: 'moveByCharacters', motionArgs: { forward: false }, operatorMotionArgs: { visualLine: true }},
@@ -342,7 +349,9 @@ export function initVim(CM) {
     { name: 'delete', shortName: 'd' },
     { name: 'join', shortName: 'j' },
     { name: 'normal', shortName: 'norm' },
-    { name: 'global', shortName: 'g' }
+    { name: 'global', shortName: 'g' },
+    { name: 'copy', shortName: 'co' },
+    { name: 't' }
   ];
 
   /**
@@ -743,6 +752,8 @@ export function initVim(CM) {
       this.replaySearchQueries = [];
       this.onRecordingDone = undefined;
       this.lastInsertModeChanges = createInsertModeChanges();
+      /** @type {any[]} */
+      this.previousInsertModeChanges = [];
     }
     exitMacroRecordMode() {
       var macroModeState = vimGlobalState.macroModeState;
@@ -837,7 +848,8 @@ export function initVim(CM) {
         lastSubstituteReplacePart: any;
         lastSubstituteGlobal: boolean;
         searchQuery?: null; 
-        searchIsReversed?: boolean; 
+        searchIsReversed?: boolean;
+        _operatorfuncCallback?: ((cm: CodeMirrorV, type: string) => void) | null;
       }
     }
   */
@@ -1383,6 +1395,8 @@ export function initVim(CM) {
     },
     /**@type {(cm: CodeMirrorV, input: string)=>void} */
     handleEx: function(cm, input) {
+      vimGlobalState.exCommandHistoryController.pushInput(input);
+      vimGlobalState.exCommandHistoryController.reset();
       exCommandDispatcher.processCommand(cm, input);
     },
 
@@ -1391,6 +1405,8 @@ export function initVim(CM) {
     defineAction: defineAction,
     getAction: function(name) { return actions[name]; },
     defineOperator: defineOperator,
+    setOperatorfunc: function(fn) { vimGlobalState._operatorfuncCallback = fn; },
+    getOperatorfunc: function() { return vimGlobalState._operatorfuncCallback; },
 
     recordLastCharacterSearch: recordLastCharacterSearch,
     mapCommand: mapCommand,
@@ -2829,6 +2845,7 @@ export function initVim(CM) {
       if (macroModeState.isPlaying) { return; }
       vim.lastEditInputState = inputState;
       vim.lastEditActionCommand = actionCommand;
+      macroModeState.previousInsertModeChanges = macroModeState.lastInsertModeChanges.changes.slice();
       macroModeState.lastInsertModeChanges.changes = [];
       macroModeState.lastInsertModeChanges.expectCursorActivityForChange = false;
       macroModeState.lastInsertModeChanges.visualBlock = vim.visualBlock ? vim.sel.head.line - vim.sel.anchor.line : 0;
@@ -3710,6 +3727,31 @@ export function initVim(CM) {
       } else {
         return cursorMin(ranges[0].anchor, ranges[0].head);
       }
+    },
+    operatorfunc: function(cm, args, ranges, oldAnchor, newHead) {
+      var callback = vimGlobalState._operatorfuncCallback;
+      if (!callback) {
+        showConfirm(cm, 'operatorfunc is not set');
+        return;
+      }
+      var type = args.linewise ? 'line' :
+                 (cm.state.vim && cm.state.vim.visualBlock) ? 'block' : 'char';
+      var from = ranges[0].anchor || ranges[0].head;
+      var to = ranges[ranges.length - 1].head || ranges[ranges.length - 1].anchor;
+      if (cursorIsBefore(to, from)) { var tmp = from; from = to; to = tmp; }
+      var vim = cm.state.vim;
+      if (vim.marks && vim.marks['[']) vim.marks['['].clear();
+      if (vim.marks && vim.marks[']']) vim.marks[']'].clear();
+      vim.marks['['] = cm.setBookmark(from);
+      vim.marks[']'] = cm.setBookmark(to);
+      var savedInputState = vim.inputState;
+      vim.inputState = new InputState();
+      try {
+        callback(cm, type);
+      } finally {
+        vim.inputState = savedInputState;
+      }
+      return cm.getCursor();
     },
   };
 
@@ -4607,14 +4649,17 @@ export function initVim(CM) {
         executeMacroRegister(cm, vim, macroModeState, registerName);
       }
     },
-    repeatLastExCommand: function(cm) {
+    repeatLastExCommand: function(cm, actionArgs) {
       var history = vimGlobalState.exCommandHistoryController.historyBuffer;
       var lastInput = history[history.length - 1];
       if (!lastInput) {
         showConfirm(cm, 'No previous ex command');
         return;
       }
-      exCommandDispatcher.processCommand(cm, lastInput);
+      var repeat = actionArgs.repeat || 1;
+      for (var i = 0; i < repeat; i++) {
+        exCommandDispatcher.processCommand(cm, lastInput);
+      }
     },
     repeatLastSubstitute: function(cm) {
       if (!cm.getSearchCursor) {
@@ -5176,8 +5221,7 @@ export function initVim(CM) {
       }
     },
     reinsertPreviousInsert: function(cm) {
-      var lastChange = vimGlobalState.macroModeState.lastInsertModeChanges;
-      var changes = lastChange && lastChange.changes;
+      var changes = vimGlobalState.macroModeState.previousInsertModeChanges;
       if (!changes || changes.length === 0) return;
       var text = '';
       for (var i = 0; i < changes.length; i++) {
@@ -5199,6 +5243,7 @@ export function initVim(CM) {
       var ch = lineText.charAt(cursor.ch);
       if (!ch) return;
       cm.replaceRange(ch, cursor);
+      cm.setCursor(cursor.line, cursor.ch + 1);
     },
     copySameColumnAbove: function(cm) {
       var cursor = cm.getCursor();
@@ -5208,6 +5253,38 @@ export function initVim(CM) {
       var ch = lineText.charAt(cursor.ch);
       if (!ch) return;
       cm.replaceRange(ch, cursor);
+      cm.setCursor(cursor.line, cursor.ch + 1);
+    },
+    insertUndoBreak: function(cm) {
+      var macroModeState = vimGlobalState.macroModeState;
+      var lastChange = macroModeState.lastInsertModeChanges;
+      lastChange.maybeReset = true;
+      lastChange._surroundInsertChar = null;
+      lastChange._surroundInsertNewline = false;
+      var vim = cm.state.vim;
+      if (vim.insertEnd) vim.insertEnd.clear();
+      vim.insertEnd = cm.setBookmark(cm.getCursor(), {insertLeft: true});
+      if (cm.curOp) cm.curOp.lastChange = undefined;
+    },
+    insertSuppressUndoBreak: function(cm) {
+      var vim = cm.state.vim;
+      vim._suppressUndoBreakOnMove = true;
+    },
+    insertMoveDown: function(cm, actionArgs, vim) {
+      var startCol = vim._insertStartPos ? vim._insertStartPos.ch : cm.getCursor().ch;
+      var cursor = cm.getCursor();
+      var newLine = Math.min(cursor.line + 1, cm.lastLine());
+      if (newLine === cursor.line) return;
+      var lineLen = cm.getLine(newLine).length;
+      cm.setCursor(newLine, Math.min(startCol, lineLen));
+    },
+    insertMoveUp: function(cm, actionArgs, vim) {
+      var startCol = vim._insertStartPos ? vim._insertStartPos.ch : cm.getCursor().ch;
+      var cursor = cm.getCursor();
+      var newLine = Math.max(cursor.line - 1, cm.firstLine());
+      if (newLine === cursor.line) return;
+      var lineLen = cm.getLine(newLine).length;
+      cm.setCursor(newLine, Math.min(startCol, lineLen));
     },
     oneNormalCommand: function(cm, actionArgs, vim) {
       // Save what mode we were in before Ctrl-O
@@ -5389,6 +5466,18 @@ export function initVim(CM) {
       repeatLastEdit(cm, vim, repeat, false /** repeatForInsert */);
     },
     indent: function(cm, actionArgs) {
+      if (!actionArgs.indentRight) {
+        var lastChange = vimGlobalState.macroModeState.lastInsertModeChanges;
+        var changes = lastChange.changes;
+        if (changes.length > 0 && (changes[changes.length - 1] === '0' || changes[changes.length - 1] === '^')) {
+          var cursor = cm.getCursor();
+          if (cursor.ch > 0) {
+            changes.pop();
+            cm.replaceRange('', new Pos(cursor.line, 0), new Pos(cursor.line, cursor.ch));
+            return;
+          }
+        }
+      }
       cm.indentLine(cm.getCursor().line, actionArgs.indentRight);
     },
     exitInsertMode: function(cm, actionArgs) {
@@ -8295,13 +8384,75 @@ export function initVim(CM) {
     smapclear: function(cm, params) { vimApi.mapclear('select'); },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     move: function(cm, params) {
-      commandDispatcher.processCommand(cm, cm.state.vim, {
-        keys: "",
-        type: 'motion',
-        motion: 'moveToLineOrEdgeOfDocument',
-        motionArgs: { forward: false, explicitRepeat: true, linewise: true },
-        repeatOverride: params.line+1
-      });
+      var argString = params.argString ? trim(params.argString) : '';
+      if (!argString) {
+        commandDispatcher.processCommand(cm, cm.state.vim, {
+          keys: "",
+          type: 'motion',
+          motion: 'moveToLineOrEdgeOfDocument',
+          motionArgs: { forward: false, explicitRepeat: true, linewise: true },
+          repeatOverride: params.line+1
+        });
+        return;
+      }
+      var srcLine = params.selectionLine;
+      var srcLineEnd = isNaN(params.selectionLineEnd) ? srcLine : params.selectionLineEnd;
+      var destStream = new CM.StringStream(argString);
+      var dest = exCommandDispatcher.parseLineSpec_(cm, destStream);
+      if (dest == null) {
+        showConfirm(cm, 'Invalid address');
+        return;
+      }
+      if (dest >= srcLine && dest <= srcLineEnd) {
+        return;
+      }
+      var count = srcLineEnd - srcLine + 1;
+      var text = cm.getRange(new Pos(srcLine, 0), new Pos(srcLineEnd + 1, 0));
+      if (srcLineEnd === cm.lastLine() && srcLine > 0) {
+        text = '\n' + cm.getRange(new Pos(srcLine - 1, cm.getLine(srcLine - 1).length), new Pos(srcLineEnd, cm.getLine(srcLineEnd).length));
+        cm.replaceRange('', new Pos(srcLine - 1, cm.getLine(srcLine - 1).length), new Pos(srcLineEnd, cm.getLine(srcLineEnd).length));
+      } else {
+        cm.replaceRange('', new Pos(srcLine, 0), new Pos(srcLineEnd + 1, 0));
+      }
+      if (dest > srcLineEnd) {
+        dest -= count;
+      }
+      var insertAt = Math.min(dest + 1, cm.lastLine() + 1);
+      if (insertAt > cm.lastLine()) {
+        cm.replaceRange('\n' + text.replace(/\n$/, ''), new Pos(cm.lastLine(), cm.getLine(cm.lastLine()).length));
+      } else {
+        cm.replaceRange(text, new Pos(insertAt, 0));
+      }
+      var finalLine = Math.min(dest + count, cm.lastLine());
+      cm.setCursor(new Pos(finalLine, findFirstNonWhiteSpaceCharacter(cm.getLine(finalLine))));
+    },
+    copy: function(cm, params) {
+      var argString = params.argString ? trim(params.argString) : '';
+      if (!argString) {
+        showConfirm(cm, 'Argument required');
+        return;
+      }
+      var srcLine = params.selectionLine;
+      var srcLineEnd = isNaN(params.selectionLineEnd) ? srcLine : params.selectionLineEnd;
+      var destStream = new CM.StringStream(argString);
+      var dest = exCommandDispatcher.parseLineSpec_(cm, destStream);
+      if (dest == null) {
+        showConfirm(cm, 'Invalid address');
+        return;
+      }
+      var text = cm.getRange(new Pos(srcLine, 0), new Pos(srcLineEnd + 1, 0));
+      var insertAt = Math.min(dest + 1, cm.lastLine() + 1);
+      if (insertAt > cm.lastLine()) {
+        cm.replaceRange('\n' + text.replace(/\n$/, ''), new Pos(cm.lastLine(), cm.getLine(cm.lastLine()).length));
+      } else {
+        cm.replaceRange(text, new Pos(insertAt, 0));
+      }
+      var count = srcLineEnd - srcLine + 1;
+      var finalLine = dest + count;
+      cm.setCursor(new Pos(finalLine, findFirstNonWhiteSpaceCharacter(cm.getLine(finalLine))));
+    },
+    t: function(cm, params) {
+      this.copy(cm, params);
     },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     set: function(cm, params) {
@@ -9283,6 +9434,8 @@ export function initVim(CM) {
       var lastChange = macroModeState.lastInsertModeChanges;
       if (lastChange.expectCursorActivityForChange) {
         lastChange.expectCursorActivityForChange = false;
+      } else if (vim._suppressUndoBreakOnMove) {
+        vim._suppressUndoBreakOnMove = false;
       } else {
         lastChange.maybeReset = true;
         lastChange._surroundInsertChar = null;

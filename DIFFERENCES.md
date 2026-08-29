@@ -1947,3 +1947,124 @@ This resolves conflicts between motion mappings registered by plugins (e.g., fla
 **Type change**: Added `_shadowTimer` to `vimState` in `src/types.ts`.
 
 **Upstream difference**: Upstream codemirror-vim has no timeout-based key disambiguation. Operators enter pending mode immediately and the next key is always resolved as a motion. This fork adds Neovim-style operator-prefix disambiguation, scoped to operator-pending mode only (non-operator prefixes like `g`/`z`/`<C-w>` are unaffected).
+
+## `handleEx` history recording
+
+**File**: `src/vim.js`
+
+`handleEx(cm, input)` now pushes the command to
+`exCommandHistoryController` before execution, matching the interactive
+prompt path (`onPromptClose`). Previously, commands dispatched via
+`handleEx` (vimrc `:` commands, test infrastructure, programmatic ex calls)
+were not recorded, causing `@:` (repeat last ex command) to report "No
+previous ex command."
+
+`repeatLastExCommand` now accepts `actionArgs` and loops `actionArgs.repeat`
+times (default 1), enabling `2@:` to replay the command twice. Previously,
+count was ignored.
+
+## `<C-y>` / `<C-e>` cursor advancement
+
+**File**: `src/vim.js`
+
+`copySameColumnAbove` and `copySameColumnBelow` now call
+`cm.setCursor(cursor.line, cursor.ch + 1)` after `cm.replaceRange(ch, cursor)`.
+Without this, the cursor did not advance after inserting the copied character,
+and `exitInsertMode`'s `ch - 1` adjustment left the cursor one position too
+far left compared to Neovim.
+
+## `gR` virtual replace EOL boundary
+
+**File**: `src/cm_adapter.ts`
+
+`virtualReplaceChar` boundary check changed from
+`cursor.ch >= Math.max(0, line.length - 1)` to `cursor.ch >= line.length`.
+The old check entered the insert branch when the cursor was on the *last*
+character (e.g., `ch=1` on `"hi"` where `length=2`, `1 >= 1` was true).
+The fix enters the insert branch only when the cursor is *past* all
+characters. This makes `gR` on the last character correctly replace it
+instead of appending.
+
+## `<C-a>` previous insert storage
+
+**File**: `src/vim.js`
+
+`recordLastEdit` now saves `lastInsertModeChanges.changes` to
+`macroModeState.previousInsertModeChanges` before resetting. The
+`reinsertPreviousInsert` action (`<C-a>`) reads from this saved copy
+instead of the current (empty) changes array.
+
+`MacroModeState` constructor initializes `previousInsertModeChanges`
+as an empty array.
+
+## `:move` and `:copy` ex commands
+
+**File**: `src/vim.js`
+
+Replaced the broken `:move` handler (which only moved the cursor to a line,
+not lines to a destination) with a proper line-move implementation:
+
+- Parses destination address from `params.argString` using `parseLineSpec_`
+- Extracts source lines, deletes them, adjusts destination when moving
+  downward, inserts at the new position
+- Positions cursor at first non-blank of last moved line
+
+Added `:copy` (`:co`) and `:t` ex commands. Same as `:move` but without
+the deletion step. Registered in `defaultExCommandMap` with short name `co`.
+
+## `setOperatorfunc` / `getOperatorfunc` API
+
+**File**: `src/vim.js`
+
+Added `setOperatorfunc(fn)` and `getOperatorfunc()` to the `vimApi` object.
+Stores a callback on `vimGlobalState._operatorfuncCallback`.
+
+## `g@` operator (operatorfunc)
+
+**File**: `src/vim.js`
+
+Added `{ keys: 'g@', type: 'operator', operator: 'operatorfunc' }` to
+`defaultKeymap` and `operatorfunc` handler to the `operators` object.
+
+The operator:
+- Reads the callback from `vimGlobalState._operatorfuncCallback`
+- Determines the motion type (`'line'`, `'char'`, or `'block'`)
+- Sets `'[` and `']` marks to the motion range (Neovim compatibility)
+- Saves and restores `vim.inputState` around the callback to prevent
+  reentrant corruption
+- Calls the callback with `(cm, type)`
+
+## Insert-mode `<C-G>u` / `<C-G>U` (undo break control)
+
+**File**: `src/vim.js`
+
+Added `insertUndoBreak` action (`<C-G>u`): creates an undo boundary in
+insert mode by setting `maybeReset = true` (vim-level change tracking),
+updating the `insertEnd` bookmark, and clearing `curOp.lastChange` to force
+CM6 to start a new undo group on the next transaction.
+
+Added `insertSuppressUndoBreak` action (`<C-G>U`): sets a single-shot
+`vim._suppressUndoBreakOnMove` flag. `onCursorActivity` checks this flag
+and skips `maybeReset` for one cursor movement, preventing the undo break
+that normally occurs on cursor movement in insert mode.
+
+## Insert-mode `<C-G>j` / `<C-G>k` (line navigation)
+
+**File**: `src/vim.js`
+
+Added `insertMoveDown` and `insertMoveUp` actions with keybindings
+`<C-G>j`, `<C-G><C-J>`, `<C-G>k`, `<C-G><C-K>`. Move cursor to the
+next/previous line while preserving the column where insert mode was
+entered (`vim._insertStartPos.ch`). Column is clamped to the target
+line's length.
+
+## Insert-mode `0<C-D>` / `^<C-D>` (delete all indent)
+
+**File**: `src/vim.js`
+
+The insert-mode `indent` action now detects when the last entry in
+`lastInsertModeChanges.changes` is `'0'` or `'^'`. When found and
+`indentRight` is false: pops the prefix character from changes, deletes
+all content from column 0 to the cursor position (removing all indent).
+Normal `<C-D>` behavior (one shiftwidth) is preserved when no prefix is
+detected.
