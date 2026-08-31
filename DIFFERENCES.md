@@ -81,6 +81,56 @@ generically — without popover-specific code in the fork.
 Pass `null` to clear the callback and restore the default behavior (Escape
 consumed silently in idle normal mode).
 
+### `resetForkedVimState` API
+
+**File**: `src/index.ts`
+
+Added `resetForkedVimState()` as a module-level export. Resets
+`_keyInterceptActive` to `false` and `initialCursorShapes` to `undefined`.
+
+Used by the host plugin's vim toggle feature: when disabling vim at runtime,
+the fork's module-level state must be reset so that re-enabling creates a
+clean slate. Without this, a stale `_keyInterceptActive = true` from a
+previous modal overlay would suppress keydown processing after re-enable.
+
+### `resetCursorState` API
+
+**File**: `src/block-cursor.ts`
+
+Added `resetCursorState()` as a module-level export. Resets
+`_cursorSuppressed` to `false` and clears the `_viewOverrides` map.
+
+Used alongside `resetForkedVimState()` during vim toggle: when the vim
+extension is removed from editors, per-view cursor suppression overrides
+become stale references to destroyed EditorViews. Clearing the map prevents
+memory leaks and ensures re-enabled editors start with a clean suppression
+state.
+
+### `BlockCursorPlugin.destroy()` cursor restoration
+
+**File**: `src/block-cursor.ts`
+
+`BlockCursorPlugin.destroy()` now restores native cursor visibility:
+
+1. Calls `this.view.contentDOM.style.removeProperty("caret-color")` to
+   remove the inline `caret-color: transparent !important` set by `update()`.
+2. Iterates native CM6 cursor layers
+   (`.cm-cursorLayer:not(.cm-vimCursorLayer)`) and removes the inline
+   `display: none` set by `update()`.
+
+Previously, `destroy()` only removed the vim cursor layer DOM element and
+cleaned up the per-view override map. The inline styles persisted on the
+editor DOM, leaving the native CM6 cursor invisible after the vim extension
+was removed — the cursor appeared "gone" because both the vim cursor (removed)
+and the native cursor (`display: none` + `caret-color: transparent`) were
+hidden.
+
+This fix is essential for the host plugin's vim toggle feature: when vim is
+disabled at runtime via `Compartment.reconfigure([])` or mutable array +
+`updateOptions()`, CM6 calls `destroy()` on the `BlockCursorPlugin`. The
+native CM6 cursor must reappear for the editor to function as a standard
+text editor without vim.
+
 ### Testing API surface
 
 **File**: `src/vim.js`

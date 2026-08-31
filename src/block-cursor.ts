@@ -18,6 +18,11 @@ export function setCursorSuppressed(suppressed: boolean): void {
   _cursorSuppressed = suppressed;
 }
 
+export function resetCursorState(): void {
+  _cursorSuppressed = false;
+  _viewOverrides.clear();
+}
+
 export function setCursorSuppressedForView(view: EditorView, suppressed: boolean): void {
   _viewOverrides.set(view, suppressed);
 }
@@ -203,7 +208,14 @@ export class BlockCursorPlugin {
   destroy() {
     if (this._pendingDeferred) cancelAnimationFrame(this._pendingDeferred);
     _viewOverrides.delete(this.view);
-    this.cursorLayer.remove()
+    this.cursorLayer.remove();
+    this.view.contentDOM.style.removeProperty("caret-color");
+    const nativeLayers = this.view.scrollDOM.querySelectorAll(
+      ".cm-cursorLayer:not(.cm-vimCursorLayer)"
+    ) as NodeListOf<HTMLElement>;
+    for (let i = 0; i < nativeLayers.length; i++) {
+      nativeLayers[i].style.removeProperty("display");
+    }
   }
 }
 function configChanged(update: ViewUpdate) {
