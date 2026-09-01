@@ -2295,7 +2295,7 @@ export function initVim(CM) {
       /** @arg {string} query */
       function onPromptClose(query) {
         cm.scrollTo(originalScrollPos.left, originalScrollPos.top);
-        handleQuery(query, true /** ignoreCase */, true /** smartCase */);
+        handleQuery(query, getOption('ignorecase'), getOption('smartcase'));
         var macroModeState = vimGlobalState.macroModeState;
         if (macroModeState.isRecording) {
           logSearchQuery(macroModeState, query);
@@ -2326,8 +2326,10 @@ export function initVim(CM) {
       function onChange() {
         var parsedQuery;
         try {
-          parsedQuery = updateSearchQuery(cm, lastQuery,
-              true /** ignoreCase */, true /** smartCase */);
+          parsedQuery = getOption('incsearch')
+              ? updateSearchQuery(cm, lastQuery,
+                  getOption('ignorecase'), getOption('smartcase'))
+              : undefined;
         } catch (e) {
           // Swallow bad regexes for incremental search.
         }
@@ -2365,7 +2367,7 @@ export function initVim(CM) {
           var macroModeState = vimGlobalState.macroModeState;
           if (macroModeState.isPlaying) {
             let query = macroModeState.replaySearchQueries.shift();
-            handleQuery(query || '', true /** ignoreCase */, false /** smartCase */);
+            handleQuery(query || '', getOption('ignorecase'), getOption('smartcase'));
           } else {
             showPrompt(cm, {
                 onClose: onPromptClose,
@@ -2414,7 +2416,7 @@ export function initVim(CM) {
           vimGlobalState.jumpList.cachedCursor = cm.getCursor();
           cm.setCursor(word.start);
 
-          handleQuery(query, true /** ignoreCase */, false /** smartCase */);
+          handleQuery(query, getOption('ignorecase'), getOption('smartcase'));
           break;
         case 'selectedText':
           var sel = cm.getSelection();
@@ -2424,7 +2426,7 @@ export function initVim(CM) {
             return;
           }
           exitVisualMode(cm);
-          handleQuery(escapeRegex(sel), true /** ignoreCase */, false /** smartCase */);
+          handleQuery(escapeRegex(sel), getOption('ignorecase'), getOption('smartcase'));
           break;
       }
     },
@@ -2865,18 +2867,21 @@ export function initVim(CM) {
    * @type {import("./types").vimMotions}}
    */
   var motions = {
-    moveToTopLine: function(cm, _head, motionArgs) {
+    moveToTopLine: function(cm, head, motionArgs) {
       var line = getUserVisibleLines(cm).top + motionArgs.repeat -1;
-      return new Pos(line, findFirstNonWhiteSpaceCharacter(cm.getLine(line)));
+      var ch = getOption('startofline') ? findFirstNonWhiteSpaceCharacter(cm.getLine(line)) : head.ch;
+      return new Pos(line, ch);
     },
-    moveToMiddleLine: function(cm) {
+    moveToMiddleLine: function(cm, head) {
       var range = getUserVisibleLines(cm);
       var line = Math.floor((range.top + range.bottom) * 0.5);
-      return new Pos(line, findFirstNonWhiteSpaceCharacter(cm.getLine(line)));
+      var ch = getOption('startofline') ? findFirstNonWhiteSpaceCharacter(cm.getLine(line)) : head.ch;
+      return new Pos(line, ch);
     },
-    moveToBottomLine: function(cm, _head, motionArgs) {
+    moveToBottomLine: function(cm, head, motionArgs) {
       var line = getUserVisibleLines(cm).bottom - motionArgs.repeat +1;
-      return new Pos(line, findFirstNonWhiteSpaceCharacter(cm.getLine(line)));
+      var ch = getOption('startofline') ? findFirstNonWhiteSpaceCharacter(cm.getLine(line)) : head.ch;
+      return new Pos(line, ch);
     },
     expandToLine: function(_cm, head, motionArgs) {
       // Expands forward to end of line, and then to next line if repeat is
@@ -3043,10 +3048,29 @@ export function initVim(CM) {
       }
       return best;
     },
-    moveByCharacters: function(_cm, head, motionArgs) {
+    moveByCharacters: function(cm, head, motionArgs) {
       var cur = head;
       var repeat = motionArgs.repeat;
       var ch = motionArgs.forward ? cur.ch + repeat : cur.ch - repeat;
+      var ww = getOption('whichwrap') || '';
+      var key = motionArgs.forward ? 'l' : 'h';
+      if (ww.indexOf(key) !== -1) {
+        var line = cur.line;
+        if (motionArgs.forward) {
+          var lineLen = lineLength(cm, line);
+          while (ch >= lineLen && line < cm.lastLine()) {
+            ch -= lineLen;
+            line++;
+            lineLen = lineLength(cm, line);
+          }
+        } else {
+          while (ch < 0 && line > cm.firstLine()) {
+            line--;
+            ch += lineLength(cm, line);
+          }
+        }
+        return new Pos(line, ch);
+      }
       return new Pos(cur.line, ch);
     },
     moveByLines: function(cm, head, motionArgs, vim) {
@@ -3245,13 +3269,15 @@ export function initVim(CM) {
       }
       return new Pos(head.line, 0);
     },
-    moveToLineOrEdgeOfDocument: function(cm, _head, motionArgs) {
+    moveToLineOrEdgeOfDocument: function(cm, head, motionArgs) {
       var lineNum = motionArgs.forward ? cm.lastLine() : cm.firstLine();
       if (motionArgs.repeatIsExplicit) {
         lineNum = motionArgs.repeat - cm.getOption('firstLineNumber');
       }
-      return new Pos(lineNum,
-                  findFirstNonWhiteSpaceCharacter(cm.getLine(lineNum)));
+      var ch = getOption('startofline')
+        ? findFirstNonWhiteSpaceCharacter(cm.getLine(lineNum))
+        : head.ch;
+      return new Pos(lineNum, ch);
     },
     moveToStartOfDisplayLine: function(cm) {
       cm.execCommand("goDisplayLineStart");
@@ -3607,25 +3633,63 @@ export function initVim(CM) {
           ranges[ranges.length - 1].anchor.line :
           ranges[0].head.line;
         if (args.linewise) {
-          // The only way to delete a newline is to delete until the start of
-          // the next line, so in linewise mode evalInput will include the next
-          // line. We don't want this in indent, so we go back a line.
           endLine--;
         }
+        var doShiftRound = !!getOption('shiftround');
         for (var i = startLine; i <= endLine; i++) {
-          for (var j = 0; j < repeat; j++) {
-            if (args.indentRight) {
-              cm.replaceRange(indentStr, new Pos(i, 0), new Pos(i, 0));
-            } else {
-              var lineText = cm.getLine(i);
-              var removeCount = 0;
-              for (var c = 0; c < indentSize && c < lineText.length; c++) {
-                if (lineText[c] === ' ') removeCount++;
-                else if (lineText[c] === '\t') { removeCount++; break; }
+          var lineText = cm.getLine(i);
+          if (args.indentRight) {
+            if (doShiftRound) {
+              var currentIndent = 0;
+              for (var c = 0; c < lineText.length; c++) {
+                if (lineText[c] === ' ') currentIndent++;
+                else if (lineText[c] === '\t') currentIndent += tabSize;
                 else break;
               }
-              if (removeCount > 0) {
-                cm.replaceRange('', new Pos(i, 0), new Pos(i, removeCount));
+              var target = (Math.floor(currentIndent / indentSize) + repeat) * indentSize;
+              var addCount = target - currentIndent;
+              if (addCount > 0) {
+                var removeWs = 0;
+                for (var c = 0; c < lineText.length; c++) {
+                  if (lineText[c] === ' ' || lineText[c] === '\t') removeWs++;
+                  else break;
+                }
+                var newIndent = useSpaces ? ' '.repeat(target) : '\t'.repeat(Math.floor(target / tabSize)) + ' '.repeat(target % tabSize);
+                cm.replaceRange(newIndent, new Pos(i, 0), new Pos(i, removeWs));
+              }
+            } else {
+              for (var j = 0; j < repeat; j++) {
+                cm.replaceRange(indentStr, new Pos(i, 0), new Pos(i, 0));
+              }
+            }
+          } else {
+            if (doShiftRound) {
+              var currentIndent = 0;
+              for (var c = 0; c < lineText.length; c++) {
+                if (lineText[c] === ' ') currentIndent++;
+                else if (lineText[c] === '\t') currentIndent += tabSize;
+                else break;
+              }
+              var target = Math.max(0, (Math.ceil(currentIndent / indentSize) - repeat) * indentSize);
+              var removeWs = 0;
+              for (var c = 0; c < lineText.length; c++) {
+                if (lineText[c] === ' ' || lineText[c] === '\t') removeWs++;
+                else break;
+              }
+              var newIndent = useSpaces ? ' '.repeat(target) : '\t'.repeat(Math.floor(target / tabSize)) + ' '.repeat(target % tabSize);
+              cm.replaceRange(newIndent, new Pos(i, 0), new Pos(i, removeWs));
+            } else {
+              for (var j = 0; j < repeat; j++) {
+                var removeCount = 0;
+                lineText = cm.getLine(i);
+                for (var c = 0; c < indentSize && c < lineText.length; c++) {
+                  if (lineText[c] === ' ') removeCount++;
+                  else if (lineText[c] === '\t') { removeCount++; break; }
+                  else break;
+                }
+                if (removeCount > 0) {
+                  cm.replaceRange('', new Pos(i, 0), new Pos(i, removeCount));
+                }
               }
             }
           }
@@ -4955,7 +5019,9 @@ export function initVim(CM) {
           if (nextStartCh == -1) {
             nextStartCh = nextLine.length;
           } else {
-            text = " ";
+            var trimmedEnd = curLine.substring(0, trimFrom);
+            var lastChar = trimmedEnd.length > 0 ? trimmedEnd[trimmedEnd.length - 1] : '';
+            text = (getOption('joinspaces') && /[.!?]/.test(lastChar)) ? "  " : " ";
           }
         }
         cm.replaceRange(text, 
@@ -5393,7 +5459,11 @@ export function initVim(CM) {
       }
     },
     incrementNumberToken: function(cm, actionArgs, vim) {
-      var re = /(-?)(?:(0x)([\da-f]+)|(0b|0|)(\d+))/gi;
+      var nf = (getOption('nrformats') || '').split(',');
+      var hasHex = nf.indexOf('hex') !== -1;
+      var hasBin = nf.indexOf('bin') !== -1;
+      var hasOctal = nf.indexOf('octal') !== -1;
+      var re = /(-?)(?:(0x)([\da-f]+)|(0b)([01]+)|(0)([0-7]+)|()(\d+))/gi;
       var match = /** @type {RegExpExecArray|null} */ (null);
       var start = 0;
       var end = 0;
@@ -5413,12 +5483,14 @@ export function initVim(CM) {
           re.lastIndex = 0;
           match = re.exec(lineStr);
           if (match) {
+            var parsed = parseNumberMatch(match, hasHex, hasBin, hasOctal);
+            if (!parsed) { match = re.exec(lineStr); continue; }
             seqIndex++;
             start = match.index;
             end = start + match[0].length;
-            var baseStr = match[2] || match[4];
-            var digits = match[3] || match[5];
-            var base = {'0b': 2, '0': 10, '': 10, '0x': 16}[baseStr.toLowerCase()];
+            var baseStr = parsed.prefix;
+            var digits = parsed.digits;
+            var base = parsed.base;
             var number = parseInt(match[1] + digits, base) + (direction * count * seqIndex);
             numberStr = number.toString(base);
             var zeroPadding = baseStr ? new Array(Math.max(0, digits.length - numberStr.length + 1 + match[1].length)).join('0') : '';
@@ -5438,16 +5510,20 @@ export function initVim(CM) {
       lineStr = cm.getLine(cur.line);
       re.lastIndex = 0;
       while ((match = re.exec(lineStr)) !== null) {
+        var _p = parseNumberMatch(match, hasHex, hasBin, hasOctal);
+        if (!_p) continue;
         start = match.index;
         end = start + match[0].length;
         if (cur.ch < end)break;
       }
       if (!actionArgs.backtrack && (end <= cur.ch))return;
       if (match) {
-        var baseStr = match[2] || match[4]
-        var digits = match[3] || match[5]
+        var parsed2 = parseNumberMatch(match, hasHex, hasBin, hasOctal);
+        if (!parsed2) return;
+        var baseStr = parsed2.prefix;
+        var digits = parsed2.digits;
         var increment = actionArgs.increase ? 1 : -1;
-        var base = {'0b': 2, '0': 10, '': 10, '0x': 16}[baseStr.toLowerCase()];
+        var base = parsed2.base;
         var number = parseInt(match[1] + digits, base) + (increment * actionArgs.repeat);
         numberStr = number.toString(base);
         var zeroPadding = baseStr ? new Array(digits.length - numberStr.length + 1 + match[1].length).join('0') : ''
@@ -5892,18 +5968,32 @@ export function initVim(CM) {
    * Below are miscellaneous utility functions used by vim.js
    */
 
-  /**
-   * Clips cursor to ensure that line is within the buffer's range
-   * and is not inside surrogate pair
-   * If includeLineBreak is true, then allow cur.ch == lineLength.
-   * @arg {CodeMirrorV} cm 
-   * @arg {Pos} cur 
-   * @arg {Pos} [oldCur]
-   * @return {Pos}
-   */
+  /** @arg {RegExpExecArray} match @arg {boolean} hasHex @arg {boolean} hasBin @arg {boolean} hasOctal @returns {{prefix:string, digits:string, base:number}|undefined} */
+  function parseNumberMatch(match, hasHex, hasBin, hasOctal) {
+    if (match[2] && match[3]) {
+      if (!hasHex) return undefined;
+      return { prefix: match[2], digits: match[3], base: 16 };
+    }
+    if (match[4] && match[5]) {
+      if (!hasBin) return undefined;
+      return { prefix: match[4], digits: match[5], base: 2 };
+    }
+    if (match[6] && match[7]) {
+      if (!hasOctal) return undefined;
+      return { prefix: match[6], digits: match[7], base: 8 };
+    }
+    if (match[9] !== undefined) {
+      return { prefix: match[8] || '', digits: match[9], base: 10 };
+    }
+    return undefined;
+  }
+  /** @arg {CodeMirrorV} cm @arg {Pos} cur @arg {Pos} [oldCur] @return {Pos} */
   function clipCursorToContent(cm, cur, oldCur) {
     var vim = cm.state.vim;
     var includeLineBreak = vim.insertMode || vim.visualMode;
+    var ve = getOption('virtualedit') || '';
+    var onemore = ve === 'onemore' || ve === 'all' || (ve === 'block' && vim.visualBlock);
+    if (onemore && !includeLineBreak) includeLineBreak = true;
     var line = Math.min(Math.max(cm.firstLine(), cur.line), cm.lastLine() );
     var text = cm.getLine(line);
     var maxCh = text.length - 1 + Number(!!includeLineBreak);
@@ -7411,7 +7501,18 @@ export function initVim(CM) {
   defineOption('keymodel', '', 'string', ['km']);
   defineOption('operatorshadowtimeout', 1000, 'number', ['ost']);
 
-  // Search functions
+  defineOption('ignorecase', true, 'boolean', ['ic']);
+  defineOption('smartcase', true, 'boolean', ['scs']);
+  defineOption('hlsearch', true, 'boolean', ['hls']);
+  defineOption('incsearch', true, 'boolean', ['is']);
+  defineOption('gdefault', false, 'boolean', ['gd']);
+  defineOption('wrapscan', true, 'boolean', ['ws']);
+  defineOption('joinspaces', false, 'boolean', ['js']);
+  defineOption('startofline', true, 'boolean', ['sol']);
+  defineOption('whichwrap', 'b,s', 'string', ['ww']);
+  defineOption('virtualedit', '', 'string', ['ve']);
+  defineOption('shiftround', false, 'boolean', ['sr']);
+  defineOption('nrformats', 'bin,hex', 'string', ['nf']);
   defineOption('pcre', true, 'boolean');
   
   /**@type {SearchStateInterface} */
@@ -7758,7 +7859,11 @@ export function initVim(CM) {
     if (!query) {
       return;
     }
-    highlightSearchMatches(cm, query);
+    if (getOption('hlsearch')) {
+      highlightSearchMatches(cm, query);
+    } else {
+      clearSearchHighlight(cm);
+    }
     if (regexEqual(query, state.getQuery())) {
       return query;
     }
@@ -7853,8 +7958,12 @@ export function initVim(CM) {
           }
         }
         if (!found) {
-          // SearchCursor may have returned null because it hit EOF, wrap
-          // around and try again.
+          if (!getOption('wrapscan')) {
+            showConfirm(cm, prev
+              ? 'search hit TOP without match for: ' + query.source
+              : 'search hit BOTTOM without match for: ' + query.source);
+            return;
+          }
           cursor = cm.getSearchCursor(query,
               // @ts-ignore
               (prev) ? new Pos(cm.lastLine()) : new Pos(cm.firstLine(), 0) );
@@ -7897,8 +8006,9 @@ export function initVim(CM) {
       for (var i = 0; i < repeat; i++) {
         found = cursor.find(prev);
         if (!found) {
-          // SearchCursor may have returned null because it hit EOF, wrap
-          // around and try again.
+          if (!getOption('wrapscan')) {
+            return;
+          }
           cursor = cm.getSearchCursor(query,
               // @ts-ignore
               (prev) ? new Pos(cm.lastLine()) : new Pos(cm.firstLine(), 0) );
@@ -8747,9 +8857,9 @@ export function initVim(CM) {
       if (regexPart) {
         // If regex part is empty, then use the previous query. Otherwise
         // use the regex part as the new query.
-        try {
-          updateSearchQuery(cm, regexPart, true /** ignoreCase */,
-            true /** smartCase */);
+         try {
+          updateSearchQuery(cm, regexPart, getOption('ignorecase'),
+            getOption('smartcase'));
         } catch (e) {
           showConfirm(cm, 'Invalid regex: ' + regexPart);
           return;
@@ -8810,7 +8920,7 @@ export function initVim(CM) {
       var tokens = argString ? splitBySeparator(argString, argString[0]) : [];
       var regexPart = '', replacePart = '', trailing, flagsPart, count;
       var confirm = false; // Whether to confirm each replace.
-      var global = false; // True to replace all instances on a line, false to replace only 1.
+      var global = !!getOption('gdefault');
       if (tokens && tokens.length) {
         regexPart = tokens[0];
         if (getOption('pcre') && regexPart !== '') {
@@ -8846,7 +8956,7 @@ export function initVim(CM) {
             confirm = true;
           }
           if (flagsPart.indexOf('g') != -1) {
-            global = true;
+            global = !global;
           }
           if (getOption('pcre')) {
             regexPart = regexPart + '/' + flagsPart;
@@ -8860,8 +8970,8 @@ export function initVim(CM) {
       }
       if (regexPart) {
         try {
-          updateSearchQuery(cm, regexPart, true /** ignoreCase */,
-            true /** smartCase */);
+          updateSearchQuery(cm, regexPart, getOption('ignorecase'),
+            getOption('smartcase'));
         } catch (e) {
           showConfirm(cm, 'Invalid regex: ' + regexPart);
           return;

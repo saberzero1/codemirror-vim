@@ -1179,6 +1179,94 @@ linewise visual change, the fix:
 
 Charwise visual change (`vc`) continues through the existing catch-all path.
 
+### Configurable Neovim options (`defineOption`)
+
+**File**: `src/vim.js`
+
+Added 12 `defineOption()` calls for standard Neovim options that were
+previously hardcoded. All options use Neovim-compatible defaults and
+abbreviations.
+
+#### Search options
+
+| Option | Abbr | Default | Behavior |
+|---|---|---|---|
+| `ignorecase` | `ic` | `true` | Case-insensitive search. When off, search is always case-sensitive. |
+| `smartcase` | `scs` | `true` | Override `ignorecase` when the query contains uppercase. |
+| `hlsearch` | `hls` | `true` | Highlight all search matches. `set nohlsearch` persistently disables highlights (`:nohlsearch` still works as a one-shot clear). |
+| `incsearch` | `is` | `true` | Show matches incrementally while typing in the search prompt. |
+| `wrapscan` | `ws` | `true` | Search wraps around end/start of document. When off, shows "search hit BOTTOM/TOP without match" and stops. |
+
+Previously, all 7 search call sites (`onPromptClose`, `onChange`,
+macro replay, `*`/`#` word-under-cursor, `*`/`#` selected text, `:s`
+substitute, `:g` global) hardcoded `ignoreCase=true` and
+`smartCase=true`/`false`. Each now reads `getOption('ignorecase')` and
+`getOption('smartcase')`.
+
+`highlightSearchMatches()` in `updateSearchQuery()` is now gated by
+`getOption('hlsearch')`. When off, `clearSearchHighlight()` is called
+instead.
+
+`onChange()` (incremental search) is gated by `getOption('incsearch')`.
+When off, the search prompt no longer scrolls to matches while typing.
+
+`findNext()` and `findNextFromAndToInclusive()` wrap-around logic is
+gated by `getOption('wrapscan')`. When off, search stops at document
+boundaries with a confirmation message.
+
+#### Substitute option
+
+| Option | Abbr | Default | Behavior |
+|---|---|---|---|
+| `gdefault` | `gd` | `false` | When on, `:s` replaces all matches on a line by default. The `g` flag inverts — `:s/foo/bar/g` replaces only the first match. |
+
+The `substitute` function initializes `global = !!getOption('gdefault')`
+instead of `false`. The `g` flag toggles: `global = !global`.
+
+#### Motion options
+
+| Option | Abbr | Default | Behavior |
+|---|---|---|---|
+| `startofline` | `sol` | `true` | Vertical motions (`G`, `gg`, `H`, `M`, `L`) move cursor to first non-blank character. When off, cursor column is preserved. |
+| `whichwrap` | `ww` | `b,s` | Comma-separated keys whose movement wraps to the next/previous line at line boundaries. `h` and `l` enable wrapping for those motions. |
+| `virtualedit` | `ve` | `''` | Cursor positioning past end of line. `onemore` allows one position past EOL. `all` allows any position. `block` allows virtual edit in visual block mode only. |
+
+`moveToTopLine`, `moveToMiddleLine`, `moveToBottomLine`, and
+`moveToLineOrEdgeOfDocument` check `getOption('startofline')` and
+preserve `head.ch` when the option is off.
+
+`moveByCharacters` checks `getOption('whichwrap')` and wraps across
+line boundaries when `h` or `l` is listed. The `b` and `s` values
+(backspace and space, Neovim defaults) are also checked as aliases.
+
+`clipCursorToContent` reads `getOption('virtualedit')` and adjusts
+`maxCh` to allow cursor positioning past EOL when `onemore`, `all`,
+or `block` (in visual block mode) is active.
+
+#### Editing options
+
+| Option | Abbr | Default | Behavior |
+|---|---|---|---|
+| `joinspaces` | `js` | `false` | `J` inserts two spaces after `.`, `!`, `?` at end of line. Matches Neovim default (`nojoinspaces`). |
+| `shiftround` | `sr` | `false` | `>>` / `<<` round indentation to the nearest `shiftwidth` multiple. |
+| `nrformats` | `nf` | `bin,hex` | Comma-separated number formats for `<C-a>` / `<C-x>`. Supported values: `bin` (binary `0b`), `hex` (hexadecimal `0x`), `octal` (octal `0`-prefixed). Decimal is always enabled. |
+
+`joinLines` detects sentence-ending characters (`.`, `!`, `?`) at the
+trimmed end of the current line and inserts two spaces when
+`getOption('joinspaces')` is true.
+
+The indent operator (`>>` / `<<`) reads `getOption('shiftround')`.
+When enabled, the target indentation is computed as
+`Math.floor(current / shiftwidth) * shiftwidth + repeat * shiftwidth`
+(right shift) or `Math.ceil(current / shiftwidth) * shiftwidth - repeat * shiftwidth`
+(left shift), rounding to the nearest multiple.
+
+`incrementNumberToken` builds a dynamic regex based on
+`getOption('nrformats')`. A `parseNumberMatch` helper extracts prefix,
+digits, and base from the regex match groups, filtering out disabled
+formats. Octal support (`0`-prefixed numbers, base 8) is now available
+when `nrformats` includes `octal`.
+
 ## Surround operators (vim-surround)
 
 **Files**: `src/vim.js`, `src/types.ts`
