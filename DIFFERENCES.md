@@ -967,12 +967,23 @@ when used with operators (`da"`, `ca"`, etc.), matching Neovim. After
 the inclusive quote expansion, trailing whitespace is consumed first;
 if no trailing whitespace exists, leading whitespace is consumed instead.
 
-### `:join` cursor positioning
+### `:join` range, bang, and cursor positioning
 
 **File**: `src/vim.js` — `exCommands.join`
 
-`:join` ex command now positions cursor at column 0 of the join line
-after joining, matching Neovim.
+`:join` ex command fixes:
+
+- **Range off-by-one**: Changed `repeat: lineEnd - line` to
+  `repeat: lineEnd - line + 1`. `actions.joinLines` interprets `repeat` as
+  total line count (minimum 2), not number of join operations. Previously
+  `:1,3j` joined only 2 lines instead of 3. Normal-mode `J`/`gJ` are
+  unaffected (they pass `repeat` directly from user count).
+- **`:j!` bang support**: Added bang detection via
+  `!!(params.argString && params.argString.trim() === '!')`. When `:j!` is
+  used, `keepSpaces: true` is passed to `actions.joinLines`, suppressing the
+  join space. Previously `:j!` behaved identically to `:j`.
+- **Cursor positioning**: Cursor is positioned at column 0 of the join line
+  after joining, matching Neovim.
 
 ### `:global` cursor positioning
 

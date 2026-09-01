@@ -8964,8 +8964,9 @@ export function initVim(CM) {
     join: function(cm, params) {
       var line = params.selectionLine;
       var lineEnd = isNaN(params.selectionLineEnd) ? line : params.selectionLineEnd;
+      var bang = !!(params.argString && params.argString.trim() === '!');
       cm.setCursor(new Pos(line, 0));
-      actions.joinLines(cm, {repeat: lineEnd - line}, cm.state.vim);
+      actions.joinLines(cm, {repeat: lineEnd - line + 1, keepSpaces: bang}, cm.state.vim);
       cm.setCursor(new Pos(line, 0));
     },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
