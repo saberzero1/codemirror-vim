@@ -2270,3 +2270,32 @@ The insert-mode `indent` action now detects when the last entry in
 all content from column 0 to the cursor position (removing all indent).
 Normal `<C-D>` behavior (one shiftwidth) is preserved when no prefix is
 detected.
+
+## `setTokenClassifier` API
+
+**File**: `src/vim.js`
+
+Added `Vim.setTokenClassifier(fn)` to register a host-provided token
+classification function. When set, the `%` bracket matcher
+(`moveToMatchedSymbol`) and the surround match path call `fn(line, ch)`
+instead of `cm.getTokenTypeAt()` to determine whether a character position
+is inside a string or comment.
+
+The function receives a 0-indexed line number and character position, and
+returns `"string"`, `"comment"`, or `""`. When the classifier returns
+`"string"`, the bracket matcher skips the bracket at that position (matching
+Neovim's behavior of not matching brackets inside quoted strings). When it
+returns `"comment"`, the bracket is also skipped.
+
+This is necessary for Markdown editing because Lezer's Markdown parser does
+not classify inline content as string or comment tokens —
+`cm.getTokenTypeAt()` returns empty for all positions in Markdown. The host
+plugin provides a treesitter-backed classifier that checks whether a
+position is inside a `code_span` (returns `"string"`) or `html_tag`
+(returns `"comment"`) using the `tree-sitter-markdown-inline` grammar.
+
+Pass `null` to clear the classifier and restore the default
+`cm.getTokenTypeAt()` behavior.
+
+The classifier is stored in the module-level `_tokenClassifier` variable,
+following the same pattern as `_idleEscapeCallback`.

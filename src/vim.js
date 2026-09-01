@@ -858,6 +858,7 @@ export function initVim(CM) {
   */
   var vimGlobalState;
   var _idleEscapeCallback = null;
+  var _tokenClassifier = null;
   function resetVimGlobalState() {
     vimGlobalState = {
       // The current search query.
@@ -980,6 +981,9 @@ export function initVim(CM) {
 
     setIdleEscapeCallback: function(fn) {
       _idleEscapeCallback = fn || null;
+    },
+    setTokenClassifier: function(fn) {
+      _tokenClassifier = fn || null;
     },
 
     suppressErrorLogging: false,
@@ -3242,7 +3246,9 @@ export function initVim(CM) {
       for (; ch < lineText.length; ch++) {
         symbol = lineText.charAt(ch);
         if (symbol && isMatchableSymbol(symbol)) {
-          var style = cm.getTokenTypeAt(new Pos(line, ch + 1));
+          var style = _tokenClassifier
+            ? _tokenClassifier(line, ch + 1)
+            : cm.getTokenTypeAt(new Pos(line, ch + 1));
           if (style === "string" && ch > cursor.ch) {
             return cursor;
           }
@@ -7444,8 +7450,12 @@ export function initVim(CM) {
     }
     // otherwise if the cursor is currently on the closing symbol
     else if (firstIndex < cur.ch && chars[cur.ch] == symb) {
-      var stringAfter = /string/.test(cm.getTokenTypeAt(offsetCursor(head, 0, 1)));
-      var stringBefore = /string/.test(cm.getTokenTypeAt(head));
+      var stringAfter = /string/.test(
+        _tokenClassifier ? _tokenClassifier(head.line, head.ch + 1) : cm.getTokenTypeAt(offsetCursor(head, 0, 1))
+      );
+      var stringBefore = /string/.test(
+        _tokenClassifier ? _tokenClassifier(head.line, head.ch) : cm.getTokenTypeAt(head)
+      );
       var isStringStart = stringAfter && !stringBefore
       if (!isStringStart) {
         end = cur.ch; // assign end to the current cursor
