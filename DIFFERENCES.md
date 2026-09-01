@@ -2098,6 +2098,59 @@ Added `insertSuppressUndoBreak` action (`<C-G>U`): sets a single-shot
 and skips `maybeReset` for one cursor movement, preventing the undo break
 that normally occurs on cursor movement in insert mode.
 
+## `foldopenAnnotation` API
+
+**Files**: `src/cm_adapter.ts`, `src/vim.js`, `src/types.ts`, `src/index.ts`
+
+Added `foldopenAnnotation`, a CM6 `AnnotationType<FoldopenCategory | null>`
+exported from the public API. Every vim motion in `defaultKeymap` is tagged
+with a `foldopen` property on `motionArgs` that identifies its Neovim
+`foldopen` category. When the motion executes and `setCursor` dispatches the
+CM6 selection transaction, the annotation is attached so host plugins can
+read `tr.annotation(foldopenAnnotation)` in a `transactionExtender` to
+decide whether the cursor entering a folded range should auto-unfold it.
+
+### Category assignments
+
+| Category  | Motions |
+|-----------|---------|
+| `hor`     | `h`, `l`, `w`, `W`, `b`, `B`, `e`, `E`, `ge`, `gE`, `f`, `F`, `t`, `T`, `;`, `,`, `0`, `^`, `$`, `\|`, `g0`, `g^`, `g$`, `gM`, `g_` |
+| `block`   | `{`, `}`, `(`, `)`, `]<char>`, `[<char>` |
+| `jump`    | `G`, `gg` |
+| `mark`    | `'x`, `` `x ``, `]'`, `['`, `` ]` ``, `` [` ``, `<C-o>`, `<C-i>` |
+| `search`  | `n`, `N`, `gn`, `gN`, synthesized `/`/`?` search motion |
+| `percent` | `%` |
+| `undo`    | `u`, `<C-r>` |
+| *(none)*  | `j`, `k`, `gj`, `gk`, `+`, `-`, `_`, `H`, `M`, `L`, `<C-f>`, `<C-b>`, `<C-d>`, `<C-u>` |
+
+Vertical motions (`j`/`k` etc.) and viewport motions (`H`/`M`/`L`,
+`<C-f>`/`<C-b>`, `<C-d>`/`<C-u>`) intentionally have no category — they
+produce no annotation, so they never trigger fold-open. This matches
+Neovim, whose default `foldopen=block,hor,mark,percent,quickfix,search,tag,undo`
+explicitly excludes vertical movements.
+
+### Implementation
+
+`_pendingFoldopen` on the `CodeMirror` adapter holds the category between
+motion execution and cursor dispatch. It is set in three places:
+
+1. `evalInput()` — before `setCursor` for both sync and async motion results
+2. `actions.undo` / `actions.redo` — before the cursor reposition after
+   undo/redo
+3. `actions.jumpListWalk` — before `setCursor` for `<C-o>`/`<C-i>`
+
+`setCursor()` reads `_pendingFoldopen`, attaches
+`foldopenAnnotation.of(category)` to the CM6 dispatch, and clears the field.
+Non-vim cursor changes (clicks, programmatic `setCursor` without a pending
+category) produce no annotation.
+
+### Types
+
+`FoldopenCategory` is a string union type exported from the public API:
+`'all' | 'block' | 'hor' | 'insert' | 'jump' | 'mark' | 'percent' | 'search' | 'tag' | 'undo'`.
+
+`MotionArgsPartial` includes `foldopen?: FoldopenCategory | null`.
+
 ## Insert-mode `<C-G>j` / `<C-G>k` (line navigation)
 
 **File**: `src/vim.js`

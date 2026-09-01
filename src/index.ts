@@ -606,9 +606,10 @@ export function resetForkedVimState(): void {
 }
 
 export { CodeMirror, Vim };
-export { setLivePreviewField, setPropertiesSource } from "./cm_adapter";
+export { foldopenAnnotation, setLivePreviewField, setPropertiesSource } from "./cm_adapter";
 export { setCursorSuppressed, setCursorSuppressedForView, clearCursorSuppressedForView, isCursorSuppressedForView, resetCursorState } from "./block-cursor";
 export type { CursorShape, CursorShapeConfig } from "./block-cursor";
+export type { FoldopenCategory } from "./types";
 
 export function getCM(view: EditorView): CodeMirror | null {
   return (view as EditorViewExtended).cm || null;

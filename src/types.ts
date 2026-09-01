@@ -177,6 +177,8 @@ export type vimActions  = {
     [key: string]: ActionFn
 }
 
+export type FoldopenCategory = 'all' | 'block' | 'hor' | 'insert' | 'jump' | 'mark' | 'percent' | 'search' | 'tag' | 'undo';
+
 export type MotionArgsPartial = {
     repeat?: number,
     forward?: boolean,
@@ -192,7 +194,8 @@ export type MotionArgsPartial = {
     explicitRepeat?: boolean,
     bigWord?: boolean,
     repeatIsExplicit?: boolean,
-    noRepeat?: boolean
+    noRepeat?: boolean,
+    foldopen?: FoldopenCategory | null,
 };
 
 export type MotionArgs = MotionArgsPartial & {repeat: number};

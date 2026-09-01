@@ -118,63 +118,66 @@ export function initVim(CM) {
     { keys: '<C-e>', type: 'action', action: 'copySameColumnBelow', context: 'insert', isEdit: true },
     { keys: '<C-y>', type: 'action', action: 'copySameColumnAbove', context: 'insert', isEdit: true },
     // Motions
+    // foldopen categories match Neovim's :help foldopen — vertical motions
+    // (j/k/gj/gk/+/-/_/H/M/L/Ctrl-f/b/d/u) intentionally have no category
+    // so they never trigger fold-open.
     { keys: 'H', type: 'motion', motion: 'moveToTopLine', motionArgs: { linewise: true, toJumplist: true }},
     { keys: 'M', type: 'motion', motion: 'moveToMiddleLine', motionArgs: { linewise: true, toJumplist: true }},
     { keys: 'L', type: 'motion', motion: 'moveToBottomLine', motionArgs: { linewise: true, toJumplist: true }},
-    { keys: 'h', type: 'motion', motion: 'moveByCharacters', motionArgs: { forward: false }},
-    { keys: 'l', type: 'motion', motion: 'moveByCharacters', motionArgs: { forward: true }},
+    { keys: 'h', type: 'motion', motion: 'moveByCharacters', motionArgs: { forward: false, foldopen: 'hor' }},
+    { keys: 'l', type: 'motion', motion: 'moveByCharacters', motionArgs: { forward: true, foldopen: 'hor' }},
     { keys: 'j', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, linewise: true }},
     { keys: 'k', type: 'motion', motion: 'moveByLines', motionArgs: { forward: false, linewise: true }},
     { keys: 'gj', type: 'motion', motion: 'moveByDisplayLines', motionArgs: { forward: true }},
     { keys: 'gk', type: 'motion', motion: 'moveByDisplayLines', motionArgs: { forward: false }},
-    { keys: 'w', type: 'motion', motion: 'moveByWords', motionArgs: { forward: true, wordEnd: false }},
-    { keys: 'W', type: 'motion', motion: 'moveByWords', motionArgs: { forward: true, wordEnd: false, bigWord: true }},
-    { keys: 'e', type: 'motion', motion: 'moveByWords', motionArgs: { forward: true, wordEnd: true, inclusive: true }},
-    { keys: 'E', type: 'motion', motion: 'moveByWords', motionArgs: { forward: true, wordEnd: true, bigWord: true, inclusive: true }},
-    { keys: 'b', type: 'motion', motion: 'moveByWords', motionArgs: { forward: false, wordEnd: false }},
-    { keys: 'B', type: 'motion', motion: 'moveByWords', motionArgs: { forward: false, wordEnd: false, bigWord: true }},
-    { keys: 'ge', type: 'motion', motion: 'moveByWords', motionArgs: { forward: false, wordEnd: true, inclusive: true }},
-    { keys: 'gE', type: 'motion', motion: 'moveByWords', motionArgs: { forward: false, wordEnd: true, bigWord: true, inclusive: true }},
-    { keys: '{', type: 'motion', motion: 'moveByParagraph', motionArgs: { forward: false, toJumplist: true }},
-    { keys: '}', type: 'motion', motion: 'moveByParagraph', motionArgs: { forward: true, toJumplist: true }},
-    { keys: '(', type: 'motion', motion: 'moveBySentence', motionArgs: { forward: false }},
-    { keys: ')', type: 'motion', motion: 'moveBySentence', motionArgs: { forward: true }},
+    { keys: 'w', type: 'motion', motion: 'moveByWords', motionArgs: { forward: true, wordEnd: false, foldopen: 'hor' }},
+    { keys: 'W', type: 'motion', motion: 'moveByWords', motionArgs: { forward: true, wordEnd: false, bigWord: true, foldopen: 'hor' }},
+    { keys: 'e', type: 'motion', motion: 'moveByWords', motionArgs: { forward: true, wordEnd: true, inclusive: true, foldopen: 'hor' }},
+    { keys: 'E', type: 'motion', motion: 'moveByWords', motionArgs: { forward: true, wordEnd: true, bigWord: true, inclusive: true, foldopen: 'hor' }},
+    { keys: 'b', type: 'motion', motion: 'moveByWords', motionArgs: { forward: false, wordEnd: false, foldopen: 'hor' }},
+    { keys: 'B', type: 'motion', motion: 'moveByWords', motionArgs: { forward: false, wordEnd: false, bigWord: true, foldopen: 'hor' }},
+    { keys: 'ge', type: 'motion', motion: 'moveByWords', motionArgs: { forward: false, wordEnd: true, inclusive: true, foldopen: 'hor' }},
+    { keys: 'gE', type: 'motion', motion: 'moveByWords', motionArgs: { forward: false, wordEnd: true, bigWord: true, inclusive: true, foldopen: 'hor' }},
+    { keys: '{', type: 'motion', motion: 'moveByParagraph', motionArgs: { forward: false, toJumplist: true, foldopen: 'block' }},
+    { keys: '}', type: 'motion', motion: 'moveByParagraph', motionArgs: { forward: true, toJumplist: true, foldopen: 'block' }},
+    { keys: '(', type: 'motion', motion: 'moveBySentence', motionArgs: { forward: false, foldopen: 'block' }},
+    { keys: ')', type: 'motion', motion: 'moveBySentence', motionArgs: { forward: true, foldopen: 'block' }},
     { keys: '<C-f>', type: 'motion', motion: 'moveByPage', motionArgs: { forward: true }},
     { keys: '<C-b>', type: 'motion', motion: 'moveByPage', motionArgs: { forward: false }},
     { keys: '<C-d>', type: 'motion', motion: 'moveByScroll', motionArgs: { forward: true, explicitRepeat: true }},
     { keys: '<C-u>', type: 'motion', motion: 'moveByScroll', motionArgs: { forward: false, explicitRepeat: true }},
-    { keys: 'gg', type: 'motion', motion: 'moveToLineOrEdgeOfDocument', motionArgs: { forward: false, explicitRepeat: true, linewise: true, toJumplist: true }},
-    { keys: 'G', type: 'motion', motion: 'moveToLineOrEdgeOfDocument', motionArgs: { forward: true, explicitRepeat: true, linewise: true, toJumplist: true }},
-    { keys: "g$", type: "motion", motion: "moveToEndOfDisplayLine" },
-    { keys: "g^", type: "motion", motion: "moveToFirstNonBlankOfDisplayLine" },
-    { keys: "g0", type: "motion", motion: "moveToStartOfDisplayLine" },
-    { keys: "g_", type: "motion", motion: "moveToLastNonWhiteSpaceCharacter", motionArgs: { inclusive: true }},
-    { keys: "gM", type: "motion", motion: "moveToMiddleOfTextLine" },
-    { keys: '0', type: 'motion', motion: 'moveToStartOfLine' },
-    { keys: '^', type: 'motion', motion: 'moveToFirstNonWhiteSpaceCharacter' },
+    { keys: 'gg', type: 'motion', motion: 'moveToLineOrEdgeOfDocument', motionArgs: { forward: false, explicitRepeat: true, linewise: true, toJumplist: true, foldopen: 'jump' }},
+    { keys: 'G', type: 'motion', motion: 'moveToLineOrEdgeOfDocument', motionArgs: { forward: true, explicitRepeat: true, linewise: true, toJumplist: true, foldopen: 'jump' }},
+    { keys: "g$", type: "motion", motion: "moveToEndOfDisplayLine", motionArgs: { foldopen: 'hor' } },
+    { keys: "g^", type: "motion", motion: "moveToFirstNonBlankOfDisplayLine", motionArgs: { foldopen: 'hor' } },
+    { keys: "g0", type: "motion", motion: "moveToStartOfDisplayLine", motionArgs: { foldopen: 'hor' } },
+    { keys: "g_", type: "motion", motion: "moveToLastNonWhiteSpaceCharacter", motionArgs: { inclusive: true, foldopen: 'hor' }},
+    { keys: "gM", type: "motion", motion: "moveToMiddleOfTextLine", motionArgs: { foldopen: 'hor' } },
+    { keys: '0', type: 'motion', motion: 'moveToStartOfLine', motionArgs: { foldopen: 'hor' }},
+    { keys: '^', type: 'motion', motion: 'moveToFirstNonWhiteSpaceCharacter', motionArgs: { foldopen: 'hor' }},
     { keys: '+', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true }},
     { keys: '-', type: 'motion', motion: 'moveByLines', motionArgs: { forward: false, toFirstChar:true }},
     { keys: '_', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true, repeatOffset:-1 }},
-    { keys: '$', type: 'motion', motion: 'moveToEol', motionArgs: { inclusive: true }},
-    { keys: '%', type: 'motion', motion: 'moveToMatchedSymbol', motionArgs: { inclusive: true, toJumplist: true }},
-    { keys: 'f<character>', type: 'motion', motion: 'moveToCharacter', motionArgs: { forward: true , inclusive: true }},
-    { keys: 'F<character>', type: 'motion', motion: 'moveToCharacter', motionArgs: { forward: false }},
-    { keys: 't<character>', type: 'motion', motion: 'moveTillCharacter', motionArgs: { forward: true, inclusive: true }},
-    { keys: 'T<character>', type: 'motion', motion: 'moveTillCharacter', motionArgs: { forward: false }},
-    { keys: ';', type: 'motion', motion: 'repeatLastCharacterSearch', motionArgs: { forward: true }},
-    { keys: ',', type: 'motion', motion: 'repeatLastCharacterSearch', motionArgs: { forward: false }},
-    { keys: '\'<register>', type: 'motion', motion: 'goToMark', motionArgs: {toJumplist: true, linewise: true}},
-    { keys: '`<register>', type: 'motion', motion: 'goToMark', motionArgs: {toJumplist: true}},
-    { keys: ']`', type: 'motion', motion: 'jumpToMark', motionArgs: { forward: true } },
-    { keys: '[`', type: 'motion', motion: 'jumpToMark', motionArgs: { forward: false } },
-    { keys: ']\'', type: 'motion', motion: 'jumpToMark', motionArgs: { forward: true, linewise: true } },
-    { keys: '[\'', type: 'motion', motion: 'jumpToMark', motionArgs: { forward: false, linewise: true } },
+    { keys: '$', type: 'motion', motion: 'moveToEol', motionArgs: { inclusive: true, foldopen: 'hor' }},
+    { keys: '%', type: 'motion', motion: 'moveToMatchedSymbol', motionArgs: { inclusive: true, toJumplist: true, foldopen: 'percent' }},
+    { keys: 'f<character>', type: 'motion', motion: 'moveToCharacter', motionArgs: { forward: true , inclusive: true, foldopen: 'hor' }},
+    { keys: 'F<character>', type: 'motion', motion: 'moveToCharacter', motionArgs: { forward: false, foldopen: 'hor' }},
+    { keys: 't<character>', type: 'motion', motion: 'moveTillCharacter', motionArgs: { forward: true, inclusive: true, foldopen: 'hor' }},
+    { keys: 'T<character>', type: 'motion', motion: 'moveTillCharacter', motionArgs: { forward: false, foldopen: 'hor' }},
+    { keys: ';', type: 'motion', motion: 'repeatLastCharacterSearch', motionArgs: { forward: true, foldopen: 'hor' }},
+    { keys: ',', type: 'motion', motion: 'repeatLastCharacterSearch', motionArgs: { forward: false, foldopen: 'hor' }},
+    { keys: '\'<register>', type: 'motion', motion: 'goToMark', motionArgs: {toJumplist: true, linewise: true, foldopen: 'mark'}},
+    { keys: '`<register>', type: 'motion', motion: 'goToMark', motionArgs: {toJumplist: true, foldopen: 'mark'}},
+    { keys: ']`', type: 'motion', motion: 'jumpToMark', motionArgs: { forward: true, foldopen: 'mark' } },
+    { keys: '[`', type: 'motion', motion: 'jumpToMark', motionArgs: { forward: false, foldopen: 'mark' } },
+    { keys: ']\'', type: 'motion', motion: 'jumpToMark', motionArgs: { forward: true, linewise: true, foldopen: 'mark' } },
+    { keys: '[\'', type: 'motion', motion: 'jumpToMark', motionArgs: { forward: false, linewise: true, foldopen: 'mark' } },
     // the next two aren't motions but must come before more general motion declarations
     { keys: ']p', type: 'action', action: 'paste', isEdit: true, actionArgs: { after: true, isEdit: true, matchIndent: true}},
     { keys: '[p', type: 'action', action: 'paste', isEdit: true, actionArgs: { after: false, isEdit: true, matchIndent: true}},
-    { keys: ']<character>', type: 'motion', motion: 'moveToSymbol', motionArgs: { forward: true, toJumplist: true}},
-    { keys: '[<character>', type: 'motion', motion: 'moveToSymbol', motionArgs: { forward: false, toJumplist: true}},
-    { keys: '|', type: 'motion', motion: 'moveToColumn'},
+    { keys: ']<character>', type: 'motion', motion: 'moveToSymbol', motionArgs: { forward: true, toJumplist: true, foldopen: 'block'}},
+    { keys: '[<character>', type: 'motion', motion: 'moveToSymbol', motionArgs: { forward: false, toJumplist: true, foldopen: 'block'}},
+    { keys: '|', type: 'motion', motion: 'moveToColumn', motionArgs: { foldopen: 'hor' }},
     { keys: 'o', type: 'motion', motion: 'moveToOtherHighlightedEnd', context:'visual'},
     { keys: 'O', type: 'motion', motion: 'moveToOtherHighlightedEnd', motionArgs: {sameLine: true}, context:'visual'},
     // Operators
@@ -188,10 +191,10 @@ export function initVim(CM) {
     { keys: 'gu', type: 'operator', operator: 'changeCase', operatorArgs: {toLower: true}, isEdit: true },
     { keys: 'gU', type: 'operator', operator: 'changeCase', operatorArgs: {toLower: false}, isEdit: true },
     { keys: 'gc', type: 'operator', operator: 'toggleComment', isEdit: true },
-    { keys: 'n', type: 'motion', motion: 'findNext', motionArgs: { forward: true, toJumplist: true }},
-    { keys: 'N', type: 'motion', motion: 'findNext', motionArgs: { forward: false, toJumplist: true }},
-    { keys: 'gn', type: 'motion', motion: 'findAndSelectNextInclusive', motionArgs: { forward: true }},
-    { keys: 'gN', type: 'motion', motion: 'findAndSelectNextInclusive', motionArgs: { forward: false }},
+    { keys: 'n', type: 'motion', motion: 'findNext', motionArgs: { forward: true, toJumplist: true, foldopen: 'search' }},
+    { keys: 'N', type: 'motion', motion: 'findNext', motionArgs: { forward: false, toJumplist: true, foldopen: 'search' }},
+    { keys: 'gn', type: 'motion', motion: 'findAndSelectNextInclusive', motionArgs: { forward: true, foldopen: 'search' }},
+    { keys: 'gN', type: 'motion', motion: 'findAndSelectNextInclusive', motionArgs: { forward: false, foldopen: 'search' }},
     { keys: 'gq', type: 'operator', operator: 'hardWrap' },
     { keys: 'gw', type: 'operator', operator: 'hardWrap', operatorArgs: {keepCursor: true}},
     { keys: 'g?', type: 'operator', operator: 'rot13'},
@@ -2286,7 +2289,7 @@ export function initVim(CM) {
           keys: '',
           type: 'motion',
           motion: 'findNext',
-          motionArgs: { forward: true, toJumplist: command.searchArgs.toJumplist }
+          motionArgs: { forward: true, toJumplist: command.searchArgs.toJumplist, foldopen: 'search' }
         });
       }
       /** @arg {string} query */
@@ -2626,6 +2629,7 @@ export function initVim(CM) {
                   cursorIsBefore(rNewAnchor, rNewHead) ? rNewHead : rNewAnchor);
             } else {
               rNewHead = clipCursorToContent(cm, rNewHead, savedOldHead);
+              if (savedMotionArgs.foldopen) cm._pendingFoldopen = savedMotionArgs.foldopen;
               cm.setCursor(rNewHead.line, rNewHead.ch);
             }
           }).catch(function() {
@@ -2683,6 +2687,7 @@ export function initVim(CM) {
                   : newAnchor);
         } else if (!operator) {
           newHead = clipCursorToContent(cm, newHead, oldHead);
+          if (motionArgs.foldopen) cm._pendingFoldopen = motionArgs.foldopen;
           cm.setCursor(newHead.line, newHead.ch);
         }
       }
@@ -4580,6 +4585,7 @@ export function initVim(CM) {
       var mark = jumpList.move(cm, forward ? repeat : -repeat);
       var markPos = mark ? mark.find() : undefined;
       markPos = markPos ? markPos : cm.getCursor();
+      cm._pendingFoldopen = 'mark';
       cm.setCursor(markPos);
     },
     scroll: function(cm, actionArgs, vim) {
@@ -5203,10 +5209,12 @@ export function initVim(CM) {
     undo: function(cm, actionArgs) {
       cm.operation(function() {
         repeatFn(cm, CM.commands.undo, actionArgs.repeat)();
+        cm._pendingFoldopen = 'undo';
         cm.setCursor(clipCursorToContent(cm, cm.getCursor('start')));
       });
     },
     redo: function(cm, actionArgs) {
+      cm._pendingFoldopen = 'undo';
       repeatFn(cm, CM.commands.redo, actionArgs.repeat)();
     },
     setRegister: function(_cm, actionArgs, vim) {

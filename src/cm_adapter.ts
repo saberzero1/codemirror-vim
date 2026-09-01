@@ -1,4 +1,4 @@
-import { EditorSelection, Text, MapMode, ChangeDesc, type StateField } from "@codemirror/state"
+import { type AnnotationType, Annotation, EditorSelection, Text, MapMode, ChangeDesc, type StateField } from "@codemirror/state"
 import { StringStream, matchBrackets, indentUnit, ensureSyntaxTree, foldCode, foldedRanges } from "@codemirror/language"
 import { EditorView, runScopeHandlers, ViewUpdate, Decoration } from "@codemirror/view"
 import { RegExpCursor, setSearchQuery, SearchQuery } from "@codemirror/search"
@@ -7,7 +7,18 @@ import {
   undo, redo, cursorLineBoundaryBackward, cursorLineBoundaryForward, cursorCharBackward, 
   toggleLineComment
 } from "@codemirror/commands"
-import {vimState, CM5RangeInterface} from "./types"
+import {vimState, CM5RangeInterface, type FoldopenCategory} from "./types"
+
+/**
+ * Transaction annotation carrying the foldopen category of the vim motion
+ * that caused this cursor movement.  Host plugins (e.g. Obsidian's fold-aware
+ * navigation) read this annotation in a `transactionExtender` to decide
+ * whether the cursor entering a folded range should auto-unfold it.
+ *
+ * Matches Neovim's `foldopen` option semantics — vertical motions like `j`/`k`
+ * produce no annotation (null), so they never trigger unfold.
+ */
+export const foldopenAnnotation: AnnotationType<FoldopenCategory | null> = Annotation.define<FoldopenCategory | null>();
 
 let _livePreviewField: StateField<boolean> | null = null;
 let _propertiesSourceFn: (() => boolean) | null = null;
@@ -217,6 +228,7 @@ export class CodeMirror {
   marks: Record<string, Marker> = Object.create(null);
   $mid = 0; // marker id counter
   curOp: Operation | null | undefined;
+  _pendingFoldopen: FoldopenCategory | null = null;
   options: any = {};
   _handlers: any = {};
   constructor(cm6: EditorView) {
@@ -260,7 +272,13 @@ export class CodeMirror {
       line = line.line;
     }
     var offset = indexFromPos(this.cm6.state.doc, { line, ch: ch || 0 })
-    this.cm6.dispatch({ selection: { anchor: offset } }, { scrollIntoView: !this.curOp })
+    var spec: Record<string, unknown> = { selection: { anchor: offset } };
+    if (!this.curOp) spec.scrollIntoView = true;
+    if (this._pendingFoldopen != null) {
+      spec.annotations = foldopenAnnotation.of(this._pendingFoldopen);
+      this._pendingFoldopen = null;
+    }
+    this.cm6.dispatch(spec);
     if (this.curOp && !this.curOp.isVimOp)
       this.onBeforeEndOperation();
   };
