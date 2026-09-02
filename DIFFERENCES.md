@@ -1024,6 +1024,32 @@ before the second keystroke arrived. With this fix, `<C-w>` defers to
 partial matches when sub-commands are registered, while still firing as
 idle when no sub-commands exist (preventing browser-level interception).
 
+### Full-match disambiguation with backtracking for user-registered keymaps
+
+**Files**: `src/vim.js` — `commandDispatcher.matchCommand`, `handleKeyNonInsertMode`; `src/types.ts`
+
+`matchCommand` defers to partial matches when a full match has a strict
+extension in the keymap. For example, when both `gc` (full match, action) and
+`gcc` (partial match, action) are registered, typing `gc` returns `partial`
+instead of `full`, allowing the longer `gcc` sequence to complete. The check
+only triggers when a partial match's keys start with the full match's keys and
+are strictly longer.
+
+The deferred full match is returned as `_deferredCommand` on the partial result
+so `handleKeyNonInsertMode` can backtrack when the longer mapping never
+completes. When the next keystroke produces a `none` match and a deferred
+command exists whose keys are a prefix of the buffered input, the deferred
+command executes and the remaining suffix is replayed via `doKeyToKey`. This
+enables `gcj` (gc fires as operator via expr mapping returning `g@`, then `j`
+is replayed as the motion) and visual `gc` (deferred command fires on timeout
+when no further keys arrive).
+
+A configurable timeout (reuses `operatorshadowtimeout`, default 1000ms) fires
+the deferred command if no subsequent key arrives — necessary for cases where
+the shorter mapping is the final input (e.g. visual `gc` after a selection).
+The timer and deferred state are cleared on successful full match,
+`clearInputState`, and each new keypress.
+
 ### Visual operator cursor re-clamping after `exitVisualMode`
 
 **File**: `src/vim.js` — `applyOperator`

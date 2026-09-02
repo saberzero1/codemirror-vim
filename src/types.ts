@@ -50,6 +50,8 @@ export type vimState = {
     _commandGeneration: number,
     _insertStartPos?: { line: number, ch: number } | null,
     _shadowTimer?: ReturnType<typeof setTimeout>,
+    _deferredCommand?: vimKey,
+    _deferredCommandTimer?: ReturnType<typeof setTimeout>,
     _preventReselect?: boolean,
     _suppressModeSignal?: boolean,
     _suppressUndoBreakOnMove?: boolean,
@@ -294,6 +296,7 @@ type allCommands = {
     noremap?: boolean,
     operatorPending?: boolean,
     _isDefault?: boolean,
+    _backtrackSuffix?: string,
 }
 export type motionCommand = allCommands & {
     type: 'motion',

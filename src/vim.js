@@ -1299,6 +1299,10 @@ export function initVim(CM) {
           clearTimeout(vim._shadowTimer);
           vim._shadowTimer = undefined;
         }
+        if (vim._deferredCommandTimer) {
+          clearTimeout(vim._deferredCommandTimer);
+          vim._deferredCommandTimer = undefined;
+        }
 
         if (vim.surroundState) {
           var surroundResult = handleSurroundSubState(cm, key, vim);
@@ -1319,7 +1323,27 @@ export function initVim(CM) {
           mainKey = vim.inputState.operatorShortcut;
         }
         var match = commandDispatcher.matchCommand(mainKey, defaultKeymap, vim.inputState, context);
-        if (match.type == 'none') { clearInputState(cm); return false; }
+        if (match.type == 'none') {
+          // Backtracking: if a shorter full match was deferred because a
+          // longer partial existed (e.g. 'gc' deferred for 'gcc'), execute
+          // the deferred command and replay the leftover keys.
+          if (vim._deferredCommand) {
+            var deferred = vim._deferredCommand;
+            var deferredKeys = deferred.keys;
+            vim._deferredCommand = undefined;
+            if (mainKey.indexOf(deferredKeys) === 0) {
+              var suffix = mainKey.slice(deferredKeys.length);
+              vim.inputState.keyBuffer.length = 0;
+              keysMatcher = /^(\d*)(.*)$/.exec(keys);
+              if (keysMatcher && keysMatcher[1] && keysMatcher[1] != '0') {
+                vim.inputState.pushRepeatDigit(keysMatcher[1]);
+              }
+              deferred._backtrackSuffix = suffix || undefined;
+              return deferred;
+            }
+          }
+          clearInputState(cm); return false;
+        }
         else if (match.type == 'partial') {
           if (match.expectLiteralNext) vim.expectLiteralNext = true;
           if (match._deferredMotion) {
@@ -1336,10 +1360,39 @@ export function initVim(CM) {
               });
             }, shadowTimeout);
           }
+          // Prefix-ambiguity deferral: remember the shorter full match so
+          // we can backtrack to it if the longer mapping never completes.
+          if (match._deferredCommand) {
+            vim._deferredCommand = match._deferredCommand;
+            var mappingTimeout = getOption('operatorshadowtimeout');
+            if (mappingTimeout == null) mappingTimeout = 1000;
+            if (mappingTimeout > 0) {
+              var deferredForTimer = match._deferredCommand;
+              vim._deferredCommandTimer = window.setTimeout(function() {
+                vim._deferredCommandTimer = undefined;
+                vim._deferredCommand = undefined;
+                if (!cm.state.vim) return;
+                var buffered = vim.inputState.keyBuffer.join("");
+                var timerKeysMatcher = /^(\d*)(.*)$/.exec(buffered);
+                var timerMainKey = timerKeysMatcher ? (timerKeysMatcher[2] || timerKeysMatcher[1]) : buffered;
+                if (timerMainKey === deferredForTimer.keys) {
+                  vim.inputState.keyBuffer.length = 0;
+                  if (timerKeysMatcher && timerKeysMatcher[1] && timerKeysMatcher[1] != '0') {
+                    vim.inputState.pushRepeatDigit(timerKeysMatcher[1]);
+                  }
+                  cm.operation(function() {
+                    commandDispatcher.processCommand(cm, vim, deferredForTimer);
+                  });
+                }
+              }, mappingTimeout);
+            }
+          }
           return true;
         }
         else if (match.type == 'clear') { clearInputState(cm); return true; }
         vim.expectLiteralNext = false;
+        // Successful full match — clear any deferred state.
+        vim._deferredCommand = undefined;
 
         vim.inputState.keyBuffer.length = 0;
         keysMatcher = /^(\d*)(.*)$/.exec(keys);
@@ -1374,6 +1427,7 @@ export function initVim(CM) {
         return function() { return true; };
       } else if (command) {
         return function() {
+          var backtrackSuffix = typeof command === 'object' ? command._backtrackSuffix : undefined;
           return cm.operation(function() {
             // @ts-ignore
             cm.curOp.isVimOp = true;
@@ -1384,6 +1438,9 @@ export function initVim(CM) {
                 doKeyToKey(cm, command.toKeys, command);
               } else {
                 commandDispatcher.processCommand(cm, vim, command);
+              }
+              if (backtrackSuffix) {
+                doKeyToKey(cm, backtrackSuffix, { noremap: true });
               }
             } catch (e) {
               // clear VIM state in case it's in a bad state.
@@ -1593,7 +1650,6 @@ export function initVim(CM) {
         }
 
         var result = vimApi.handleKey(cm, key, 'mapping');
-
         if (!result && wasInsert && vim.insertMode) {
           if (key[0] == "<") {
             var lowerKey = key.toLowerCase().slice(1, -1);
@@ -1793,6 +1849,11 @@ export function initVim(CM) {
       clearTimeout(vim._shadowTimer);
       vim._shadowTimer = undefined;
     }
+    if (vim._deferredCommandTimer) {
+      clearTimeout(vim._deferredCommandTimer);
+      vim._deferredCommandTimer = undefined;
+    }
+    vim._deferredCommand = undefined;
     vim.inputState = new InputState();
     vim.expectLiteralNext = false;
     if (typeof vim._commandGeneration === 'number') {
@@ -2099,6 +2160,16 @@ export function initVim(CM) {
       // mapCommand), defer to the partials so the multi-key sequence can
       // complete.  The idle entry still fires when no partials exist,
       // preventing the keystroke from propagating to the browser.
+
+      if (matches.partial.length && matches.partial.some(function(p) {
+        return p.keys.length > bestMatch.keys.length && p.keys.indexOf(bestMatch.keys) === 0;
+      })) {
+        return {
+          type: 'partial',
+          expectLiteralNext: false,
+          _deferredCommand: bestMatch
+        };
+      }
       if (bestMatch.type === 'idle' && matches.partial.length) {
         return {
           type: 'partial',
