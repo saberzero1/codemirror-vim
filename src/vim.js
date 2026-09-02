@@ -2164,17 +2164,16 @@ export function initVim(CM) {
       if (matches.partial.length && matches.partial.some(function(p) {
         if (p.keys.length <= bestMatch.keys.length) return false;
         if (p.keys.indexOf(bestMatch.keys) !== 0) return false;
-        // False prefix: '<' (indent operator) vs '<leader>...' — the
-        // partial starts with a <...> special key notation, not with the
-        // literal '<' character.  A single-char full match like '<' must
-        // not be deferred by keys whose first token is a special key.
+        // Default entries (ZZ, dd, s<char>, <C-f>) coexist with
+        // shorter keys by design — skip them.
+        if (p._isDefault) return false;
+        // False string prefix: '<' vs '<leader>...' — the partial's
+        // first token is a <...> special key, not a literal '<' char.
         if (bestMatch.keys.length === 1 && p.keys[0] === '<' && p.keys.indexOf('>') > 0) return false;
-        // Skip built-in type collisions handled elsewhere:
-        // - motions extending non-motions (il vs i) — operator-pending
-        // - operatorMotions extending operators (dd vs d) — operatorShortcut
-        // - operatorPending actions without active operator (s<char> vs s)
+        // Plugin-registered text objects (il, al) extending built-in
+        // action keys (i, a).
         if (p.type === 'motion' && bestMatch.type !== 'motion') return false;
-        if (p.type === 'operatorMotion' && bestMatch.type === 'operator') return false;
+        // OperatorPending actions without an active operator.
         if (p.operatorPending && !inputState.operator) return false;
         return true;
       })) {

@@ -1033,28 +1033,35 @@ extension in the keymap. For example, when both `gc` (full match, action) and
 `gcc` (partial match, action) are registered, typing `gc` returns `partial`
 instead of `full`, allowing the longer `gcc` sequence to complete.
 
-The deferral has four exclusion rules that prevent false positives from
-built-in keymap collisions:
+The deferral has four exclusion rules that prevent false positives — cases
+where a longer keymap entry shares a string prefix with a shorter one but
+the two are handled by other mechanisms (context filtering, operator
+shortcut, operator-prefix shadow resolver):
 
-1. **Special-key false prefix** — a single-character full match like `<`
+1. **Default keymap entries** — built-in entries tagged `_isDefault` (e.g.
+   `ZZ`, `ZQ`, `dd`, `yy`, `cc`, `s<character>`, `<C-f>`) coexist with
+   their shorter keys by design.  `ZZ`/`ZQ` are handled after `Z` enters
+   the key buffer; `dd`/`yy`/`cc` are handled by the `operatorShortcut`
+   mechanism; `s<character>` is handled by the operator-prefix shadow
+   resolver.  Without this exclusion, user-registered `Z→dd` would be
+   deferred by the built-in `ZZ`/`ZQ`.
+2. **Special-key false prefix** — a single-character full match like `<`
    (indent operator) must not be deferred by partials whose keys begin with
-   a `<...>` special-key notation (e.g. `<C-f>`, `<leader>rn`). The string
-   `<C-f>` starts with `<` but `<C-f>` is a single conceptual key, not a
-   continuation of the `<` character.
-2. **Motions extending non-motions** — text-object motions (`il`, `al`,
-   `it`, …) share a string prefix with insert/append actions (`i`, `a`) but
-   are only relevant in operator-pending context (handled by
-   `commandMatches` context filtering and the operator-prefix shadow
-   resolver). Without this exclusion, `i`/`a` would be deferred instead of
-   immediately entering insert mode.
-3. **OperatorMotions extending operators** — linewise shortcuts (`dd`, `yy`,
-   `cc`) share a prefix with their operator (`d`, `y`, `c`) but are handled
-   by the `operatorShortcut` mechanism, not the deferral.
-4. **OperatorPending actions without an active operator** — surround actions
-   (`s<character>`, `S<character>`) share a prefix with substitute keys
-   (`s`→`cl`, `S`→`cc`) but are only meaningful in operator-pending context.
-   The operator-prefix shadow resolver handles these when an operator is
-   pending; outside that context, the full match executes immediately.
+   a `<...>` special-key notation (e.g. `<leader>rn`).  The string
+   `<leader>rn` starts with the character `<` but `<leader>` is a single
+   conceptual key, not a continuation of the literal `<` character.
+3. **Motions extending non-motions** — text-object motions (`il`, `al`,
+   `it`, …) registered by host plugins share a string prefix with
+   insert/append actions (`i`, `a`) but are only relevant in
+   operator-pending context.  Without this exclusion, pressing `i` or `a`
+   in normal mode would be deferred instead of immediately entering insert
+   mode.
+4. **OperatorPending actions without an active operator** — surround-style
+   actions (`s<character>`) registered by host plugins with
+   `operatorPending: true` share a prefix with substitute (`s`→`cl`) but
+   are only meaningful when an operator is pending.  The operator-prefix
+   shadow resolver handles them in that context; outside it, the full match
+   executes immediately.
 
 The deferred full match is returned as `_deferredCommand` on the partial result
 so `handleKeyNonInsertMode` can backtrack when the longer mapping never
