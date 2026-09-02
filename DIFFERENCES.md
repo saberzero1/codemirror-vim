@@ -1028,19 +1028,33 @@ idle when no sub-commands exist (preventing browser-level interception).
 
 **Files**: `src/vim.js` — `commandDispatcher.matchCommand`, `handleKeyNonInsertMode`; `src/types.ts`
 
- `matchCommand` defers to partial matches when a full match has a strict
- extension in the keymap. For example, when both `gc` (full match, action) and
- `gcc` (partial match, action) are registered, typing `gc` returns `partial`
- instead of `full`, allowing the longer `gcc` sequence to complete. The check
- only triggers when a partial match's keys start with the full match's keys and
- are strictly longer, and when the partial is not a built-in motion or
- operatorMotion extending a built-in action or operator key — text-object
- motions (`il`, `al`, `it`, …) share a prefix with insert/append actions
- (`i`, `a`) but are only relevant in operator-pending context (handled by
- `commandMatches` context filtering), and linewise operatorMotions (`dd`, `yy`,
- `cc`) share a prefix with their operator (`d`, `y`, `c`) but are handled by
- the `operatorShortcut` mechanism. Without this exclusion, pressing `i` or `a`
- in normal mode would be deferred instead of immediately entering insert mode.
+`matchCommand` defers to partial matches when a full match has a strict
+extension in the keymap. For example, when both `gc` (full match, action) and
+`gcc` (partial match, action) are registered, typing `gc` returns `partial`
+instead of `full`, allowing the longer `gcc` sequence to complete.
+
+The deferral has four exclusion rules that prevent false positives from
+built-in keymap collisions:
+
+1. **Special-key false prefix** — a single-character full match like `<`
+   (indent operator) must not be deferred by partials whose keys begin with
+   a `<...>` special-key notation (e.g. `<C-f>`, `<leader>rn`). The string
+   `<C-f>` starts with `<` but `<C-f>` is a single conceptual key, not a
+   continuation of the `<` character.
+2. **Motions extending non-motions** — text-object motions (`il`, `al`,
+   `it`, …) share a string prefix with insert/append actions (`i`, `a`) but
+   are only relevant in operator-pending context (handled by
+   `commandMatches` context filtering and the operator-prefix shadow
+   resolver). Without this exclusion, `i`/`a` would be deferred instead of
+   immediately entering insert mode.
+3. **OperatorMotions extending operators** — linewise shortcuts (`dd`, `yy`,
+   `cc`) share a prefix with their operator (`d`, `y`, `c`) but are handled
+   by the `operatorShortcut` mechanism, not the deferral.
+4. **OperatorPending actions without an active operator** — surround actions
+   (`s<character>`, `S<character>`) share a prefix with substitute keys
+   (`s`→`cl`, `S`→`cc`) but are only meaningful in operator-pending context.
+   The operator-prefix shadow resolver handles these when an operator is
+   pending; outside that context, the full match executes immediately.
 
 The deferred full match is returned as `_deferredCommand` on the partial result
 so `handleKeyNonInsertMode` can backtrack when the longer mapping never
