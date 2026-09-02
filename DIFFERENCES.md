@@ -1028,12 +1028,19 @@ idle when no sub-commands exist (preventing browser-level interception).
 
 **Files**: `src/vim.js` — `commandDispatcher.matchCommand`, `handleKeyNonInsertMode`; `src/types.ts`
 
-`matchCommand` defers to partial matches when a full match has a strict
-extension in the keymap. For example, when both `gc` (full match, action) and
-`gcc` (partial match, action) are registered, typing `gc` returns `partial`
-instead of `full`, allowing the longer `gcc` sequence to complete. The check
-only triggers when a partial match's keys start with the full match's keys and
-are strictly longer.
+ `matchCommand` defers to partial matches when a full match has a strict
+ extension in the keymap. For example, when both `gc` (full match, action) and
+ `gcc` (partial match, action) are registered, typing `gc` returns `partial`
+ instead of `full`, allowing the longer `gcc` sequence to complete. The check
+ only triggers when a partial match's keys start with the full match's keys and
+ are strictly longer, and when the partial is not a built-in motion or
+ operatorMotion extending a built-in action or operator key — text-object
+ motions (`il`, `al`, `it`, …) share a prefix with insert/append actions
+ (`i`, `a`) but are only relevant in operator-pending context (handled by
+ `commandMatches` context filtering), and linewise operatorMotions (`dd`, `yy`,
+ `cc`) share a prefix with their operator (`d`, `y`, `c`) but are handled by
+ the `operatorShortcut` mechanism. Without this exclusion, pressing `i` or `a`
+ in normal mode would be deferred instead of immediately entering insert mode.
 
 The deferred full match is returned as `_deferredCommand` on the partial result
 so `handleKeyNonInsertMode` can backtrack when the longer mapping never
