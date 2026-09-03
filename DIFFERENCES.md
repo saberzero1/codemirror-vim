@@ -258,12 +258,49 @@ from the default keymap whose `keys` field matches the given string, and
 decrements the `usedKeys` counters accordingly. Returns `true` if at least
 one entry was removed, `false` otherwise.
 
-`Vim.unmap()` cannot remove entries created by `Vim.mapCommand()` because
-`unmap` checks the `context` field during iteration and `mapCommand` entries
-have no context. `removeMapCommand` provides a clean removal path for
+`removeMapCommand` provides a context-insensitive removal path for
 plugin-registered keymap entries (EasyMotion motions, leader-prefixed
 commands, etc.) that need to be cleaned up when the leader key changes or
-features are toggled.
+features are toggled. Unlike `Vim.unmap()` which matches by context,
+`removeMapCommand` removes all entries with matching keys regardless of
+context.
+
+### Per-mode `unmap` of context-less mappings
+
+**File**: `src/vim.js` — `ExCommandDispatcher.unmap`, `vimApi.mapclear`
+
+`unmap(lhs, ctx)` now supports removing a single mode from a context-less
+(all-mode) mapping, matching Neovim's `:nunmap` behavior on a `:map`-created
+mapping.
+
+Previously, `unmap(lhs, 'normal')` required an exact `context === 'normal'`
+match. Entries created by `mapCommand()` or `:map` without a mode prefix have
+`context === undefined` — the strict equality check (`undefined === 'normal'`)
+always failed, so `unmap` returned without effect. The only way to remove
+such entries was `removeMapCommand(keys)` (which removes from all modes) or
+`unmap(lhs, undefined)` (same effect).
+
+Now, when a mode-specific `unmap(lhs, ctx)` finds no exact context match, it
+falls back to searching for a context-less entry with matching keys. If found,
+the context-less entry is removed and re-added as separate entries for the
+remaining modes. For example, `unmap('j', 'normal')` on a context-less `j`
+mapping removes the original entry and creates two new entries with
+`context: 'visual'` and `context: 'operatorPending'`.
+
+The fallback only matches non-default entries (`!_isDefault`). The `_isDefault`
+check is part of the match condition (not a `continue` guard) to prevent the
+loop from skipping a default entry and then splitting a later non-default entry
+with the same keys — a scenario that occurs when `applyLuaMaps` accumulates
+duplicate user mappings across `reloadFeatures` calls.
+
+The mode set for context-less mappings is `['normal', 'visual',
+'operatorPending']`, matching Neovim's `:map` semantics (`:map` creates
+mappings for normal + visual + operator-pending, not insert).
+
+`mapclear(ctx)` uses the same mode set when splitting context-less mappings
+during mode-specific clearing (e.g., `:nmapclear`). Previously it used
+`['normal', 'insert', 'visual']` — `insert` was incorrect (`:map` does not
+create insert-mode mappings) and `operatorPending` was missing.
 
 ### Key string normalization for `map`/`mapCommand`
 

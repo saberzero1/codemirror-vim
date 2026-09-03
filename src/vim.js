@@ -1028,7 +1028,7 @@ export function initVim(CM) {
             if (mapping.context) {
               this._mapCommand(mapping);
             } else {
-              var contexts = ['normal', 'insert', 'visual'];
+              var contexts = ['normal', 'visual', 'operatorPending'];
               for (var j in contexts) {
                 if (contexts[j] !== ctx) {
                   var newMapping = Object.assign({}, mapping);
@@ -8522,6 +8522,25 @@ export function initVim(CM) {
             defaultKeymap.splice(i, 1);
             removeUsedKeys(keys);
             return true;
+          }
+        }
+        if (ctx) {
+          var allModeContexts = ['normal', 'visual', 'operatorPending'];
+          for (var i = 0; i < defaultKeymap.length; i++) {
+            if (keys == defaultKeymap[i].keys
+                && defaultKeymap[i].context == null
+                && !defaultKeymap[i]._isDefault) {
+              var original = defaultKeymap.splice(i, 1)[0];
+              for (var j = 0; j < allModeContexts.length; j++) {
+                if (allModeContexts[j] !== ctx) {
+                  var copy = Object.assign({}, original);
+                  copy.context = allModeContexts[j];
+                  _mapCommand(copy);
+                }
+              }
+              removeUsedKeys(keys);
+              return true;
+            }
           }
         }
       }
