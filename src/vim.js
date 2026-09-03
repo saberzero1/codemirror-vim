@@ -1363,11 +1363,20 @@ export function initVim(CM) {
           // Prefix-ambiguity deferral: remember the shorter full match so
           // we can backtrack to it if the longer mapping never completes.
           if (match._deferredCommand) {
-            vim._deferredCommand = match._deferredCommand;
+            var deferredForTimer = match._deferredCommand;
             var mappingTimeout = getOption('operatorshadowtimeout');
             if (mappingTimeout == null) mappingTimeout = 1000;
-            if (mappingTimeout > 0) {
-              var deferredForTimer = match._deferredCommand;
+            if (mappingTimeout <= 0) {
+              vim.inputState.keyBuffer.length = 0;
+              cm.operation(function() {
+                if (deferredForTimer.type == 'keyToKey') {
+                  doKeyToKey(cm, deferredForTimer.toKeys, deferredForTimer);
+                } else {
+                  commandDispatcher.processCommand(cm, vim, deferredForTimer);
+                }
+              });
+            } else {
+              vim._deferredCommand = deferredForTimer;
               vim._deferredCommandTimer = window.setTimeout(function() {
                 vim._deferredCommandTimer = undefined;
                 vim._deferredCommand = undefined;
@@ -1381,7 +1390,11 @@ export function initVim(CM) {
                     vim.inputState.pushRepeatDigit(timerKeysMatcher[1]);
                   }
                   cm.operation(function() {
-                    commandDispatcher.processCommand(cm, vim, deferredForTimer);
+                    if (deferredForTimer.type == 'keyToKey') {
+                      doKeyToKey(cm, deferredForTimer.toKeys, deferredForTimer);
+                    } else {
+                      commandDispatcher.processCommand(cm, vim, deferredForTimer);
+                    }
                   });
                 }
               }, mappingTimeout);
@@ -7593,7 +7606,7 @@ export function initVim(CM) {
   defineOption('clipboard', '', 'string', ['clip']);
   defineOption('selectmode', '', 'string', ['slm']);
   defineOption('keymodel', '', 'string', ['km']);
-  defineOption('operatorshadowtimeout', 1000, 'number', ['ost']);
+  defineOption('operatorshadowtimeout', 1000, 'number', ['ost', 'timeoutlen', 'tm']);
 
   defineOption('ignorecase', true, 'boolean', ['ic']);
   defineOption('smartcase', true, 'boolean', ['scs']);

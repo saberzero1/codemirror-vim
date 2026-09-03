@@ -1111,9 +1111,16 @@ when no further keys arrive).
 
 A configurable timeout (reuses `operatorshadowtimeout`, default 1000ms) fires
 the deferred command if no subsequent key arrives — necessary for cases where
-the shorter mapping is the final input (e.g. visual `gc` after a selection).
-The timer and deferred state are cleared on successful full match,
-`clearInputState`, and each new keypress.
+the shorter mapping is the final input (e.g. visual `gc` after a selection,
+`<Space><Space>` mapped to `:buffers<CR>` when `<Space><Space>h` exists as a
+partial match). When `operatorshadowtimeout` is `0`, the deferred command
+executes immediately without waiting (matching Neovim's `timeoutlen=0`
+behavior). The dispatch routes `keyToKey` type commands to `doKeyToKey()`
+instead of `processCommand()` — `processCommand` has no `case 'keyToKey'`
+handler, so deferred `keyToKey` mappings (e.g., `noremap` with a
+`:command<CR>` rhs) would silently drop without this routing. The timer and
+deferred state are cleared on successful full match, `clearInputState`, and
+each new keypress.
 
 ### Visual operator cursor re-clamping after `exitVisualMode`
 
@@ -2182,11 +2189,11 @@ This resolves conflicts between motion mappings registered by plugins (e.g., fla
 - `matchCommand()`: after the existing `idle` deferral block, a new check defers full motion matches when `inputState.operator` is set and `operatorPending` action partials exist. The deferred motion is stored on the return value as `_deferredMotion`.
 - `handleKeyNonInsertMode()`: when a partial match carries `_deferredMotion`, a `window.setTimeout` is started. On timeout, the deferred motion is dispatched via `processCommand()`. The timer is cleared when any subsequent key arrives.
 - `clearInputState()` and the vim teardown handler: clear the shadow timer to prevent stale execution after Escape or editor destruction.
-- New option: `defineOption('operatorshadowtimeout', 1000, 'number', ['ost'])`
+- New option: `defineOption('operatorshadowtimeout', 1000, 'number', ['ost', 'timeoutlen', 'tm'])` — `timeoutlen` and `tm` are Neovim-compatible aliases
 
 **Type change**: Added `_shadowTimer` to `vimState` in `src/types.ts`.
 
-**Upstream difference**: Upstream codemirror-vim has no timeout-based key disambiguation. Operators enter pending mode immediately and the next key is always resolved as a motion. This fork adds Neovim-style operator-prefix disambiguation, scoped to operator-pending mode only (non-operator prefixes like `g`/`z`/`<C-w>` are unaffected).
+**Upstream difference**: Upstream codemirror-vim has no timeout-based key disambiguation. Operators enter pending mode immediately and the next key is always resolved as a motion. This fork adds Neovim-style key disambiguation via `operatorshadowtimeout` (aliased as `timeoutlen`/`tm` for Neovim compatibility). The timeout applies to both operator-pending disambiguation and prefix-ambiguity deferral for user-registered `keyToKey` mappings.
 
 ## `handleEx` history recording
 
