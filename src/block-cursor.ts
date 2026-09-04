@@ -41,6 +41,10 @@ export function isCursorSuppressed(): boolean {
   return _cursorSuppressed;
 }
 
+export function getViewOverrideCount(): number {
+  return _viewOverrides.size;
+}
+
 export type CursorShape = 'block' | 'bar' | 'underline' | 'hollow';
 
 export interface CursorShapeConfig {

@@ -52,6 +52,10 @@ selection, hint mode) and `setKeyInterceptActive(false)` when the modal
 exits. Without this, the observer would call `preventDefault` on label
 keypresses before the host's modal capture-phase handlers can process them.
 
+Added `isKeyInterceptActive(): boolean` to query the current state. Used
+by the host plugin's table debug state inspector to expose key interception
+status for runtime diagnostics.
+
 ### `setIdleEscapeCallback` API
 
 **File**: `src/vim.js`
@@ -603,6 +607,14 @@ Added `isCursorSuppressedForView(view: EditorView): boolean` to query the
 effective suppression state for a specific view (per-view override if set,
 otherwise global default). Used by the host plugin's animated cursor
 controller to skip canvas drawing when per-view suppression is active.
+
+Added `isCursorSuppressed(): boolean` as a re-export to query the global
+suppression flag independently of per-view overrides.
+
+Added `getViewOverrideCount(): number` to query the number of active
+per-view cursor suppression overrides. Used by the host plugin's table
+debug state inspector for runtime diagnostics — a non-zero count when no
+table interaction is active indicates stale overrides.
 
 #### Table cell override
 
