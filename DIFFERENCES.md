@@ -930,6 +930,30 @@ join space, preventing double spaces when the line ends with whitespace.
 (producing `a{\n}b` instead of `a{}b`). When brackets span 3+ lines, the
 range is set linewise covering only the inner content lines.
 
+### Inner bracket text objects search forward for the next pair
+
+**File**: `src/vim.js` — `motions.textObjectManipulation`
+
+When the cursor is not inside a pair, `textObjectManipulation` falls back to
+a `getSearchCursor` scan for the next opening bracket and retries
+`selectCompanionObject` from there. Upstream gated that fallback on
+`inclusive`, so it ran for `da(`/`da{`/`da[` but not for the `i` variants —
+`di(` with the cursor before the pair silently did nothing while `da(` on the
+same position worked. The gate is removed; both variants now search.
+
+Neovim applies the search to both (`:h v_i(`: "when the cursor is not inside
+a () block, then find the next '('"), and it is not limited to the current
+line — `di(` on a line above the pair deletes its contents. It only looks
+forward, so with the cursor past the last pair in the document the object
+still matches nothing.
+
+The existing multiline handling above applies to forward-searched results
+too: a pair spanning 3+ lines yields a linewise inner range.
+
+Quote objects were never affected — `findBeginningAndEnd` already advances
+the cursor to the first quote on the line before scanning, which is why
+`di"` worked from outside while `di(` did not.
+
 ### j/k at document boundary
 
 **File**: `src/vim.js` — `motions.moveByLines`
@@ -2161,7 +2185,7 @@ The `ys_motion` handler in `handleSurroundSubState` now directly evaluates text 
 
 **Problem**: For two-character text objects like `aB`, `iw`, `a"`, the `ys_motion` handler dispatched the first character (e.g., `a`) via `vimApi.handleKey(cm, motionChar, 'mapping')`. This created a partial keyBuffer match. The handler then returned `false`, expecting the outer `findKey` to process the second character (`B`) through the normal keyBuffer → `matchCommand` → `processMotion` → `evalInput` flow. However, `evalInput` calls `clearInputState` at line 2424 before the motion executes. Although `clearInputState` runs after `selectedCharacter` was captured in `motionArgs` at line 2414-2417, instrumentation revealed `selectedCharacter` was `null` at `evalInput` entry — indicating the `inputState` object read at line 2384 (`var inputState = vim.inputState`) was already a fresh one from a prior `clearInputState`, not the one `matchCommand` set `selectedCharacter` on.
 
-**Fix**: When the `ys_motion` target is `a` or `i` (text object prefix), the handler directly calls `motions.textObjectManipulation(cm, head, { selectedCharacter, textObjectInner }, vim)` to get the motion result, then constructs the `ys_replacement` surround state inline — bypassing `evalInput` entirely. Single-character motions (like `w`, `$`, `j`) and count-prefixed motions (like `2j`) continue through the original `handleKey` dispatch path.
+**Fix**: When the `ys_motion` target is `a` or `i` (text object prefix), the handler directly evaluates the text object to get the motion result, then constructs the `ys_replacement` surround state inline — bypassing `evalInput` entirely. Single-character motions (like `w`, `$`, `j`) and count-prefixed motions (like `2j`) continue through the original `handleKey` dispatch path. The evaluation goes through `runTextObjectMotion` (see below) rather than calling `motions.textObjectManipulation` directly, so host-registered text objects resolve as they do in normal operator-pending.
 
 **Type change**: Added `operatorArgs?: Record<string, unknown>` to the `surroundState` type in `types.ts`. All `ys_motion` creation sites now include `operatorArgs` to preserve surround-specific operator args through the handler.
 
@@ -2184,10 +2208,48 @@ When an operator-pending async motion (e.g., `d` + EasyMotion target) resolves, 
 
 **Implementation**:
 - In the `ys_motion` handler's `onRepeat` callback, store `_ysTextObjectMotion` (the prefix: `'i'` or `'a'`) and `_ysTextObjectChar` (the object: `'w'`, `'B'`, `'"'`, etc.) alongside `_surroundReplacement` and `_surroundType`
-- In `repeatLastEdit`'s `repeatCommand()`, when `_ysTextObjectMotion` is present with `_surroundType === 'ys'`, re-evaluate the text object at the current cursor position via `motions.textObjectManipulation()` and apply the surround with `addSurroundToRange()`
+- In `repeatLastEdit`'s `repeatCommand()`, when `_ysTextObjectMotion` is present with `_surroundType === 'ys'`, re-evaluate the text object at the current cursor position via `runTextObjectMotion()` (see below) and apply the surround with `addSurroundToRange()`
 - Simple delimiters (`ysiwb`, `ysiw"`, `ysaw'`) work for dot-repeat. Tag (`ysiw<em>`) and function (`ysiwflen`) dot-repeat requires additional `pendingInput` prompt replay which is not yet implemented.
 
 **Type change**: Added `_asyncMotionTarget`, `_ysTextObjectMotion`, `_ysTextObjectChar` to `InputStateInterface` in `src/types.ts`.
+
+## Host-registered text objects for `ys` (`runTextObjectMotion`)
+
+**File**: `src/vim.js`
+
+Both `ys` text object call sites — the `ys_motion` branch of
+`handleSurroundSubState` and the `_ysTextObjectMotion` replay in
+`repeatLastEdit`'s `repeatCommand()` — called `motions.textObjectManipulation`
+directly. That function only recognizes the built-in objects
+(`` ( ) { } [ ] < > ' " ` b B w W p t s ``). Any object a host registered through
+`mapCommand('i$', 'motion', …)` matched nothing, so the motion result was
+`null`, the handler fell through to `clearInputState`, and the pending `ysi`
+disappeared from the chord display — even though `di$` with the same
+registration worked, because normal operator-pending resolution goes through
+the keymap.
+
+`runTextObjectMotion(cm, head, vim, motionChar, motionKey)` closes the gap. It
+scans `defaultKeymap` for a `type: 'motion'` command whose `keys` equal the
+exact sequence (`i$`, `aB`, …), merges `command.motionArgs` over
+`{ repeat: 1, selectedCharacter }` into a fresh object, and invokes the motion
+with the same `(cm, head, motionArgs, vim, inputState)` signature `evalInput`
+uses. The built-in `i<register>`/`a<register>` entries never match, since the
+comparison is on the literal key string.
+
+**The fallback is load-bearing, not defensive.** A registered object that
+shadows a built-in key must not win unconditionally — the Vim Motions plugin
+registers `aB` as its Markdown blockquote object, which collides with the
+built-in `{}` block. Without the fallback, `csbBysaBb` on `(hello)` stopped
+working: `aB` resolved to the blockquote object, found no blockquote, and the
+surround was cancelled. If the registered motion returns a falsy result,
+resolution therefore falls through to `motions.textObjectManipulation` with
+the original character, so `ysaB` uses the host's object where it matches and
+the `{}` block everywhere else. Keys with no built-in meaning (`i$`, `i=`) are
+unaffected either way.
+
+Multiple exact matches are tried in `defaultKeymap` order, which is
+registration order reversed (`_mapCommand` unshifts), so the most recent
+registration wins — the same precedence `commandMatches` gives.
 
 ## Operator-prefix shadow resolver (`operatorshadowtimeout`)
 

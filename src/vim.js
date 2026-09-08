@@ -3431,7 +3431,7 @@ export function initVim(CM) {
       if (mirroredPairs[character]) {
         move = true;
         tmp = selectCompanionObject(cm, head, character, inclusive);
-        if (!tmp && inclusive) {
+        if (!tmp) {
           var sc = cm.getSearchCursor(new RegExp("\\" + character, "g"), head)
           if (sc.find()) {
             // @ts-ignore
@@ -4367,6 +4367,39 @@ export function initVim(CM) {
     }
   }
 
+  /**
+   * Run the `i`/`a` text object for `motionChar + motionKey`. Host-registered
+   * objects (`i$`, `i=`, …) are matched on the exact key sequence and tried
+   * first; the built-in `i<register>` wildcard object is the fallback, so a
+   * registered object that shadows a built-in one (`aB`) only wins where it
+   * actually matches.
+   * @arg {CodeMirrorV} cm
+   * @arg {Pos} head
+   * @arg {vimState} vim
+   * @arg {string} motionChar
+   * @arg {string} motionKey
+   */
+  function runTextObjectMotion(cm, head, vim, motionChar, motionKey) {
+    var keys = motionChar + motionKey;
+    for (var i = 0; i < defaultKeymap.length; i++) {
+      var command = defaultKeymap[i];
+      if (command.type !== 'motion' || command.keys !== keys) continue;
+      var fn = motions[command.motion];
+      if (!fn) continue;
+      var mappedArgs = Object.assign(
+        { repeat: 1, selectedCharacter: motionKey },
+        command.motionArgs
+      );
+      var mappedResult = fn.call(motions, cm, head, mappedArgs, vim, vim.inputState);
+      if (mappedResult) return mappedResult;
+    }
+    return motions.textObjectManipulation(cm, head, {
+      repeat: 1,
+      selectedCharacter: motionKey,
+      textObjectInner: motionChar === 'i'
+    }, vim);
+  }
+
   function handleSurroundSubState(cm, key, vim) {
     var state = vim.surroundState;
     if (!state) return false;
@@ -4417,8 +4450,7 @@ export function initVim(CM) {
         var motionKey = lastChar(key);
         if (!motionKey) { vim.surroundState = null; return true; }
         var head = cm.getCursor('head');
-        var motionResult = motions.textObjectManipulation(cm, head,
-          { repeat: 1, selectedCharacter: motionKey, textObjectInner: motionChar === 'i' }, vim);
+        var motionResult = runTextObjectMotion(cm, head, vim, motionChar, motionKey);
         if (!motionResult) {
           clearInputState(cm);
           return true;
@@ -9782,11 +9814,8 @@ export function initVim(CM) {
           vim.inputState._surroundType === 'ys' &&
           vim.inputState._surroundReplacement) {
         var head = cm.getCursor('head');
-        var motionResult = motions.textObjectManipulation(cm, head, {
-          repeat: 1,
-          selectedCharacter: vim.inputState._ysTextObjectChar,
-          textObjectInner: vim.inputState._ysTextObjectMotion === 'i'
-        }, vim);
+        var motionResult = runTextObjectMotion(cm, head, vim,
+          vim.inputState._ysTextObjectMotion, vim.inputState._ysTextObjectChar || '');
         if (motionResult) {
           var sFrom, sTo;
           if (motionResult instanceof Array) {
