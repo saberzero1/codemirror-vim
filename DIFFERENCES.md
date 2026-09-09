@@ -1201,6 +1201,59 @@ from the visual line start.
 The `g^` keybinding now maps to `moveToFirstNonBlankOfDisplayLine`. The `g0`
 keybinding continues to map to `moveToStartOfDisplayLine` (now corrected).
 
+### `zz` / `zt` / `zb` on wrapped lines
+
+**File**: `src/vim.js` — `actions.scrollToCursor`
+
+The action measured the cursor's line with `charCoords(new Pos(lineNum, 0))`,
+which on a wrapped line is the box of the line's *first display row*, not of
+the line. `zz` therefore centered that first row and pushed the rest of the
+line below the viewport; once a line wrapped past the window height the cursor
+left the viewport entirely, with no path back short of moving the cursor.
+
+Vim's `scroll_cursor_halfway` treats the cursor's buffer line as one atom of
+`plines_win` height, so `zz` centers the *whole* wrapped line and the resulting
+topline is always a whole-line boundary. Only when the line is taller than the
+window does Vim scroll inside it, via `skipcol`, and then only as far as
+keeping the cursor on screen requires. Measured with Neovim 0.12.5
+(`nvim -u NONE`, 80x22 window, `wrap`, `scrolloff=0`, `smoothscroll` off),
+cursor on the final character of a single long line:
+
+| Display rows | topline | skipcol | Line occupies screen rows |
+| --- | --- | --- | --- |
+| 3 | 12 | 0 | 10–12 (9 rows above) |
+| 15 | 18 | 0 | 4–18 (3 rows above) |
+| 38 | 21 | 1280 | 1–22 (scrolled 16 rows into the line) |
+
+Note that the topline is identical for a cursor at the start and at the end of
+the same line — Vim centers the line, not the cursor's row.
+
+The action now takes `charCoords` at both column `0` and column `length - 1`,
+which straddle every display row the line occupies, and:
+
+- **`center`** averages the two rows' `bottom` values before subtracting half
+  the viewport, centering the whole line. For a single-row line both values are
+  equal and the expression reduces to the previous `charCoords.bottom -
+  height / 2`, so unwrapped `zz` is unchanged.
+- **`center`** then clamps the result down to the first row's `top`, so a line
+  taller than the viewport starts at the top of the viewport rather than
+  mid-line. This is the whole-line topline boundary.
+- **all positions** finally clamp so the cursor's own display row stays inside
+  the viewport. This is the `skipcol` behavior, and it applies to `zt` and `zb`
+  as well — `zt` on a line taller than the window would otherwise put the line
+  start at the top and leave a cursor near the line end off-screen, which is
+  also what Neovim's `skipcol 1280` above avoids.
+
+`bottom` is additionally simplified to `lastRowCoords.bottom - height`, which
+is algebraically what the previous `y - height + lineHeight` computed once
+`lineHeight` was expanded.
+
+This is a separate defect from the one described under
+[Scroll-space `charCoords` / `coordsChar`](#scroll-space-charcoords--coordschar):
+that one fixed the vertical *reference frame* the coordinates are expressed in,
+this one fixes *which display row* is measured. Both had to be correct before
+`zz` behaved.
+
 ### Other fixes
 
 - `operators.indent`: Cursor at column 0 after `>>` / `<<` (was first non-blank)

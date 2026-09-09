@@ -4825,20 +4825,32 @@ export function initVim(CM) {
       }
     },
     scrollToCursor: function(cm, actionArgs) {
-      var lineNum = cm.getCursor().line;
-      var charCoords = cm.charCoords(new Pos(lineNum, 0), 'local');
+      var cursor = cm.getCursor();
+      var lineNum = cursor.line;
+      var lineLength = cm.getLine(lineNum).length;
+      // On a wrapped line these straddle every display row the line occupies.
+      var firstRowCoords = cm.charCoords(new Pos(lineNum, 0), 'local');
+      var lastRowCoords = cm.charCoords(
+          new Pos(lineNum, Math.max(0, lineLength - 1)), 'local');
       var height = cm.getScrollInfo().clientHeight;
-      var y = charCoords.top;
+      var y = firstRowCoords.top;
       switch (actionArgs.position) {
-        case 'center': y = charCoords.bottom - height / 2;
+        case 'center':
+          // Vim centers the whole buffer line, not just its first display row.
+          y = (firstRowCoords.bottom + lastRowCoords.bottom) / 2 - height / 2;
+          // Vim's topline is a whole buffer line, so a line taller than the
+          // window starts at the top of the window rather than mid-line.
+          if (y > firstRowCoords.top) y = firstRowCoords.top;
           break;
         case 'bottom':
-          var lineLastCharPos = new Pos(lineNum, cm.getLine(lineNum).length - 1);
-          var lineLastCharCoords = cm.charCoords(lineLastCharPos, 'local');
-          var lineHeight = lineLastCharCoords.bottom - y;
-          y = y - height + lineHeight
+          y = lastRowCoords.bottom - height;
           break;
       }
+      // A line taller than the window can leave the cursor outside it; Vim
+      // scrolls within the line ('skipcol') to keep the cursor on screen.
+      var cursorCoords = cm.charCoords(cursor, 'local');
+      if (cursorCoords.bottom > y + height) y = cursorCoords.bottom - height;
+      if (cursorCoords.top < y) y = cursorCoords.top;
       cm.scrollTo(null, y);
     },
     replayMacro: function(cm, actionArgs, vim) {
