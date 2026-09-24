@@ -14,12 +14,46 @@ let getDrawSelectionConfig = View.getDrawSelectionConfig || function() {
 let _cursorSuppressed = false;
 const _viewOverrides = new Map<EditorView, boolean>();
 
+/**
+ * Mode reported by a host that owns keys instead of this engine.
+ *
+ * When a host delegates keys elsewhere it also calls setKeyInterceptActive,
+ * which makes the keydown observer return early, so cm.state.vim never leaves
+ * normal and the cursor would otherwise keep the normal shape in every mode.
+ * This override feeds the cursor renderer only. It deliberately does not touch
+ * cm.state.vim, which other consumers read, and redrawing goes through
+ * requestMeasure rather than a transaction, so a host input method composing
+ * over the editor is left alone.
+ */
+export type ExternalCursorMode =
+  | 'normal'
+  | 'insert'
+  | 'replace'
+  | 'visual'
+  | 'visual line'
+  | 'visual block'
+  | 'operator-pending';
+
+let _externalCursorMode: ExternalCursorMode | null = null;
+const _livePlugins = new Set<BlockCursorPlugin>();
+
+export function setExternalCursorMode(mode: ExternalCursorMode | null): void {
+  if (mode === _externalCursorMode) return;
+  _externalCursorMode = mode;
+  for (const plugin of _livePlugins) plugin.refreshExternalMode();
+}
+
+export function getExternalCursorMode(): ExternalCursorMode | null {
+  return _externalCursorMode;
+}
+
 export function setCursorSuppressed(suppressed: boolean): void {
   _cursorSuppressed = suppressed;
 }
 
 export function resetCursorState(): void {
   _cursorSuppressed = false;
+  _externalCursorMode = null;
   _viewOverrides.clear();
 }
 
@@ -123,6 +157,7 @@ export class BlockCursorPlugin {
     this.cursorLayer.setAttribute("aria-hidden", "true")
     view.requestMeasure(this.measureReq)
     this.setBlinkRate()
+    _livePlugins.add(this)
   }
 
   setBlinkRate() {
@@ -138,13 +173,7 @@ export class BlockCursorPlugin {
     // Always hide native CM6 cursor layers — the fork renders its own cursor for every mode.
     let nativeLayers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
     for (let i = 0; i < nativeLayers.length; i++) nativeLayers[i].style.display = "none";
-    let vim = this.cm.state.vim;
-    let inInsertMode = vim && vim.insertMode && !this.cm.state.overwrite;
-    if (!inInsertMode || suppressed) {
-      this.view.contentDOM.style.setProperty("caret-color", "transparent", "important");
-    } else {
-      this.view.contentDOM.style.setProperty("caret-color", "var(--interactive-accent, #ff9696)", "important");
-    }
+    this.applyCaretColor(suppressed);
     if (suppressed) {
       this.cursorLayer.style.display = "none";
     } else {
@@ -169,6 +198,26 @@ export class BlockCursorPlugin {
       });
     }
     if (configChanged(update)) this.setBlinkRate();
+  }
+
+  applyCaretColor(suppressed: boolean) {
+    let effective = effectiveVimState(this.cm);
+    let inInsertMode = effective && effective.insertMode && !effective.overwrite;
+    if (!inInsertMode || suppressed) {
+      this.view.contentDOM.style.setProperty("caret-color", "transparent", "important");
+    } else {
+      this.view.contentDOM.style.setProperty("caret-color", "var(--interactive-accent, #ff9696)", "important");
+    }
+  }
+
+  // Redraws for an external mode change, which produces no ViewUpdate of its
+  // own. requestMeasure is a measurement pass rather than a transaction, so it
+  // cannot disturb a host input method composing over the editor.
+  refreshExternalMode() {
+    let suppressed = isCursorSuppressedForView(this.view);
+    if (suppressed && this.view.dom.closest('.cm-table-widget')) suppressed = false;
+    this.applyCaretColor(suppressed);
+    this.view.requestMeasure(this.measureReq)
   }
 
   scheduleRedraw() {
@@ -211,6 +260,7 @@ export class BlockCursorPlugin {
 
   destroy() {
     if (this._pendingDeferred) cancelAnimationFrame(this._pendingDeferred);
+    _livePlugins.delete(this);
     _viewOverrides.delete(this.view);
     this.cursorLayer.remove();
     this.view.contentDOM.style.removeProperty("caret-color");
@@ -263,14 +313,43 @@ function getBase(view: EditorView) {
   return {left: left - view.scrollDOM.scrollLeft * view.scaleX, top: rect.top - view.scrollDOM.scrollTop * view.scaleY}
 }
 
-function resolveShape(cm: CodeMirror): CursorShape {
+type EffectiveVimState = {
+  insertMode: boolean,
+  overwrite: boolean,
+  visualMode: boolean,
+  status: string,
+  shapes: CursorShapeConfig,
+}
+
+function effectiveVimState(cm: CodeMirror): EffectiveVimState | null {
   let vim = cm.state.vim;
-  if (!vim) return 'block';
+  if (!vim) return null;
   let shapes: CursorShapeConfig = vim.cursorShapes || {};
-  if (vim.insertMode && !cm.state.overwrite) return shapes.insert ?? 'bar';
-  if (cm.state.overwrite) return shapes.replace ?? 'underline';
-  if (vim.visualMode) return shapes.visual ?? 'block';
-  if (vim.status) return shapes.operatorPending ?? 'underline';
+  let external = _externalCursorMode;
+  if (!external) return {
+    insertMode: !!vim.insertMode,
+    overwrite: !!cm.state.overwrite,
+    visualMode: !!vim.visualMode,
+    status: vim.status || '',
+    shapes,
+  };
+  return {
+    insertMode: external === 'insert',
+    overwrite: external === 'replace',
+    visualMode: external === 'visual' || external === 'visual line' || external === 'visual block',
+    status: external === 'operator-pending' ? 'operator-pending' : '',
+    shapes,
+  };
+}
+
+function resolveShape(cm: CodeMirror): CursorShape {
+  let state = effectiveVimState(cm);
+  if (!state) return 'block';
+  let shapes = state.shapes;
+  if (state.insertMode && !state.overwrite) return shapes.insert ?? 'bar';
+  if (state.overwrite) return shapes.replace ?? 'underline';
+  if (state.visualMode) return shapes.visual ?? 'block';
+  if (state.status) return shapes.operatorPending ?? 'underline';
   return shapes.normal ?? 'block';
 }
 
@@ -279,10 +358,11 @@ function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange,
   let fatCursor = false;
   let hCoeff = 1;
   let vim = cm.state.vim;
+  let effective = effectiveVimState(cm);
   let shape: CursorShape = 'block';
-  if (vim) {
+  if (vim && effective) {
     shape = resolveShape(cm);
-    let showCursor = !vim.insertMode || cm.state.overwrite || shape !== 'bar';
+    let showCursor = !effective.insertMode || effective.overwrite || shape !== 'bar';
     if (showCursor) {
       fatCursor = true;
       if (vim.visualBlock && !primary)

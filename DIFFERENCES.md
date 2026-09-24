@@ -102,7 +102,9 @@ previous modal overlay would suppress keydown processing after re-enable.
 **File**: `src/block-cursor.ts`
 
 Added `resetCursorState()` as a module-level export. Resets
-`_cursorSuppressed` to `false` and clears the `_viewOverrides` map.
+`_cursorSuppressed` to `false`, clears `_externalCursorMode` (see
+[`setExternalCursorMode`](#setexternalcursormode-api)), and clears the
+`_viewOverrides` map.
 
 Used alongside `resetForkedVimState()` during vim toggle: when the vim
 extension is removed from editors, per-view cursor suppression overrides
@@ -2619,3 +2621,59 @@ Pass `null` to clear the source; `scrollToCursor` then behaves as though
 
 The source is stored in the module-level `_scrolloffSource` variable, following
 the same pattern as `_tokenClassifier`.
+
+## `setExternalCursorMode` API
+
+**Files**: `src/block-cursor.ts`, `src/index.ts`
+
+Added `setExternalCursorMode(mode)` and `getExternalCursorMode()` as
+module-level exports, plus the exported `ExternalCursorMode` type — the seven
+values `'normal'`, `'insert'`, `'replace'`, `'visual'`, `'visual line'`,
+`'visual block'`, `'operator-pending'`.
+
+A host that delegates keys to another backend also calls
+[`setKeyInterceptActive`](#setkeyinterceptactive-api), which makes the keydown
+observer return early. `cm.state.vim` therefore never leaves normal, and
+because [`resolveShape()`](#per-mode-cursor-shapes) reads that state, the cursor
+keeps the normal shape in every mode even though the host knows the real one.
+This override supplies it.
+
+Resolution goes through a new `effectiveVimState(cm)` helper, which returns
+`insertMode`, `overwrite`, `visualMode`, `status` and `shapes`. With no override
+set it reports `cm.state.vim` and `cm.state.overwrite` unchanged, so behavior
+without a host is identical to before. With one set, the four mode fields are
+derived from the override and `cm.state.vim` is not consulted for them. Three
+call sites use it, and all three must agree or the rendering is internally
+inconsistent:
+
+- `resolveShape()` reads all four fields; disagreement gives the wrong shape.
+- `measureCursor()` computes
+  `showCursor = !insertMode || overwrite || shape !== 'bar'`; disagreement
+  draws a bar-shaped fat cursor instead of revealing the native caret.
+- `applyCaretColor()` reads `insertMode && !overwrite`; disagreement leaves the
+  native caret transparent during insert.
+
+`applyCaretColor()` is extracted from `BlockCursorPlugin.update()`, which
+previously inlined the caret-color branch; `update()` now calls it.
+
+Two constraints on this API are load-bearing, and both were established by
+measuring a host-side alternative that violated them:
+
+- **It must not write `cm.state.vim`.** A host reading that state for a status
+  bar or mode tracker would observe the override as though the engine itself
+  had changed mode.
+- **It must not redraw by dispatching a transaction.** A host input method
+  composing over the editor is disturbed by one. `refreshExternalMode()`
+  therefore redraws through `view.requestMeasure()`, a measurement pass, and
+  also refreshes the caret color, which `readPos`/`drawSel` do not touch.
+
+An external mode change produces no `ViewUpdate` of its own, so
+`BlockCursorPlugin.update()` never observes it and per-view redraw cannot be
+driven from there. A module-level `_livePlugins` set is maintained instead —
+added in the constructor, removed in `destroy()` — and `setExternalCursorMode`
+calls `refreshExternalMode()` on each member. The setter returns early when the
+mode is unchanged, so repeated calls with the same value cost nothing.
+
+Pass `null` to clear the override; resolution falls back to `cm.state.vim`,
+which is the upstream behavior. [`resetCursorState()`](#resetcursorstate-api)
+clears it too.
