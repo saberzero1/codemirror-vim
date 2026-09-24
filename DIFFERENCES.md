@@ -1254,6 +1254,75 @@ that one fixed the vertical *reference frame* the coordinates are expressed in,
 this one fixes *which display row* is measured. Both had to be correct before
 `zz` behaved.
 
+[`scrolloff` in `zz` / `zt` / `zb`](#scrolloff-in-zz--zt--zb) below later added
+a margin term to the `top` and `bottom` positions and to the cursor clamp; the
+measurements above are all at `scrolloff=0`, where that term is zero and the
+description here is unchanged.
+
+### `scrolloff` in `zz` / `zt` / `zb`
+
+**File**: `src/vim.js` — `actions.scrollToCursor`
+
+The action had no `'scrolloff'` term, so it placed the cursor line flush
+against the viewport edge whatever the host had configured. Upstream cannot
+know the value — CM6 has no such option — so the fork reads it through
+[`setScrolloffSource`](#setscrolloffsource-api).
+
+Neovim applies the margin in two unrelated places, and that distinction is what
+makes this more than one clamp. Measured with Neovim 0.12.5 (`nvim --clean`,
+80x23 window, `wrap`, `smoothscroll` off), cursor line 61.
+
+**`zt` and `zb` move `topline`, on any line.** The margin is held past the
+cursor *line*, not past the cursor's own row, and saturates at the centered
+position:
+
+| Command | `so` | topline | Rows above the line | `winline` |
+| --- | --- | --- | --- | --- |
+| `zt` | 0 | 61 | 0 | 1 |
+| `zt` | 5 | 56 | 5 | 6 |
+| `zb` | 5 | 44 | 17 | 18 (5 rows below the line) |
+| `zt` | 11 | 50 | 11 | 12 |
+| `zb` | 11 | 50 | 11 | 12 |
+| `zz` | 11 | 50 | 11 | 12 |
+
+`so` 12 and 9999 reproduce the `so=11` rows exactly, so once the margin no
+longer fits, all three commands agree on the centered position rather than
+overshooting it. `zz` itself never moves on a line that fits: it only ever sets
+a whole-line `topline`, which already satisfies any margin.
+
+**Inside a line taller than the window the margin applies to the cursor's own
+display row**, through `skipcol` rather than `topline`. Cursor on the middle
+character of a 46-display-row line:
+
+| `so` | skipcol | `winline` | Rows below the cursor |
+| --- | --- | --- | --- |
+| 0 | 0 | 23 | 0 |
+| 5 | 400 | 18 | 5 |
+| 9999 | 880 | 12 | 11 (centered) |
+
+The margin is out of reach at that line's first and last display rows, where
+`skipcol` saturates at `0` and at `lineRows - winheight`: a cursor on the final
+character of the same line stays on the bottom row at every `so`, with
+`skipcol` pinned at 1840.
+
+The action now computes `centerY` once and:
+
+- **`top`** takes `Math.max(firstRowCoords.top - margin, centerY)` and
+  **`bottom`** takes `Math.min(lastRowCoords.bottom - height + margin,
+  centerY)`. Clamping toward `centerY` is what produces the convergence above.
+- **the cursor clamps** widen by `reach`, the margin limited to
+  `(height - rowHeight) / 2`. That limit's fixed point forces the centered row
+  Neovim's `w_height_inner <= so * 2` branch produces. `reach` is `0` unless
+  the line is taller than the viewport, because `zz` must not move on a line
+  that fits.
+- **a line-extent clamp** then bounds `y` to `[firstRowCoords.top,
+  lastRowCoords.bottom - height]` in that same regime, reproducing `skipcol`
+  saturation.
+
+`margin` is computed from `cm.defaultTextHeight()` rather than the `charCoords`
+box: `'scrolloff'` counts display rows, and the character box is shorter than
+the row containing it, which would render a 5-row margin as 3.96 rows.
+
 ### Other fixes
 
 - `operators.indent`: Cursor at column 0 after `>>` / `<<` (was first non-blank)
@@ -2524,3 +2593,29 @@ Pass `null` to clear the classifier and restore the default
 
 The classifier is stored in the module-level `_tokenClassifier` variable,
 following the same pattern as `_idleEscapeCallback`.
+
+## `setScrolloffSource` API
+
+**File**: `src/vim.js`
+
+Added `Vim.setScrolloffSource(fn)` to register a host-provided `'scrolloff'`
+reader. When set, `actions.scrollToCursor` calls `fn()` for the current value
+in display rows and applies it as described under
+[`scrolloff` in `zz` / `zt` / `zb`](#scrolloff-in-zz--zt--zb).
+
+`'scrolloff'` is deliberately not a fork option, unlike the 12 registered
+through [`defineOption`](#configurable-neovim-options-defineoption). CM6 has no
+equivalent to read, and a host that already enforces the margin for ordinary
+cursor motions owns the value; defining a second one here would let the two
+disagree. The callback keeps one source of truth in the host.
+
+A host cannot supply this from the outside. `scrollToCursor` reaches its
+target by assigning `scrollDOM.scrollTop` directly, without dispatching a
+transaction, so a CM6 `updateListener` never observes these commands and has no
+opportunity to correct them afterwards.
+
+Pass `null` to clear the source; `scrollToCursor` then behaves as though
+`'scrolloff'` were `0`, which is its upstream behavior.
+
+The source is stored in the module-level `_scrolloffSource` variable, following
+the same pattern as `_tokenClassifier`.

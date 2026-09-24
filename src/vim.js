@@ -859,6 +859,7 @@ export function initVim(CM) {
   var vimGlobalState;
   var _idleEscapeCallback = null;
   var _tokenClassifier = null;
+  var _scrolloffSource = null;
   function resetVimGlobalState() {
     vimGlobalState = {
       // The current search query.
@@ -984,6 +985,10 @@ export function initVim(CM) {
     },
     setTokenClassifier: function(fn) {
       _tokenClassifier = fn || null;
+    },
+    /**@type {(fn: (() => number) | null) => void} */
+    setScrolloffSource: function(fn) {
+      _scrolloffSource = fn || null;
     },
 
     suppressErrorLogging: false,
@@ -4833,24 +4838,55 @@ export function initVim(CM) {
       var lastRowCoords = cm.charCoords(
           new Pos(lineNum, Math.max(0, lineLength - 1)), 'local');
       var height = cm.getScrollInfo().clientHeight;
-      var y = firstRowCoords.top;
+      var rowHeight = cm.defaultTextHeight();
+      var tallerThanViewport =
+          lastRowCoords.bottom - firstRowCoords.top > height;
+      // 'scrolloff' counts display rows, so it needs the row height rather
+      // than the character box charCoords reports.
+      var scrolloff = _scrolloffSource ? _scrolloffSource() : 0;
+      var margin = Math.max(0, scrolloff || 0) * rowHeight;
+
+      // Vim centers the whole buffer line, not just its first display row,
+      // and its topline is a whole buffer line, so a line taller than the
+      // window starts at the top of the window rather than mid-line.
+      var centerY =
+          (firstRowCoords.bottom + lastRowCoords.bottom) / 2 - height / 2;
+      if (centerY > firstRowCoords.top) centerY = firstRowCoords.top;
+
+      var y;
       switch (actionArgs.position) {
         case 'center':
-          // Vim centers the whole buffer line, not just its first display row.
-          y = (firstRowCoords.bottom + lastRowCoords.bottom) / 2 - height / 2;
-          // Vim's topline is a whole buffer line, so a line taller than the
-          // window starts at the top of the window rather than mid-line.
-          if (y > firstRowCoords.top) y = firstRowCoords.top;
+          y = centerY;
           break;
         case 'bottom':
-          y = lastRowCoords.bottom - height;
+          // zt and zb hold 'scrolloff' rows past the line, and both stop at
+          // the centered position once that margin no longer fits -- which is
+          // why all three commands agree once 'scrolloff' exceeds half the
+          // window.
+          y = Math.min(lastRowCoords.bottom - height + margin, centerY);
+          break;
+        default:
+          y = Math.max(firstRowCoords.top - margin, centerY);
           break;
       }
+
       // A line taller than the window can leave the cursor outside it; Vim
-      // scrolls within the line ('skipcol') to keep the cursor on screen.
+      // scrolls within the line ('skipcol') to keep the cursor on screen. That
+      // is the only regime where 'scrolloff' applies to the cursor's own row,
+      // and an unreachable margin centers it.
       var cursorCoords = cm.charCoords(cursor, 'local');
-      if (cursorCoords.bottom > y + height) y = cursorCoords.bottom - height;
-      if (cursorCoords.top < y) y = cursorCoords.top;
+      var reach = tallerThanViewport
+          ? Math.min(margin, Math.max(0, (height - rowHeight) / 2))
+          : 0;
+      if (cursorCoords.bottom + reach > y + height)
+        y = cursorCoords.bottom + reach - height;
+      if (cursorCoords.top - reach < y) y = cursorCoords.top - reach;
+      if (tallerThanViewport) {
+        // 'skipcol' saturates at the line's own extent, so the margin is out
+        // of reach at the line's first and last display rows.
+        if (y > lastRowCoords.bottom - height) y = lastRowCoords.bottom - height;
+        if (y < firstRowCoords.top) y = firstRowCoords.top;
+      }
       cm.scrollTo(null, y);
     },
     replayMacro: function(cm, actionArgs, vim) {
