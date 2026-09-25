@@ -94,8 +94,18 @@ jobs:
                   echo "npm $actual, node $(node --version)"
 
             # `yarn install` runs the package's own `prepare`, which is the build.
+            #
+            # NODE_AUTH_TOKEN is set to empty deliberately. `registry-url` above makes setup-node
+            # write an .npmrc containing a literal `${NODE_AUTH_TOKEN}` and point
+            # NPM_CONFIG_USERCONFIG at it. npm leaves that placeholder alone, but yarn 1 tries to
+            # expand it and aborts the whole install with "Failed to replace env in config" when
+            # the variable is unset — which it always is here, because trusted publishing uses no
+            # token. Defining it empty satisfies yarn's expansion; installing public packages
+            # needs no credential, and the publish step still authenticates over OIDC.
             - name: Install dependencies
               run: yarn install --frozen-lockfile
+              env:
+                  NODE_AUTH_TOKEN: ''
 
             # The entry points in package.json all live under dist/, and a build that half-failed
             # would otherwise publish a package that resolves to nothing.
