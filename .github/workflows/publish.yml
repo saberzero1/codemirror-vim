@@ -119,5 +119,11 @@ jobs:
 
             # No --provenance flag and no NODE_AUTH_TOKEN: under trusted publishing npm mints a
             # short-lived token from the OIDC claim and attaches provenance by itself.
+            #
+            # --ignore-scripts because `prepare` shells out to yarn, and yarn cannot parse the
+            # .npmrc setup-node generated (see the install step). The install above already ran
+            # `prepare`, and the step above fails the job if it produced nothing, so the tarball
+            # is built and verified before this point — rebuilding here would only re-enter the
+            # same yarn failure. Do not drop this flag without also removing that .npmrc.
             - name: Publish ${{ needs.check.outputs.package }}
-              run: npm publish
+              run: npm publish --ignore-scripts
