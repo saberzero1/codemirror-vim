@@ -1,5 +1,5 @@
 {
-  "name": "@replit/codemirror-vim",
+  "name": "@saberzero1/codemirror-vim",
   "version": "6.3.0",
   "description": "Vim keybindings for CodeMirror 6",
   "author": {
@@ -12,7 +12,7 @@
     "build-types": "rm -rf out && tsc && dts-bundle-generator out/index.ts -o dist/index.d.ts && cp dist/index.d.ts dist/index.d.cts",
     "testAll": "yarn run build-test-package && yarn run test && cd dev/cm5 && yarn run buildAndTest",
     "build": "cm-buildhelper src/index.ts && node scripts/addVersion.cjs && npm run build-types",
-    "publish": "yarn run build && npm publish",
+    "release": "yarn run build && npm publish",
     "build-test-package": "bash ./scripts/build-test-package.sh",
     "prepare": "yarn run build",
     "test:neovim-extract": "tsx test/neovim/extract-definitions.ts",
@@ -60,6 +60,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/replit/codemirror-vim.git"
+    "url": "git+https://github.com/saberzero1/codemirror-vim.git"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

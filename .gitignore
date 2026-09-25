@@ -7,6 +7,9 @@ out
 /test/*.d.ts.map
 .*
 !.envrc
+# `.*` above also hides .github, so new workflow files are silently skipped by `git add`. The
+# existing workflows predate that rule and stayed tracked; publish.yml would not have been.
+!.github
 .DS_Store
 chromedriver
-replit-codemirror-vim-latest.tgz
+saberzero1-codemirror-vim-latest.tgz

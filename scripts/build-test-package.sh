@@ -6,13 +6,13 @@ cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
 
 # npm pack the repository
-rm -f replit-codemirror-vim-*.tgz
+rm -f saberzero1-codemirror-vim-*.tgz
 npm pack
 
 # Get the name of the packed file
-PACKAGE_FILE=$(ls replit-codemirror-vim-*.tgz | sort -V | tail -n 1)
+PACKAGE_FILE=$(ls saberzero1-codemirror-vim-*.tgz | sort -V | tail -n 1)
 
-mv "$PACKAGE_FILE" replit-codemirror-vim-latest.tgz
+mv "$PACKAGE_FILE" saberzero1-codemirror-vim-latest.tgz
 
 rm -rf ../.test_package
 mkdir -p ../.test_package
@@ -70,7 +70,7 @@ echo '{
 ' > tsconfig.json
 
 # Install the ace package from the npm pack result
-npm i "$ROOT"/replit-codemirror-vim-latest.tgz 
+npm i "$ROOT"/saberzero1-codemirror-vim-latest.tgz 
 npm i codemirror @codemirror/lang-javascript @codemirror/lang-xml
 
 # Install TypeScript
