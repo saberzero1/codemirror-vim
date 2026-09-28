@@ -1667,21 +1667,37 @@ selection dimensions in `_surroundSelOffset` for replay. `_surroundNewline`
 preserves the newline flag across dot-repeat.
 
 For `cs` dot-repeat on nested structures (e.g. `csba..` on `(((test)))`), the
-search position is offset by `newPair.open.length` **on iterations after the
-first**, so a later pass through the count loop starts past the delimiter the
-previous pass wrote and expands outward instead of re-matching it.
+search position steps past the replacement's opening delimiter **when the cursor
+is standing on that delimiter**, so each repeat expands outward instead of
+re-matching what the previous one wrote. `changeSurroundPair` parks the cursor on
+the opening delimiter, so the condition holds for a repeated `.` — each one a
+fresh `surroundAction` call — and for every iteration after the first inside one
+count loop.
 
-The `ci > 0` guard is load-bearing. The offset was originally applied on every
-iteration, which displaced the search on the first one too: one column right of
-the last character inside a pair is that pair's own closing delimiter, and
-`findSurroundingQuotes` scans backwards for the nearest quote, so it took that
-closing quote as an *opening* quote and matched the following pair. On
-`(test), "test", "test", "test"` with the cursor on the second word's final `t`,
-`.` produced `(test), "test(, )test", "test"` where typing `cs"b` by hand gave
-the correct `(test), (test), "test", "test"`. Brackets masked it, because
-`findSurroundingBrackets` counts depth and recovers from the same displacement.
-`handleSurroundSubState`'s interactive loop always carried the guard; only the
-`savedReplacement` replay in `surroundAction` was missing it.
+The discriminator is the delimiter under the cursor, not the iteration number.
+Two opposing regressions bound it, and each of the two obvious rules trips one:
+
+- **Offsetting unconditionally** displaces a cursor that is merely somewhere
+  inside a pair. One column right of the last character before a closing quote
+  *is* that quote, and `findSurroundingQuotes` scans backwards for the nearest
+  quote, so it takes that closing quote as an *opening* quote and matches the
+  following pair. On `(test), "test", "test", "test"` with the cursor on the
+  second word's final `t`, `.` produced `(test), "test(, )test", "test"` where
+  typing `cs"b` by hand gave the correct `(test), (test), "test", "test"`.
+  Brackets mask this, because `findSurroundingBrackets` counts depth and recovers
+  from the same displacement.
+- **Gating on `ci > 0`** fixes that but breaks `csba..`, because repeated `.` is
+  three separate calls that are all at `ci === 0`. The cursor sits on the `<` the
+  previous repeat wrote, `findSurroundingBrackets` takes `curChar === open` as
+  its opening position, and both repeats no-op: `(((test)))` yields
+  `<((test))>` instead of `<<<test>>>`. **This is the state of 6.4.1**; 6.4.2
+  carries the delimiter-under-cursor rule that satisfies both.
+
+`handleSurroundSubState`'s interactive loop keeps its plain `ci > 0` guard and is
+deliberately *not* given this rule. Its first iteration is a freshly typed
+command rather than a repeat, so a cursor resting on an opening bracket must
+select that bracket's own pair: `cs)b` with the cursor on the outer `(` of
+`((a))` changes the outer pair, which is what Vim and nvim-surround do.
 
 Visual `S` replaces the previous `S` → `VdO` keyToKey in visual mode. `S` in
 visual mode now surrounds instead of substituting.

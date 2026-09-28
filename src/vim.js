@@ -5870,15 +5870,23 @@ export function initVim(CM) {
           var csFindCount = isBracketTarget ? 1 : count;
           var csNewPair = getSurroundPair(savedReplacement);
           for (var ci = 0; ci < csLoopCount; ci++) {
-            // Only later iterations start past the delimiter this loop just
-            // wrote, so the search expands outward. Offsetting the first
-            // iteration moves the search off the cursor: a cursor on the last
-            // character before a closing quote lands on that quote, which
-            // findSurroundingQuotes then reads as the *opening* quote of the
+            // Step past the opening delimiter the cursor is standing on, so the
+            // search expands outward instead of re-matching it.
+            // changeSurroundPair parks the cursor there, so this covers both a
+            // repeated `.` — each one a fresh call at ci 0 — and every iteration
+            // after the first within one count loop.
+            //
+            // The test is the delimiter under the cursor, not the iteration
+            // number. Offsetting unconditionally displaces a cursor that is
+            // merely somewhere inside a pair: one column right of the last
+            // character before a closing quote *is* that quote, which
+            // findSurroundingQuotes then reads as the opening quote of the
             // following pair.
             var csSearchPos = cm.getCursor();
-            if (ci > 0) {
-              csSearchPos = new Pos(csSearchPos.line, csSearchPos.ch + csNewPair.open.length);
+            var csOpen = csNewPair.open;
+            var csLineText = cm.getLine(csSearchPos.line) || '';
+            if (csOpen && csLineText.slice(csSearchPos.ch, csSearchPos.ch + csOpen.length) === csOpen) {
+              csSearchPos = new Pos(csSearchPos.line, csSearchPos.ch + csOpen.length);
             }
             var found = findSurroundingPair(cm, csSearchPos, target, csFindCount);
             if (!found) break;

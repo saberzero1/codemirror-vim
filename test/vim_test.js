@@ -6738,6 +6738,20 @@ testVim('dot_cs_quotes', function(cm, vim, helpers) {
   eq("'hello' 'world'", cm.getValue());
 }, { value: '"hello" "world"' });
 
+// The opposite pressure to the cursor_before_closing_quote case below: here the
+// cursor *is* on the delimiter the previous change wrote, so the search must
+// step past it to reach the next layer out. Searching from the raw cursor
+// re-matches the same delimiter and both repeats no-op at '<((test))>'.
+testVim('dot_cs_nested_layers_step_outward', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('c', 's', 'b', 'a');
+  eq('<((test))>', cm.getValue());
+  helpers.doKeys('.');
+  eq('<<(test)>>', cm.getValue());
+  helpers.doKeys('.');
+  eq('<<<test>>>', cm.getValue());
+}, { value: '(((test)))' });
+
 // A repeat must resolve the same pair the typed command would, from the
 // cursor itself. Column 12 is the last character before the second closing
 // quote; a forward-shifted search start reads that quote as the opening quote
