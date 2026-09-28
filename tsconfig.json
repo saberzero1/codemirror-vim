@@ -18,7 +18,7 @@
         "target": "es6",
         "module": "es2020",
         "newLine": "lf",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
     },
     "include": [
         "src/*.ts",

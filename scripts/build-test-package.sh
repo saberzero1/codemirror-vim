@@ -60,9 +60,9 @@ echo '{
     "noImplicitOverride": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "commonjs",
+    "module": "node16",
     "target": "es2020",
-    "moduleResolution": "node"
+    "moduleResolution": "node16"
   },
   "include": ["*.ts"],
   "exclude": ["node_modules"]
