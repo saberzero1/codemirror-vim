@@ -3,7 +3,7 @@ import { highlightActiveLine, keymap, Decoration, DecorationSet,
    ViewPlugin, ViewUpdate, WidgetType, drawSelection } from '@codemirror/view';
 import { javascript } from '@codemirror/lang-javascript';
 import { xml } from '@codemirror/lang-xml';
-import { Vim, vim } from "../src/index" // "@replit/codemirror-vim" 
+import { Vim, vim } from "../src/index" // "@saberzero1/codemirror-vim" 
 
 import * as commands from "@codemirror/commands";
 import { Annotation, Compartment, EditorState, Extension, Transaction, Range } from '@codemirror/state';
