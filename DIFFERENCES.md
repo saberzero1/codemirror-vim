@@ -2763,3 +2763,39 @@ mode is unchanged, so repeated calls with the same value cost nothing.
 Pass `null` to clear the override; resolution falls back to `cm.state.vim`,
 which is the upstream behavior. [`resetCursorState()`](#resetcursorstate-api)
 clears it too.
+
+## Build and test tooling
+
+**Files**: `package.json`, `patches/@marijn+testtool+0.1.3.patch`,
+`tsconfig.json`, `scripts/build-test-package.sh`, `dev/index.ts`,
+`.github/workflows/`
+
+`patch-package` runs on `postinstall` and applies
+`patches/@marijn+testtool+0.1.3.patch`, raising the Selenium wait in
+`runBrowserTests` from 20s to 180s. That value is hard-coded upstream with no
+way to configure it, and this fork's browser suite — 1916 tests — takes longer
+than 20s to report, so every run died with a `TimeoutError` before the
+harness wrote its results element. `postinstall-postinstall` is present so the
+hook also runs under Yarn 1 after `yarn remove`.
+
+`scripts/build-test-package.sh` generates its throwaway consumer package with
+`module` and `moduleResolution` both set to `node16`. TypeScript 6 removed
+`moduleResolution: node10` (spelled `"node"`), and the script installs
+`typescript@latest`. Setting only `moduleResolution` trades that error for
+`TS5110`; both keys have to move together. The root `tsconfig.json` uses
+`bundler` instead — `node16` is unusable there because it requires explicit
+`.js` extensions on relative imports, which `src/` does not use.
+
+`dev/index.ts` names `@saberzero1/codemirror-vim` in the trailing comment on
+its `../src/index` import. That comment is load-bearing:
+`build-test-package.sh` strips the real import path and leaves the comment as
+the specifier, so the packaged-consumer test must name this fork rather than
+upstream.
+
+CI pins `actions/checkout@v7`, `actions/setup-node@v7` on Node 22 (matching
+`nodejs_22` in `flake.nix`), `actions/github-script@v9`, and
+`styfle/cancel-workflow-action@0.13.1`.
+
+Note that `nix develop` puts Node 22 on `PATH` but nixpkgs' `yarn` carries its
+own Node 24 shebang, so `yarn run test` and `node node_modules/.bin/cm-runtests`
+do not run on the same interpreter.
