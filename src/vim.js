@@ -6188,8 +6188,9 @@ export function initVim(CM) {
       return { prefix: match[4], digits: match[5], base: 2 };
     }
     if (match[6] && match[7]) {
-      if (!hasOctal) return undefined;
-      return { prefix: match[6], digits: match[7], base: 8 };
+      // Without `octal` in nrformats (Neovim's default) this is a decimal number; keeping
+      // `0` as the prefix makes the caller's zero padding preserve width (007 -> 008).
+      return { prefix: match[6], digits: match[7], base: hasOctal ? 8 : 10 };
     }
     if (match[9] !== undefined) {
       return { prefix: match[8] || '', digits: match[9], base: 10 };

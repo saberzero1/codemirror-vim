@@ -1018,11 +1018,19 @@ indent doesn't divide evenly by tabSize.
 
 ### Octal increment disabled by default
 
-**File**: `src/vim.js` — `actions.incrementNumberToken`
+**File**: `src/vim.js` — `actions.incrementNumberToken`, `parseNumberMatch`
 
 Numbers with leading zeros (e.g. `007`) are now incremented as decimal
 (007 → 008) instead of octal (007 → 010), matching Neovim's default
 `nrformats` setting which does not include `octal`.
+
+The number regex tries its octal alternative before the decimal one, so a
+`0`-prefixed token never reaches the decimal branch on its own.
+`parseNumberMatch` therefore re-reads that match as base 10 when `octal` is
+absent, keeping the leading `0` as the prefix so the caller's zero padding
+preserves the original width (`007` → `008`, not `8`). Previously it returned
+`undefined` — as it still does for disabled `hex` and `bin` — which made
+`<C-a>` skip the token and leave the buffer unchanged.
 
 ### Empty :s uses default flags
 
@@ -1522,8 +1530,10 @@ When enabled, the target indentation is computed as
 `incrementNumberToken` builds a dynamic regex based on
 `getOption('nrformats')`. A `parseNumberMatch` helper extracts prefix,
 digits, and base from the regex match groups, filtering out disabled
-formats. Octal support (`0`-prefixed numbers, base 8) is now available
-when `nrformats` includes `octal`.
+formats. Octal support (`0`-prefixed numbers, base 8) is available when
+`nrformats` includes `octal`; when it does not, a `0`-prefixed token is
+re-read as decimal rather than skipped — see
+[Octal increment disabled by default](#octal-increment-disabled-by-default).
 
 ## Surround operators (vim-surround)
 
