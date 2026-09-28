@@ -1054,11 +1054,15 @@ export function initVim(CM) {
       if (typeof trigger !== 'string' || trigger.length !== 1) {
         throw new Error('Surround trigger must be a single character, got: ' + JSON.stringify(trigger));
       }
-      if (RESERVED_SURROUND_CHARS.has(trigger)) {
-        throw new Error('Cannot register surround pair for reserved character: "' + trigger + '". Reserved characters are: ' + Array.from(RESERVED_SURROUND_CHARS).join(', '));
-      }
       if (typeof open !== 'string' || typeof close !== 'string') {
         throw new Error('Surround open and close must be strings');
+      }
+      // An empty delimiter is accepted nowhere downstream — findSurroundingPair
+      // bails on a zero width and the add path writes nothing — so it would
+      // silently disable the character rather than rebind it. That matters now
+      // that a built-in can be the target.
+      if (!open.length || !close.length) {
+        throw new Error('Surround open and close must not be empty (trigger: "' + trigger + '")');
       }
       customSurroundPairs.set(trigger, { open: open, close: close });
     },
@@ -3950,15 +3954,22 @@ export function initVim(CM) {
   };
   var surroundAliases = { 'b': ')', 'B': '}', 'r': ']', 'a': '>' };
   var customSurroundPairs = new Map();
-  var RESERVED_SURROUND_CHARS = new Set([
-    '(', ')', '[', ']', '{', '}', '<', '>',
-    'b', 'B', 'r', 'a',
-    't', 'T', 'f', 'F',
-    '"', "'", '`'
-  ]);
 
   function normalizeSurroundTarget(ch) {
     return surroundAliases[ch] || ch;
+  }
+
+  /**
+   * A registered pair wins over every built-in meaning of the same character,
+   * which is the only thing that makes the defaults overridable. The alias is
+   * resolved on the miss so overriding `)` also reaches `b`: `b` *means* `)`,
+   * and leaving it on the built-in would make `dsb` and `ds)` disagree.
+   * @arg {any} ch
+   */
+  function getCustomSurroundPair(ch) {
+    if (typeof ch !== 'string') return undefined;
+    return customSurroundPairs.get(ch) ||
+      customSurroundPairs.get(normalizeSurroundTarget(ch));
   }
 
   function getSurroundPair(ch) {
@@ -3973,7 +3984,7 @@ export function initVim(CM) {
           : { open: ch.value + '(', close: ')' };
       }
     }
-    var custom = customSurroundPairs.get(ch);
+    var custom = getCustomSurroundPair(ch);
     if (custom) return { open: custom.open, close: custom.close };
     ch = normalizeSurroundTarget(ch);
     var bracket = surroundBrackets[ch];
@@ -3982,7 +3993,7 @@ export function initVim(CM) {
   }
 
   function findSurroundingPair(cm, pos, target, count) {
-    var custom = customSurroundPairs.get(target);
+    var custom = getCustomSurroundPair(target);
     if (custom) {
       return findSurroundingMultiChar(cm, pos, custom.open, custom.close, count);
     }
@@ -4498,7 +4509,8 @@ export function initVim(CM) {
     var ch = lastChar(key);
     if (!ch || ch.length > 1) { vim.surroundState = null; return true; }
 
-    if (isExpectingReplacement(state) && (ch === '<' || ch === 'f' || ch === 'F')) {
+    if (isExpectingReplacement(state) && !getCustomSurroundPair(ch) &&
+        (ch === '<' || ch === 'f' || ch === 'F')) {
       startPendingInput(state, ch, cm, vim);
       return true;
     }
@@ -4523,7 +4535,7 @@ export function initVim(CM) {
         });
         if (state.onRepeat) state.onRepeat(ch);
       } else {
-        var isBracketTarget = !!surroundBrackets[normalizeSurroundTarget(state.target)] || customSurroundPairs.has(state.target);
+        var isBracketTarget = !!surroundBrackets[normalizeSurroundTarget(state.target)] || !!getCustomSurroundPair(state.target);
         var csLoopCount = isBracketTarget ? (state.count || 1) : 1;
         var csFindCount = isBracketTarget ? 1 : (state.count || 1);
         var didChange = false;
@@ -5756,12 +5768,16 @@ export function initVim(CM) {
       var count = actionArgs.repeat;
       var savedReplacement;
       if (!target) return;
+      // `t` and `f` reach the tag and function-call finders rather than a
+      // delimiter pair, so an override of either has to be checked before the
+      // dispatch, not inside the generic branch it never enters.
+      var targetOverridden = !!getCustomSurroundPair(target);
 
       if (pendingOp === 'delete') {
-        if (target === 't') {
+        if (target === 't' && !targetOverridden) {
           var tags = findSurroundingTag(cm, cm.getCursor(), count);
           if (tags) deleteTagSurround(cm, tags);
-        } else if (target === 'f') {
+        } else if (target === 'f' && !targetOverridden) {
           var func = findSurroundingFunction(cm, cm.getCursor());
           if (func) {
             var fClose = func.close;
@@ -5774,7 +5790,7 @@ export function initVim(CM) {
             });
           }
         } else {
-          var isBracketDel = !!surroundBrackets[normalizeSurroundTarget(target)] || customSurroundPairs.has(target);
+          var isBracketDel = !!surroundBrackets[normalizeSurroundTarget(target)] || targetOverridden;
           var dsLoopCount = isBracketDel ? count : 1;
           var dsFindCount = isBracketDel ? 1 : count;
           for (var di = 0; di < dsLoopCount; di++) {
@@ -5788,7 +5804,7 @@ export function initVim(CM) {
         savedReplacement = _csLast && _csLast._surroundType === 'cs'
           ? _csLast._surroundReplacement
           : undefined;
-        if (target === 't') {
+        if (target === 't' && !targetOverridden) {
           var tags = findSurroundingTag(cm, cm.getCursor(), count);
           if (!tags) return;
           if (savedReplacement) {
@@ -5806,7 +5822,7 @@ export function initVim(CM) {
               }
             };
           }
-        } else if (target === 'f' && !savedReplacement) {
+        } else if (target === 'f' && !targetOverridden && !savedReplacement) {
           var func = findSurroundingFunction(cm, cm.getCursor());
           if (!func) return;
           /** @type {{ funcNameStart: import("./types").Pos, open: import("./types").Pos, close: import("./types").Pos }} */
@@ -5839,7 +5855,7 @@ export function initVim(CM) {
           };
           vim.status = 'func: ';
         } else if (savedReplacement) {
-          if (target === 'f') {
+          if (target === 'f' && !targetOverridden) {
             var savedFunc = findSurroundingFunction(cm, cm.getCursor());
             if (!savedFunc) return;
             /** @type {{ funcNameStart: import("./types").Pos, open: import("./types").Pos, close: import("./types").Pos }} */
@@ -5849,19 +5865,27 @@ export function initVim(CM) {
             });
             return;
           }
-          var isBracketTarget = !!surroundBrackets[normalizeSurroundTarget(target)] || customSurroundPairs.has(target);
+          var isBracketTarget = !!surroundBrackets[normalizeSurroundTarget(target)] || targetOverridden;
           var csLoopCount = isBracketTarget ? count : 1;
           var csFindCount = isBracketTarget ? 1 : count;
+          var csNewPair = getSurroundPair(savedReplacement);
           for (var ci = 0; ci < csLoopCount; ci++) {
-            var csPos = cm.getCursor();
-            var newPair = getSurroundPair(savedReplacement);
-            var csSearchPos = new Pos(csPos.line, csPos.ch + newPair.open.length);
+            // Only later iterations start past the delimiter this loop just
+            // wrote, so the search expands outward. Offsetting the first
+            // iteration moves the search off the cursor: a cursor on the last
+            // character before a closing quote lands on that quote, which
+            // findSurroundingQuotes then reads as the *opening* quote of the
+            // following pair.
+            var csSearchPos = cm.getCursor();
+            if (ci > 0) {
+              csSearchPos = new Pos(csSearchPos.line, csSearchPos.ch + csNewPair.open.length);
+            }
             var found = findSurroundingPair(cm, csSearchPos, target, csFindCount);
             if (!found) break;
             changeSurroundPair(cm, found, savedReplacement);
           }
         } else {
-          var isQuoteTarget = !surroundBrackets[normalizeSurroundTarget(target)] && !customSurroundPairs.has(target);
+          var isQuoteTarget = !surroundBrackets[normalizeSurroundTarget(target)] && !targetOverridden;
           vim.surroundState = {
             type: 'change',
             target: target,
@@ -5922,7 +5946,8 @@ export function initVim(CM) {
           to = new Pos(to.line, to.ch + 1);
         }
 
-        if (replacement === '<' || replacement === 'f' || replacement === 'F') {
+        if (!getCustomSurroundPair(replacement) &&
+            (replacement === '<' || replacement === 'f' || replacement === 'F')) {
           vim.surroundState = {
             type: 'visual_replacement',
             from: from,
@@ -6054,7 +6079,8 @@ export function initVim(CM) {
         var to = cursorMax(sel.head, sel.anchor);
         to = new Pos(to.line, to.ch + 1);
 
-        if (replacement === '<' || replacement === 'f' || replacement === 'F') {
+        if (!getCustomSurroundPair(replacement) &&
+            (replacement === '<' || replacement === 'f' || replacement === 'F')) {
           vim.surroundState = {
             type: 'visual_replacement',
             from: from,

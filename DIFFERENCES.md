@@ -1657,9 +1657,21 @@ selection dimensions in `_surroundSelOffset` for replay. `_surroundNewline`
 preserves the newline flag across dot-repeat.
 
 For `cs` dot-repeat on nested structures (e.g. `csba..` on `(((test)))`), the
-search position is offset by `newPair.open.length` after each change so the next
-iteration finds the inner pair rather than re-matching the already-changed
-delimiter.
+search position is offset by `newPair.open.length` **on iterations after the
+first**, so a later pass through the count loop starts past the delimiter the
+previous pass wrote and expands outward instead of re-matching it.
+
+The `ci > 0` guard is load-bearing. The offset was originally applied on every
+iteration, which displaced the search on the first one too: one column right of
+the last character inside a pair is that pair's own closing delimiter, and
+`findSurroundingQuotes` scans backwards for the nearest quote, so it took that
+closing quote as an *opening* quote and matched the following pair. On
+`(test), "test", "test", "test"` with the cursor on the second word's final `t`,
+`.` produced `(test), "test(, )test", "test"` where typing `cs"b` by hand gave
+the correct `(test), (test), "test", "test"`. Brackets masked it, because
+`findSurroundingBrackets` counts depth and recovers from the same displacement.
+`handleSurroundSubState`'s interactive loop always carried the guard; only the
+`savedReplacement` replay in `surroundAction` was missing it.
 
 Visual `S` replaces the previous `S` → `VdO` keyToKey in visual mode. `S` in
 visual mode now surrounds instead of substituting.
@@ -1808,28 +1820,76 @@ Single-line only (same limitation as `dsf` — `findSurroundingFunction` uses
 
 **File**: `src/vim.js`
 
-Users can register custom single-character triggers that map to arbitrary
-open/close delimiter strings (including multi-character). The public API:
+Users can register single-character triggers that map to arbitrary open/close
+delimiter strings (including multi-character). **Every character is available,
+built-ins included** — there is no reserved list. The public API:
 
 - `Vim.registerSurroundPair(trigger, open, close)` — adds a pair to the
-  `customSurroundPairs` Map. Throws if `trigger` is not a single character,
-  if it is in `RESERVED_SURROUND_CHARS`, or if `open`/`close` are not strings.
-- `Vim.unregisterSurroundPair(trigger)` — removes a custom pair.
+  `customSurroundPairs` Map. Throws if `trigger` is not a single character, if
+  `open`/`close` are not strings, or if either is empty.
+- `Vim.unregisterSurroundPair(trigger)` — removes a pair, restoring whatever
+  built-in meaning the character had.
 
-Reserved characters (19 total): `( ) [ ] { } < > b B r a t T f F " ' \``.
-These are rejected to prevent overriding built-in bracket, quote, alias, tag,
-and function surround behavior.
+`RESERVED_SURROUND_CHARS` — a 19-entry set (`( ) [ ] { } < > b B r a t T f F " '`
+and `` ` ``) that `registerSurroundPair` rejected — has been removed. It made the
+commonest reason to want a custom pair impossible: the opening-bracket forms add
+inner spaces, so `ysiw(` yields `( word )` and nothing could ask for `(word)`.
+nvim-surround exposes its whole `surrounds` table for override, so rejecting
+these was also a parity gap. `T` was in the set despite carrying no behavior at
+all — nothing in the surround paths ever branched on it.
+
+Empty delimiters are rejected in its place. `findSurroundingPair` bails on a zero
+width and the add path writes nothing, so an empty delimiter *disables* the
+character rather than rebinding it — a silent no-op that only became reachable
+once a built-in could be the target.
+
+**Override resolution** — `getCustomSurroundPair(ch)` is the single resolver
+behind all seven lookup sites. It prefers a registered pair over any built-in
+meaning of the same character, and on a miss retries with
+`normalizeSurroundTarget(ch)`, so
+overriding `)` also reaches `b` (and `}`→`B`, `]`→`r`, `>`→`a`). Without the
+alias retry, `dsb` and `ds)` would disagree about what the pair is. The raw
+character resolves first, so an alias and its canonical character can be
+overridden to different pairs, and overriding only `b` leaves `)` on the
+built-in.
+
+**Built-in dispatch guards** — eight branches read a built-in meaning *before*
+they read a delimiter pair, so relaxing registration alone would leave them
+ignoring an override. Each now consults the resolver first:
+
+- **Five target guards**, all in `surroundAction` on `t` and `f`, which reach the
+  tag and function-call finders: `t` and `f` in the `delete` branch, `t` and `f`
+  in the `change` branch, and `f` again in the `savedReplacement` dot-repeat
+  replay. A hoisted `targetOverridden` serves all five. It is computed above the
+  dispatch on purpose — `t` and `f` never enter the generic branch where the
+  check would otherwise naturally live, so moving it down silently restores the
+  old behavior.
+- **Three replacement guards**, on `<`, `f` and `F`, which open the tag-name and
+  function-name prompts: one each in `handleSurroundSubState`, `surroundVisual`
+  and `surroundVisualNewline`.
+
+`targetOverridden` is additionally reused by the three count-semantics flags
+(`isBracketDel`, `isBracketTarget`, `isQuoteTarget`), which previously called
+`customSurroundPairs.has(target)` and so missed alias resolution.
+
+`surroundActionNewline` needs no guard: it goes straight to
+`findSurroundingPair`, which honors overrides already.
+
+Overridden brackets keep depth-aware matching. The search moves off
+`findSurroundingBrackets` onto `findSurroundingMultiChar`, whose asymmetric
+branch counts depth and spans lines, so `ds(` on `((hello))` with `(` rebound to
+`(`/`)` still deletes the inner pair.
 
 Custom pairs integrate with all surround operations:
 
-1. **`getSurroundPair(ch)`** checks `customSurroundPairs` after the
+1. **`getSurroundPair(ch)`** calls `getCustomSurroundPair` after the
    tag/function object check but before `normalizeSurroundTarget` and the
-   `surroundBrackets` lookup. Custom pairs take priority over the single-char
-   quote fallback.
+   `surroundBrackets` lookup. A registered pair takes priority over the
+   built-in bracket table and the single-char quote fallback.
 
-2. **`findSurroundingPair(cm, pos, target, count)`** checks
-   `customSurroundPairs` before the built-in bracket/quote dispatch. When a
-   custom pair is found, it delegates to `findSurroundingMultiChar`.
+2. **`findSurroundingPair(cm, pos, target, count)`** calls
+   `getCustomSurroundPair` before the built-in bracket/quote dispatch. When a
+   pair is found, it delegates to `findSurroundingMultiChar`.
 
 3. **`findSurroundingMultiChar(cm, pos, open, close, count)`** handles
    multi-character delimiter matching:
@@ -1856,14 +1916,30 @@ Custom pairs integrate with all surround operations:
    Space removal is gated to `openW === 1 && closeW === 1` (multi-char
    delimiters never trigger space removal).
 
-5. **`isQuoteTarget`** in `surroundAction` excludes custom pairs:
-   `!surroundBrackets[...] && !customSurroundPairs.has(target)`. This prevents
-   custom pairs from being treated as quote-type targets (which would apply
-   `charRepeat` count semantics instead of bracket-style outer pair semantics).
+5. **`isQuoteTarget`** in `surroundAction` excludes registered pairs:
+   `!surroundBrackets[...] && !targetOverridden`. This prevents them from being
+   treated as quote-type targets (which would apply `charRepeat` count semantics
+   instead of bracket-style outer pair semantics). `isBracketTarget` and
+   `isBracketDel` read the same flag, so an override of a quote character picks
+   up nvim-surround's "apply N times" count semantics.
 
-Test coverage: 11 tests in `test/vim_test.js` covering ys/ds/cs with asymmetric
-and symmetric custom pairs, reserved char rejection, unregister fallback,
-nested asymmetric, visual S, and built-in unaffected.
+Test coverage: 24 tests in `test/vim_test.js` — `ys`/`ds`/`cs` with asymmetric
+and symmetric pairs, multi-character-trigger and empty-delimiter rejection,
+unregister fallback, nested asymmetric, visual `S`, built-in unaffected, plus
+twelve override cases: `(` spacing, unregister restoring the built-in, nesting
+preserved, a quote override, the four alias cases, `t` and `f` as targets, and
+`<` as a replacement in both `cs` and visual `S`.
+
+Two independent negative controls, because relaxing registration and guarding
+dispatch are separable. With the guards stripped but registration relaxed,
+exactly the five guard-dependent cases fail — `alias_follows_target` returns
+`(hello) world`, `tag_target` and `func_target` delete nothing, and both
+`<`-as-replacement cases open the prompt instead of wrapping — while the four
+that only need `getSurroundPair` stay green. Swapping the resolver's two lookups
+so the alias resolves first fails `alias_takes_precedence` alone. Note that the
+browser tests import from `..`, which resolves to `dist/`: a control there needs
+`cm-buildhelper` re-run between editing `src/vim.js` and running them, or the
+built bundle stays fixed and every test passes vacuously.
 
 ### Block visual insert (`I`/`A`), change (`c`/`C`)
 

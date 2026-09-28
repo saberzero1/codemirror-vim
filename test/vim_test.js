@@ -6738,6 +6738,37 @@ testVim('dot_cs_quotes', function(cm, vim, helpers) {
   eq("'hello' 'world'", cm.getValue());
 }, { value: '"hello" "world"' });
 
+// A repeat must resolve the same pair the typed command would, from the
+// cursor itself. Column 12 is the last character before the second closing
+// quote; a forward-shifted search start reads that quote as the opening quote
+// of the following pair and yields '(test), "test(, )test", "test"'.
+testVim('dot_cs_quotes_cursor_before_closing_quote', function(cm, vim, helpers) {
+  cm.setCursor(0, 2);
+  helpers.doKeys('c', 's', '"', 'b');
+  eq('(test), "test", "test", "test"', cm.getValue());
+  cm.setCursor(0, 12);
+  helpers.doKeys('.');
+  eq('(test), (test), "test", "test"', cm.getValue());
+}, { value: '"test", "test", "test", "test"' });
+
+testVim('dot_cs_quotes_cursor_mid_word', function(cm, vim, helpers) {
+  cm.setCursor(0, 2);
+  helpers.doKeys('c', 's', '"', 'b');
+  eq('(test), "test", "test", "test"', cm.getValue());
+  cm.setCursor(0, 10);
+  helpers.doKeys('.');
+  eq('(test), (test), "test", "test"', cm.getValue());
+}, { value: '"test", "test", "test", "test"' });
+
+testVim('dot_cs_quotes_cursor_on_opening_quote', function(cm, vim, helpers) {
+  cm.setCursor(0, 2);
+  helpers.doKeys('c', 's', '"', 'b');
+  eq('(test), "test", "test", "test"', cm.getValue());
+  cm.setCursor(0, 8);
+  helpers.doKeys('.');
+  eq('(test), (test), "test", "test"', cm.getValue());
+}, { value: '"test", "test", "test", "test"' });
+
 testVim('dot_yss_quotes', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
   helpers.doKeys('y', 's', 's', '"');
@@ -7236,15 +7267,37 @@ testVim('custom_surround_cs_to_custom', function(cm, vim, helpers) {
   CodeMirror.Vim.unregisterSurroundPair('m');
 }, { value: '(hello) world' });
 
-testVim('custom_surround_reserved_char_rejected', function(cm, vim, helpers) {
+testVim('custom_surround_multichar_trigger_rejected', function(cm, vim, helpers) {
   var threw = false;
   try {
-    CodeMirror.Vim.registerSurroundPair('(', '<<', '>>');
+    CodeMirror.Vim.registerSurroundPair('ab', '<<', '>>');
   } catch (e) {
     threw = true;
   }
   is(threw);
 }, { value: 'test' });
+
+// An empty delimiter is rejected rather than stored: findSurroundingPair bails
+// on a zero width, so it would disable the character instead of rebinding it.
+testVim('custom_surround_empty_delimiter_rejected', function(cm, vim, helpers) {
+  var threwOpen = false;
+  var threwClose = false;
+  try {
+    CodeMirror.Vim.registerSurroundPair('q', '', '>>');
+  } catch (e) {
+    threwOpen = true;
+  }
+  try {
+    CodeMirror.Vim.registerSurroundPair('q', '<<', '');
+  } catch (e) {
+    threwClose = true;
+  }
+  is(threwOpen);
+  is(threwClose);
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', 'q');
+  eq('qhelloq world', cm.getValue());
+}, { value: 'hello world' });
 
 testVim('custom_surround_unregister', function(cm, vim, helpers) {
   CodeMirror.Vim.registerSurroundPair('l', '[[', ']]');
@@ -7277,6 +7330,119 @@ testVim('custom_surround_builtin_unaffected', function(cm, vim, helpers) {
   eq('hello world', cm.getValue());
   CodeMirror.Vim.unregisterSurroundPair('l');
 }, { value: '(hello) world' });
+
+// --- Overriding the built-in surround pairs ---
+
+// The built-in `(` inserts `( ` / ` )`; the override is what removes the spaces.
+testVim('custom_surround_override_open_paren_spacing', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('(', '(', ')');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', '(');
+  eq('(hello) world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('(');
+}, { value: 'hello world' });
+
+testVim('custom_surround_override_unregister_restores_builtin', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('(', '(', ')');
+  CodeMirror.Vim.unregisterSurroundPair('(');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', '(');
+  eq('( hello ) world', cm.getValue());
+}, { value: 'hello world' });
+
+// An overridden bracket keeps depth-aware matching: the search moves from the
+// built-in bracket scanner to the multi-character one, which counts depth too.
+testVim('custom_surround_override_paren_keeps_nesting', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('(', '(', ')');
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', '(');
+  eq('(hello) world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('(');
+}, { value: '((hello)) world' });
+
+testVim('custom_surround_override_quote', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('"', '\u00ab', '\u00bb');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', '"');
+  eq('\u00abhello\u00bb world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('"');
+}, { value: 'hello world' });
+
+// `b` means `)`, so overriding `)` has to reach it — otherwise `ysiwb` and
+// `ysiw)` would disagree about what the pair is.
+testVim('custom_surround_override_alias_follows_target', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair(')', '[[', ']]');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', 'b');
+  eq('[[hello]] world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair(')');
+}, { value: 'hello world' });
+
+// The raw character resolves before the alias, so an alias and its canonical
+// character can be overridden to different pairs without either leaking.
+testVim('custom_surround_override_alias_takes_precedence', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair(')', '[[', ']]');
+  CodeMirror.Vim.registerSurroundPair('b', '<<', '>>');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', 'b');
+  eq('<<hello>> world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair(')');
+  CodeMirror.Vim.unregisterSurroundPair('b');
+}, { value: 'hello world' });
+
+testVim('custom_surround_override_canonical_keeps_own_pair', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair(')', '[[', ']]');
+  CodeMirror.Vim.registerSurroundPair('b', '<<', '>>');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', ')');
+  eq('[[hello]] world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair(')');
+  CodeMirror.Vim.unregisterSurroundPair('b');
+}, { value: 'hello world' });
+
+testVim('custom_surround_override_alias_only_leaves_canonical', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('b', '<<', '>>');
+  cm.setCursor(0, 0);
+  helpers.doKeys('y', 's', 'i', 'w', ')');
+  eq('(hello) world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('b');
+}, { value: 'hello world' });
+
+// `t` normally reaches the tag finder, which would not match `<<…>>` at all.
+testVim('custom_surround_override_tag_target', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('t', '<<', '>>');
+  cm.setCursor(0, 3);
+  helpers.doKeys('d', 's', 't');
+  eq('hello world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('t');
+}, { value: '<<hello>> world' });
+
+// `f` normally reaches the function-call finder, which needs a `name(` shape.
+testVim('custom_surround_override_func_target', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('f', '%', '%');
+  cm.setCursor(0, 2);
+  helpers.doKeys('d', 's', 'f');
+  eq('hello world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('f');
+}, { value: '%hello% world' });
+
+// `<` as a replacement normally opens the tag-name prompt instead of wrapping.
+testVim('custom_surround_override_tag_replacement', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('<', '{{', '}}');
+  cm.setCursor(0, 3);
+  helpers.doKeys('c', 's', 'b', '<');
+  eq('{{hello}} world', cm.getValue());
+  eq('', vim.status || '');
+  CodeMirror.Vim.unregisterSurroundPair('<');
+}, { value: '(hello) world' });
+
+testVim('custom_surround_override_visual_S_tag_replacement', function(cm, vim, helpers) {
+  CodeMirror.Vim.registerSurroundPair('<', '{{', '}}');
+  cm.setCursor(0, 0);
+  helpers.doKeys('v', 'e', 'S', '<');
+  eq('{{hello}} world', cm.getValue());
+  CodeMirror.Vim.unregisterSurroundPair('<');
+}, { value: 'hello world' });
 
 // --- Doubled/nested symmetric surround (ds/cs on $$, "", etc.) ---
 
