@@ -90,12 +90,15 @@ export function initVim(CM) {
     { keys: '<S-BS>', type: 'keyToKey', toKeys: 'b' },
     { keys: '<C-n>', type: 'keyToKey', toKeys: 'j' },
     { keys: '<C-p>', type: 'keyToKey', toKeys: 'k' },
-    { keys: '<C-[>', type: 'keyToKey', toKeys: '<Esc>' },
+    // <C-[> is Escape (same 0x1b) so user <Esc> maps apply; <C-c> is a
+    // distinct Vim key and deliberately stays non-remappable.
+    { keys: '<C-[>', type: 'keyToKey', toKeys: '<Esc>', noremap: false },
     { keys: '<C-c>', type: 'keyToKey', toKeys: '<Esc>' },
-    { keys: '<C-[>', type: 'keyToKey', toKeys: '<Esc>', context: 'insert' },
+    { keys: '<C-[>', type: 'keyToKey', toKeys: '<Esc>', context: 'insert', noremap: false },
     { keys: '<C-c>', type: 'keyToKey', toKeys: '<Esc>', context: 'insert' },
-    { keys: '<C-Esc>', type: 'keyToKey', toKeys: '<Esc>' }, // ipad keyboard sends C-Esc instead of C-[
-    { keys: '<C-Esc>', type: 'keyToKey', toKeys: '<Esc>', context: 'insert' },
+    // ipad keyboard sends C-Esc instead of C-[
+    { keys: '<C-Esc>', type: 'keyToKey', toKeys: '<Esc>', noremap: false },
+    { keys: '<C-Esc>', type: 'keyToKey', toKeys: '<Esc>', context: 'insert', noremap: false },
     { keys: 's', type: 'keyToKey', toKeys: 'cl', context: 'normal' },
     { keys: 's', type: 'keyToKey', toKeys: 'c', context: 'visual'},
     { keys: 'S', type: 'keyToKey', toKeys: 'cc', context: 'normal' },
@@ -342,6 +345,7 @@ export function initVim(CM) {
     { name: 'sort', shortName: 'sor' },
     { name: 'substitute', shortName: 's', possiblyAsync: true },
     { name: 'startinsert', shortName: 'start' },
+    { name: 'stopinsert', shortName: 'stopi' },
     { name: 'nohlsearch', shortName: 'noh' },
     { name: 'yank', shortName: 'y' },
     { name: 'put', shortName: 'pu' },
@@ -1150,8 +1154,30 @@ export function initVim(CM) {
           }
         }
       }
+      // Vim lets ':imap <Esc>' / ':vmap <Esc>' win over the built-in mode
+      // exit, so the built-in only applies when no user mapping claims the
+      // key.  A mapping already being expanded is skipped: Vim falls back to
+      // the built-in rather than looping on ':imap <Esc> <Esc>'.
+      function userEscMappingClaims() {
+        var context = vim.insertMode ? 'insert'
+          : vim.selectMode ? 'select'
+          : 'visual';
+        var candidates = commandMatches(
+          vim.inputState.keyBuffer.join('') + key,
+          defaultKeymap, context, vim.inputState).full;
+        for (var ci = 0; ci < candidates.length; ci++) {
+          if (candidates[ci]._isDefault === false &&
+              keyToKeyStack.indexOf(candidates[ci]) == -1) {
+            return true;
+          }
+        }
+        return false;
+      }
       function handleEsc() {
         if (key == '<Esc>') {
+          if ((vim.insertMode || vim.visualMode) && userEscMappingClaims()) {
+            return;
+          }
           if (vim.visualMode) {
             // Get back to normal mode.
             exitVisualMode(cm);
@@ -9241,6 +9267,15 @@ export function initVim(CM) {
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     startinsert: function(cm, params) {
       doKeyToKey(cm, params.argString == '!' ? 'A' : 'i', {});
+    },
+    /** @arg {CodeMirrorV} cm */
+    stopinsert: function(cm) {
+      var vim = cm.state.vim;
+      // Outside insert mode Vim's :stopinsert is a no-op; routing through
+      // <Esc> instead would fire normal-mode Escape side effects.
+      if (!vim || !vim.insertMode) return;
+      exitInsertMode(cm);
+      clearInputState(cm);
     },
     redo: CM.commands.redo,
     undo: CM.commands.undo,

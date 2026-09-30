@@ -1168,6 +1168,63 @@ handler, so deferred `keyToKey` mappings (e.g., `noremap` with a
 deferred state are cleared on successful full match, `clearInputState`, and
 each new keypress.
 
+### User `<Esc>` mappings win over the built-in mode exit
+
+**File**: `src/vim.js` — `handleEsc`, `userEscMappingClaims`, `defaultKeymap`
+
+Upstream calls `handleEsc()` before `matchCommand()` in both
+`handleKeyInsertMode` and `handleKeyNonInsertMode`, so `<Esc>` exits insert or
+visual mode unconditionally and the mapping table is never consulted for it.
+`:imap <Esc> …` and `:vmap <Esc> …` are therefore silently dead — the one key
+no mapping can claim. Neovim honours them: measured on 0.12.5 under
+`nvim --clean`, `inoremap <Esc> XY` then `a` `<Esc>` yields `aXYbc`, and
+`xnoremap <Esc> ll` leaves visual mode active with the cursor two columns
+right.
+
+`handleEsc()` now consults `userEscMappingClaims()` first and returns without
+acting when a user mapping claims the key, letting the normal dispatch path
+resolve it. The resolver reuses `commandMatches` against the current context
+(`insert`, `select`, or `visual`) with `keyBuffer.join('') + key`, and accepts a
+candidate only when both hold:
+
+1. **`_isDefault === false`** — only a user-registered entry may override the
+   built-in exit. No built-in entry has `keys: '<Esc>'`, so this cannot change
+   the outcome today; it states the predicate the resolver is for, and keeps a
+   default `<Esc>` entry added later from diverting the built-in exit into
+   itself. Nothing else in the resolver distinguishes default from user entries,
+   so unlike the `noremap` check discussed below it is not a duplicate of logic
+   enforced elsewhere.
+2. **Not already on `keyToKeyStack`** — a mapping currently being expanded is
+   skipped, so the recursive `imap <Esc> <Esc>` falls back to the built-in exit
+   instead of resolving to a no-op. Neovim leaves the buffer unchanged in that
+   case (its mode is not readable from an `nvim_feedkeys(…, 'mtx')` probe, which
+   drains typeahead and ends insert mode regardless); the fork's own e2e
+   coverage asserts it reaches normal mode.
+
+Only **full** matches count. Partial matches are deliberately ignored, which
+matches Neovim — with `inoremap <Esc>q ZZ` and nothing bound to bare `<Esc>`,
+Neovim still exits insert mode — and here it is also a safety property. The
+insert-mode partial branch in `handleKeyInsertMode` returns consumed without
+arming `lastInsertModeKeyTimer` when the buffer contains a non-character key
+(`hasNonCharKey`), so honouring the partial would swallow `<Esc>` indefinitely
+and leave no way out of insert mode at all.
+
+The `<C-[>` and `<C-Esc>` keyToKey entries in `defaultKeymap` now carry
+`noremap: false` while the adjacent `<C-c>` entries deliberately do not.
+`<C-[>` *is* Escape — both send `0x1b` — and Neovim applies an `<Esc>` mapping
+to it, while `<C-c>` is a distinct key and must stay unmapped so it remains a
+dependable way out of insert mode. Measured: with `inoremap <Esc> XY` active,
+`a` `<C-[>` gives `aXYbc` and `a` `<C-c>` gives `abc`. That single property is
+the whole mechanism — `commandMatches` already skips user entries during a
+`noremap` expansion through
+`startIndex = noremap ? keyMap.length - defaultKeymapLength : 0`, so no
+`noremap` check is needed inside `userEscMappingClaims`; an explicit one was
+written and then removed after no test could distinguish its presence.
+
+Normal mode is unaffected: `handleEsc()` already fell through to the normal
+dispatch path there, so the guard is applied only when `insertMode` or
+`visualMode` is set.
+
 ### Visual operator cursor re-clamping after `exitVisualMode`
 
 **File**: `src/vim.js` — `applyOperator`
@@ -2228,6 +2285,34 @@ from `cm.firstLine()` to `cm.lastLine()`.
 `:d{count}` now parses the count from `params.args` and extends the deletion
 range. `:d3` deletes 3 lines starting from the current line. Previously,
 the count was ignored.
+
+### `:stopinsert` — leave insert mode
+
+**File**: `src/vim.js` — `defaultExCommandMap`, `exCommands.stopinsert`
+
+Added `{ name: 'stopinsert', shortName: 'stopi' }` and the matching
+`exCommands.stopinsert`. Upstream ships `:startinsert` with no counterpart, so
+there was no way to leave insert mode from an ex command, a mapping rhs, or a
+host callback without synthesizing a key.
+
+The implementation calls `exitInsertMode(cm)` followed by `clearInputState(cm)`
+behind an `if (!vim || !vim.insertMode) return` guard, mirroring what
+`handleEsc()` does for the insert branch. Measured against Neovim 0.12.5:
+`:stopinsert` is indistinguishable from `<Esc>` on the way out — `A` `x` on
+`hello` leaves `hellox` with the cursor on column `5` either way — and it is a
+no-op outside insert mode, leaving the mode, buffer, and cursor untouched.
+
+It deliberately does **not** route through `doKeyToKey(cm, '<Esc>')` the way
+`startinsert` routes through `i`/`A`. In normal mode that path reaches the
+`command === false` branch of `handleKey`, which for `<Esc>` in idle normal mode
+invokes `_idleEscapeCallback` — a host hook that dismisses popovers and blurs
+non-workspace editors. Routing through it would give a command Vim defines as
+doing nothing a set of visible side effects. Calling `exitInsertMode` directly
+keeps the no-op genuinely inert.
+
+Because the guard checks `insertMode` rather than delegating to `<Esc>`, a user
+mapping on `<Esc>` does not intercept `:stopinsert` either, which is correct:
+`:stopinsert` is defined to end insert mode, not to replay the Escape key.
 
 ### Insert `<C-U>` — delete to insert-start position
 
