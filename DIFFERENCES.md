@@ -122,7 +122,9 @@ state.
    remove the inline `caret-color: transparent !important` set by `update()`.
 2. Iterates native CM6 cursor layers
    (`.cm-cursorLayer:not(.cm-vimCursorLayer)`) and removes the inline
-   `display: none` set by `update()`.
+   `display: none` set by `update()`. Scoped to layers this view owns — see
+   **Cursor layer ownership** below — so it cannot clear a `display` property
+   it never set on a nested editor's layer.
 
 Previously, `destroy()` only removed the vim cursor layer DOM element and
 cleaned up the per-view override map. The inline styles persisted on the
@@ -136,6 +138,58 @@ disabled at runtime via `Compartment.reconfigure([])` or mutable array +
 `updateOptions()`, CM6 calls `destroy()` on the `BlockCursorPlugin`. The
 native CM6 cursor must reappear for the editor to function as a standard
 text editor without vim.
+
+### Cursor layer ownership (nested `EditorView` safety)
+
+**File**: `src/block-cursor.ts`
+
+`BlockCursorPlugin.update()` hides native CM6 cursor layers so the fork's own
+cursor is the only one rendered:
+
+```ts
+let nativeLayers = this.view.scrollDOM.querySelectorAll(
+  ".cm-cursorLayer:not(.cm-vimCursorLayer)");
+for (...) nativeLayers[i].style.display = "none";
+```
+
+That is correct for the view's own layer and wrong for any **other**
+`EditorView` a host mounts inside this one's `scrollDOM`. `querySelectorAll`
+is a subtree query and does not stop at an editor boundary, so a nested
+editor's cursor layer matched too and was hidden — leaving that editor with a
+caret element that is present, positioned and focused, but invisible.
+
+Both loops now skip layers the view does not own:
+
+```ts
+ownsLayer(layer: HTMLElement): boolean {
+  return layer.closest(".cm-editor") === this.view.dom;
+}
+```
+
+A nested editor's layer resolves `closest(".cm-editor")` to its own editor
+root rather than the outer view's `dom`, so it is left alone. The guard is
+generic: it asserts only "this view's layers" and knows nothing about what the
+host nests.
+
+**Why this matters.** The Vim Motions plugin's `tableWidgetMode: 'owned'`
+surface block-replaces a Markdown table and mounts a nested `EditorView`
+inside the replaced range to host the caret. That editor is deliberately built
+**without** the vim extension — the parent's vim owns commands, mode and
+registers — so it has no `BlockCursorPlugin` of its own and draws its caret
+with plain `drawSelection()`. Before this change the parent's plugin hid that
+caret, and a table cell had no visible cursor at all.
+
+Measured against that surface, caret parked in a cell:
+
+| | nested cursor layer | caret |
+|---|---|---|
+| before | inline `display: none`, 1 child | `0x0` |
+| after | `display: block`, 1 child | `1x19` at `1146,253`, inside a cell whose box starts at `1127,203` |
+
+The `0x0` is worth recording: a `display: none` element reports no bounding
+box, so any probe that measured the caret's geometry was measuring the
+consequence rather than the cause. The defect is only visible by reading the
+layer's `display`, or by instrumenting `update()`/`drawSel()` directly.
 
 ### Testing API surface
 

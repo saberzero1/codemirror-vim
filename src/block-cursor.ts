@@ -160,6 +160,11 @@ export class BlockCursorPlugin {
     _livePlugins.add(this)
   }
 
+  /** True when `layer` belongs to this view rather than a nested EditorView. */
+  ownsLayer(layer: HTMLElement): boolean {
+    return layer.closest(".cm-editor") === this.view.dom;
+  }
+
   setBlinkRate() {
     let config = getDrawSelectionConfig(this.cm.cm6.state);
     let blinkRate = config.cursorBlinkRate;
@@ -171,8 +176,15 @@ export class BlockCursorPlugin {
     let inTableCell = this.view.dom.closest('.cm-table-widget') !== null;
     if (suppressed && inTableCell) suppressed = false;
     // Always hide native CM6 cursor layers — the fork renders its own cursor for every mode.
+    // Only this view's own, though: a host may mount a second EditorView inside
+    // this one's scrollDOM (Obsidian's owned table surface does), and that view
+    // draws its caret with plain drawSelection(). Hiding its layer leaves it
+    // with a cursor element that is present, focused and invisible.
     let nativeLayers = this.view.scrollDOM.querySelectorAll(".cm-cursorLayer:not(.cm-vimCursorLayer)") as NodeListOf<HTMLElement>;
-    for (let i = 0; i < nativeLayers.length; i++) nativeLayers[i].style.display = "none";
+    for (let i = 0; i < nativeLayers.length; i++) {
+      if (!this.ownsLayer(nativeLayers[i])) continue;
+      nativeLayers[i].style.display = "none";
+    }
     this.applyCaretColor(suppressed);
     if (suppressed) {
       this.cursorLayer.style.display = "none";
@@ -268,6 +280,7 @@ export class BlockCursorPlugin {
       ".cm-cursorLayer:not(.cm-vimCursorLayer)"
     ) as NodeListOf<HTMLElement>;
     for (let i = 0; i < nativeLayers.length; i++) {
+      if (!this.ownsLayer(nativeLayers[i])) continue;
       nativeLayers[i].style.removeProperty("display");
     }
   }
