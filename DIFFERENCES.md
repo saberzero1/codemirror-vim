@@ -191,6 +191,86 @@ box, so any probe that measured the caret's geometry was measuring the
 consequence rather than the cause. The defect is only visible by reading the
 layer's `display`, or by instrumenting `update()`/`drawSel()` directly.
 
+### `vimCursorFromSource` — a vim cursor in a view with no vim state
+
+**File**: `src/block-cursor.ts`
+
+```ts
+export function vimCursorFromSource(
+  getSource: () => CodeMirror | null | undefined,
+): Extension
+```
+
+Draws the fork's cursor in an `EditorView` that has **no vim state of its
+own**, reading mode from an adapter supplied by the host.
+
+Restoring the nested editor's caret (see **Cursor layer ownership** above) only
+established that a caret was visible. It was `drawSelection()`'s — a 1px bar,
+identical in every vim mode — so inside a table cell normal mode and insert
+mode were indistinguishable, and none of the fork's per-mode shapes,
+`caret-color` handling or suppression applied.
+
+The obvious fix is wrong: giving the nested editor its own vim extension would
+give it a **second** vim state, and the host's whole reason for not doing so is
+that one state must keep owning commands, registers, mode and dot-repeat.
+Hence a cursor that renders in one view and reads its mode from another.
+
+The plugin attaches lazily, because the host's adapter is not necessarily
+resolvable when the child is constructed:
+
+```ts
+attach() {
+  if (this.cursor) return;
+  let cm = getSource();
+  if (cm && cm.state.vim) this.cursor = new BlockCursorPlugin(this.view, cm);
+}
+```
+
+**Hosts must force a redraw on mode change, and `refreshVimCursors()` is how.**
+A vim mode change produces **no transaction in the view this cursor draws in**
+— the keys go to the view that owns the vim state — so without a host-side
+nudge the cursor keeps whatever shape it was first measured with. Measured in
+the Vim Motions `owned` table surface: the child's cursor plugin received
+**zero** updates across an `i` and an `<Esc>`, and the block stayed `10x19`
+throughout insert mode.
+
+```ts
+export function refreshVimCursors(): void
+```
+
+Redraws every live cursor plugin, reusing the `_livePlugins` mechanism
+`setExternalCursorMode` already drives. The host calls it when the source's
+`insertMode`/`visualMode`/`visualLine`/`visualBlock` signature changes.
+
+It must be a **measurement pass rather than a transaction**, which is the whole
+reason this is an API rather than a line of host code. Nudging the child with a
+forced selection dispatch also redraws the cursor correctly — and measurably
+broke two unrelated things in the host: the dispatch carries `scrollIntoView`,
+which moved the child's scroller under `scrolloff=100`, and routing it through
+the host's reconcile churned mounts, breaking remount-on-re-entry. Both were
+confirmed by stashing the host change and re-running. `requestMeasure` has
+neither effect, and for the same reason cannot disturb an input method
+composing over the editor.
+
+Hosts should also hide `drawSelection()`'s cursor layer in that view, or its
+bar renders beside the block — measured `10x19` and `1x19` together in normal
+mode. Only the cursor layer: the selection layer is what renders a mirrored
+visual range.
+
+Measured in a table cell, caret parked mid-cell:
+
+| mode | fork cursor | `drawSelection()` caret | browser caret |
+|---|---|---|---|
+| normal | `10x19` | hidden | `transparent` |
+| insert | none | hidden | accent |
+| normal (returned) | `10x19` | hidden | `transparent` |
+
+Insert mode drawing nothing is correct, not a regression: `measureCursor` sets
+`showCursor = !insertMode || overwrite || shape !== "bar"`, so for a bar shape
+the fork deliberately suppresses its own element and tints the **real** browser
+caret through `caret-color` instead. A probe that measures only
+`.cm-fat-cursor` reads that as "no caret" and is measuring the wrong thing.
+
 ### Testing API surface
 
 **File**: `src/vim.js`

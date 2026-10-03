@@ -1,5 +1,5 @@
-import { SelectionRange, Prec } from "@codemirror/state"
-import { ViewUpdate, EditorView, Direction } from "@codemirror/view"
+import { SelectionRange, Prec, Extension } from "@codemirror/state"
+import { ViewUpdate, EditorView, Direction, ViewPlugin } from "@codemirror/view"
 import { CodeMirror } from "."
 
 import * as View  from "@codemirror/view"
@@ -45,6 +45,19 @@ export function setExternalCursorMode(mode: ExternalCursorMode | null): void {
 
 export function getExternalCursorMode(): ExternalCursorMode | null {
   return _externalCursorMode;
+}
+
+/**
+ * Redraws every live vim cursor.
+ *
+ * For a host whose vim mode changed without producing a ViewUpdate in the view
+ * the cursor draws in — the `vimCursorFromSource` case, where the keys go to a
+ * different view entirely. Like `setExternalCursorMode`, this is a measurement
+ * pass rather than a transaction, so it cannot move a selection, scroll a
+ * viewport or disturb an input method composing over the editor.
+ */
+export function refreshVimCursors(): void {
+  for (const plugin of _livePlugins) plugin.refreshExternalMode();
 }
 
 export function setCursorSuppressed(suppressed: boolean): void {
@@ -332,6 +345,22 @@ type EffectiveVimState = {
   visualMode: boolean,
   status: string,
   shapes: CursorShapeConfig,
+}
+
+export function vimCursorFromSource(
+  getSource: () => CodeMirror | null | undefined,
+): Extension {
+  return ViewPlugin.fromClass(class {
+    cursor: BlockCursorPlugin | null = null;
+    constructor(readonly view: EditorView) { this.attach(); }
+    attach() {
+      if (this.cursor) return;
+      let cm = getSource();
+      if (cm && cm.state.vim) this.cursor = new BlockCursorPlugin(this.view, cm);
+    }
+    update(update: ViewUpdate) { this.attach(); this.cursor?.update(update); }
+    destroy() { this.cursor?.destroy(); this.cursor = null; }
+  });
 }
 
 function effectiveVimState(cm: CodeMirror): EffectiveVimState | null {

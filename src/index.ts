@@ -611,7 +611,7 @@ export function resetForkedVimState(): void {
 
 export { CodeMirror, Vim };
 export { foldopenAnnotation, setLivePreviewField, setPropertiesSource } from "./cm_adapter";
-export { setCursorSuppressed, setCursorSuppressedForView, clearCursorSuppressedForView, isCursorSuppressedForView, isCursorSuppressed, resetCursorState, getViewOverrideCount, setExternalCursorMode, getExternalCursorMode } from "./block-cursor";
+export { setCursorSuppressed, setCursorSuppressedForView, clearCursorSuppressedForView, isCursorSuppressedForView, isCursorSuppressed, resetCursorState, getViewOverrideCount, setExternalCursorMode, getExternalCursorMode, vimCursorFromSource, refreshVimCursors } from "./block-cursor";
 export type { CursorShape, CursorShapeConfig, ExternalCursorMode } from "./block-cursor";
 export type { FoldopenCategory } from "./types";
 
