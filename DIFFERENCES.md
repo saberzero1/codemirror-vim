@@ -265,11 +265,73 @@ Measured in a table cell, caret parked mid-cell:
 | insert | none | hidden | accent |
 | normal (returned) | `10x19` | hidden | `transparent` |
 
-Insert mode drawing nothing is correct, not a regression: `measureCursor` sets
-`showCursor = !insertMode || overwrite || shape !== "bar"`, so for a bar shape
-the fork deliberately suppresses its own element and tints the **real** browser
-caret through `caret-color` instead. A probe that measures only
-`.cm-fat-cursor` reads that as "no caret" and is measuring the wrong thing.
+Insert mode drawing nothing is correct **only where a native caret exists**:
+`measureCursor` sets `showCursor = !insertMode || overwrite || shape !== "bar"`,
+so for a bar shape the fork suppresses its own element and tints the **real**
+browser caret through `caret-color` instead. A probe that measures only
+`.cm-fat-cursor` reads that as "no caret" and is measuring the wrong thing —
+but in a view that has no usable native caret it really is no caret, which is
+what `nativeCaretUnavailable` below exists for.
+
+### `nativeCaretUnavailable` — when the browser caret is not available
+
+**File**: `src/block-cursor.ts`
+
+```ts
+export interface VimCursorFromSourceOptions {
+  nativeCaretUnavailable?: boolean;
+}
+```
+
+The deferral described above assumes the host has a browser caret to tint. A
+view with `drawSelection()` installed does not: its theme sets
+
+```
+caret-color: transparent !important
+```
+
+on `.cm-line`, so it can draw its own caret. The fork's inline `!important` on
+`contentDOM` wins at `.cm-content`, but the caret paints inside `.cm-line` and
+loses there — so insert mode showed **no caret at all** wherever the resolved
+shape was `bar`, which is the default.
+
+That took a stylesheet enumeration to pin down, because every obvious reading
+looked healthy. Measured in the Vim Motions `owned` table surface:
+
+| | `.cm-content` | `.cm-line` | caret |
+|---|---|---|---|
+| host's main editor, insert | `rgb(138, 92, 245)` | `rgb(138, 92, 245)` | visible |
+| nested cell editor, insert | `rgb(138, 92, 245)` | `rgba(0, 0, 0, 0)` | **invisible** |
+
+Enumerating every `caret-color` rule in the document and testing which match
+the nested line yields exactly one, and it matches the nested editor only:
+
+```
+NESTED  {transparent !imp}  .ͼ4 .cm-line
+```
+
+`ͼ4` is CodeMirror's generated theme class for `drawSelection()`. Focus was
+never involved — the view is focused and its DOM selection is collapsed inside
+it.
+
+With the option set, the gate gains one term:
+
+```ts
+let showCursor = !effective.insertMode || effective.overwrite || shape !== 'bar'
+  || nativeCaretUnavailable;
+```
+
+**It changes only whether a cursor is drawn, never which shape.** `shape` is
+still whatever `resolveShape` returned from the source's `cursorShapes`, so a
+user who configured `insert: 'block'` or `'underline'` keeps it; only the
+default `bar` changes from "defer to the browser" to "draw a 2px bar".
+`applyCaretColor` also forces `transparent` under this option, since the
+plugin now draws in every mode and tinting a native caret could only produce a
+second one.
+
+Measured in a cell with the option set: insert draws
+`cm-fat-cursor cm-cursor-primary cm-cursor-bar` at 2px wide, normal draws a
+10px block, and configuring `insert: 'block'` yields a block in insert mode.
 
 ### Testing API surface
 

@@ -162,7 +162,8 @@ export class BlockCursorPlugin {
   cm: CodeMirror
   _pendingDeferred: number = 0
 
-  constructor(readonly view: EditorView, cm: CodeMirror) {
+  constructor(readonly view: EditorView, cm: CodeMirror,
+              readonly nativeCaretUnavailable = false) {
     this.cm = cm;
     this.measureReq = {read: this.readPos.bind(this), write: this.drawSel.bind(this)}
     this.cursorLayer = view.scrollDOM.appendChild(document.createElement("div"))
@@ -228,7 +229,9 @@ export class BlockCursorPlugin {
   applyCaretColor(suppressed: boolean) {
     let effective = effectiveVimState(this.cm);
     let inInsertMode = effective && effective.insertMode && !effective.overwrite;
-    if (!inInsertMode || suppressed) {
+    // With no usable native caret this plugin draws in every mode, so tinting
+    // one would only risk a second caret if the host ever restores it.
+    if (!inInsertMode || suppressed || this.nativeCaretUnavailable) {
       this.view.contentDOM.style.setProperty("caret-color", "transparent", "important");
     } else {
       this.view.contentDOM.style.setProperty("caret-color", "var(--interactive-accent, #ff9696)", "important");
@@ -254,7 +257,7 @@ export class BlockCursorPlugin {
     let cursors: Piece[] = []
     for (let r of state.selection.ranges) {
       let prim = r == state.selection.main
-      let piece = measureCursor(this.cm, this.view, r, prim)
+      let piece = measureCursor(this.cm, this.view, r, prim, this.nativeCaretUnavailable)
       if (piece) cursors.push(piece)
     }
     return {cursors}
@@ -347,8 +350,23 @@ type EffectiveVimState = {
   shapes: CursorShapeConfig,
 }
 
+export interface VimCursorFromSourceOptions {
+  /**
+   * Set when this view has no usable native caret — typically because
+   * `drawSelection()` is installed, whose theme sets
+   * `caret-color: transparent !important` on `.cm-line` so it can draw its
+   * own. Without this the cursor is simply absent in insert mode wherever the
+   * resolved shape is `bar`, since that case defers to the browser caret.
+   *
+   * It changes only *whether* a cursor is drawn, never which shape: a
+   * configured `insert: 'block'` or `'underline'` is unaffected either way.
+   */
+  nativeCaretUnavailable?: boolean;
+}
+
 export function vimCursorFromSource(
   getSource: () => CodeMirror | null | undefined,
+  options: VimCursorFromSourceOptions = {},
 ): Extension {
   return ViewPlugin.fromClass(class {
     cursor: BlockCursorPlugin | null = null;
@@ -356,7 +374,9 @@ export function vimCursorFromSource(
     attach() {
       if (this.cursor) return;
       let cm = getSource();
-      if (cm && cm.state.vim) this.cursor = new BlockCursorPlugin(this.view, cm);
+      if (cm && cm.state.vim)
+        this.cursor = new BlockCursorPlugin(this.view, cm,
+                                            !!options.nativeCaretUnavailable);
     }
     update(update: ViewUpdate) { this.attach(); this.cursor?.update(update); }
     destroy() { this.cursor?.destroy(); this.cursor = null; }
@@ -395,7 +415,8 @@ function resolveShape(cm: CodeMirror): CursorShape {
   return shapes.normal ?? 'block';
 }
 
-function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange, primary: boolean): Piece | null {
+function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange, primary: boolean,
+                       nativeCaretUnavailable = false): Piece | null {
   let head = cursor.head;
   let fatCursor = false;
   let hCoeff = 1;
@@ -404,7 +425,13 @@ function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange,
   let shape: CursorShape = 'block';
   if (vim && effective) {
     shape = resolveShape(cm);
-    let showCursor = !effective.insertMode || effective.overwrite || shape !== 'bar';
+    // A bar in insert mode is normally left to the real browser caret, which
+    // the host's `caret-color` then tints. A view whose native caret has been
+    // suppressed has no such caret, so draw the bar instead of nothing. The
+    // shape itself is still whatever `resolveShape` returned, so a user who
+    // configured `insert: 'block'` or `'underline'` keeps it.
+    let showCursor = !effective.insertMode || effective.overwrite || shape !== 'bar'
+      || nativeCaretUnavailable;
     if (showCursor) {
       fatCursor = true;
       if (vim.visualBlock && !primary)

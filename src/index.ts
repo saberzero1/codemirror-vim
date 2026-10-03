@@ -1,6 +1,7 @@
 import { initVim } from "./vim";
 import { CodeMirror } from "./cm_adapter";
 import { BlockCursorPlugin, hideNativeSelection } from "./block-cursor";
+export type { VimCursorFromSourceOptions } from "./block-cursor";
 import {
   Extension,
   StateField,
