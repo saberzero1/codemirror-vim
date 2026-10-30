@@ -6288,8 +6288,14 @@ export function initVim(CM) {
     // sequence, so that the key buffer is not cleared.
     if (inputState.operator) context = "operatorPending";
     var match, partial = [], full = [];
-    // if currently expanded key comes from a noremap, searcg only in default keys
-    var startIndex = noremap ? keyMap.length - defaultKeymapLength : 0;
+    // if currently expanded key comes from a noremap, search only in default
+    // keys -- except for a <Plug> name, which Vim and Neovim remap even from a
+    // noremap rhs: it is how a user reaches a plugin's mapping, and nnoremap
+    // and Lua's vim.keymap.set are noremap by default. Neovim 0.12.5 with
+    // `nmap <Plug>(down) j`, `nmap l k`, `nnoremap Q <Plug>(down)l`: Q runs j
+    // and then a plain l.
+    var startIndex = noremap && !/^<plug>/i.test(keys)
+      ? keyMap.length - defaultKeymapLength : 0;
     for (var i = startIndex; i < keyMap.length; i++) {
       var command = keyMap[i];
       if (context == 'insert' && command.context != 'insert' ||

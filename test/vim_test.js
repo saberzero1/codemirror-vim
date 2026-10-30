@@ -5942,6 +5942,23 @@ testVim('noremap_map_interaction2', function(cm, vim, helpers) {
   eqCursorPos(new Pos(0, 0), cm.getCursor());
 }, { value: 'wOrd1\nwOrd2' });
 
+// A <Plug> name is remapped even from a noremap rhs, as in Vim and Neovim;
+// the keys after it stay noremap.
+testVim('noremap_plug', function(cm, vim, helpers) {
+  CodeMirror.Vim.map('<Plug>(down)', 'j', 'normal');
+  CodeMirror.Vim.map('l', 'k', 'normal');
+  CodeMirror.Vim.noremap('R', '<Plug>(down)', 'normal');
+  CodeMirror.Vim.noremap('Q', '<Plug>(down)l', 'normal');
+  cm.setCursor(0, 0);
+  helpers.doKeys('R');
+  eqCursorPos(new Pos(1, 0), cm.getCursor());
+  cm.setCursor(0, 0);
+  helpers.doKeys('Q');
+  eqCursorPos(new Pos(1, 1), cm.getCursor());
+  eq('abc\nabc\nabc', cm.getValue());
+  helpers.doEx('mapclear');
+}, { value: 'abc\nabc\nabc' });
+
 testVim('gq_and_gw', function(cm, vim, helpers) {
   cm.setValue(
     "1\n2\nhello world\n"
