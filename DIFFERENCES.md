@@ -1074,6 +1074,28 @@ is ignored for the native fallback (native paste fires once). Dot-repeat
 (`.`) replays the `p` key, which re-enters the `paste` action and
 re-evaluates the clipboard.
 
+### CodeMirror 5 suite not run in CI
+
+**Files**: `package.json` (`testAll`, `testCm5`), `.github/workflows/ci.yml`
+
+Upstream's `testAll` runs the browser suite a second time against the
+CodeMirror 5 build in `dev/cm5`. This fork publishes only the CodeMirror 6
+build (`dist`), and nothing it serves uses CodeMirror 5 for editing: Obsidian
+keeps CodeMirror 5 for its Markdown mode and code-block language modes, and its
+own vim runs on its CodeMirror 6 adapter.
+
+21 tests of fork-only features fail under CodeMirror 5 because they need
+adapter methods only the CodeMirror 6 adapter has: 12 call
+`overWriteSelection` (replace mode, `vim_on_mode_change`, `vim_ex_imap`), 8 call
+`virtualReplaceChar` (virtual replace), and `vim_changeCase_visual_block` reads
+`length` of undefined. CI never reached them: `testAll` stopped at the
+CodeMirror 6 phase, which failed on the `leaveVimMode` double call until that
+was fixed, so they were never seen.
+
+`testAll` now runs the CodeMirror 6 suite only, and CI no longer installs
+`dev/cm5`. `dev/cm5` stays in the tree, which keeps merges from upstream
+simple, and `yarn run testCm5` still runs that suite on demand.
+
 ## Behavioral fixes (Neovim parity)
 
 All changes below match verified Neovim behavior. Fork test expectations

@@ -20,6 +20,5 @@ jobs:
           node-version: 22
 
       - run: yarn install
-      - run: cd ./dev/cm5 && yarn install
       - run: yarn run build
       - run: yarn run testAll
