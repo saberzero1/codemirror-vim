@@ -603,6 +603,15 @@ renders the wrong character. Cleaned up via `cancelAnimationFrame` in
   from firing against a destroyed editor)
 - Clears `virtualPrompt` (prevents dangling prompt state)
 - Resets `vim.inputState` (clears any pending key prefix, operator, or motion)
+- Is safe to call again. Upstream removes the paste listener with
+  `getOnPasteFn(cm)`, which reads `cm.state.vim` and so throws once a first
+  call has nulled it. The `leaveVimMode` tests call it explicitly, and the
+  view's `destroy()` calls it again when the harness tears the editor down:
+  CI failed `vim_leaveVimMode_clears_input_state` with
+  `Cannot read properties of null (reading 'onPasteFn')` on every push since
+  at least 6.4.1. The listener is now read from the state and removed only if
+  it exists. `vim_leaveVimMode_twice` calls it twice and fails with that
+  error without the fix.
 
 ### Default keymap protection
 

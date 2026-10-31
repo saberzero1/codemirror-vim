@@ -423,8 +423,11 @@ export function initVim(CM) {
 
     cm.setOption('disableInput', false);
     cm.off('cursorActivity', onCursorActivity);
+    // The listener is read from the state rather than built by getOnPasteFn,
+    // which dereferences cm.state.vim: on a second call, such as a view
+    // destroyed after an explicit leaveVimMode, that threw.
     // @ts-ignore
-    CM.off(cm.getInputField(), 'paste', getOnPasteFn(cm));
+    if (vim && vim.onPasteFn) CM.off(cm.getInputField(), 'paste', vim.onPasteFn);
     cm.state.vim = null;
     if (highlightTimeout) clearTimeout(highlightTimeout);
   }

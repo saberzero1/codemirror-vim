@@ -7928,6 +7928,15 @@ testVim('leaveVimMode_from_insert_mode', function(cm, vim, helpers) {
   eq(null, cm.state.vim);
 }, { value: 'abc' });
 
+// A second call finds no vim state. It used to build the paste listener it
+// was removing from that state and throw, which is what the two tests above
+// hit when the next test's setup destroyed their view.
+testVim('leaveVimMode_twice', function(cm, vim, helpers) {
+  CodeMirror.Vim.leaveVimMode(cm);
+  CodeMirror.Vim.leaveVimMode(cm);
+  eq(null, cm.state.vim);
+}, { value: 'abc' });
+
 // --- getKeymap() API tests ---
 
 testVim('getKeymap_returns_array', function(cm, vim, helpers) {
