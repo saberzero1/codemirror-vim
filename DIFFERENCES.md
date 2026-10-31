@@ -1412,14 +1412,40 @@ to it, while `<C-c>` is a distinct key and must stay unmapped so it remains a
 dependable way out of insert mode. Measured: with `inoremap <Esc> XY` active,
 `a` `<C-[>` gives `aXYbc` and `a` `<C-c>` gives `abc`. That single property is
 the whole mechanism — `commandMatches` already skips user entries during a
-`noremap` expansion through
-`startIndex = noremap ? keyMap.length - defaultKeymapLength : 0`, so no
+`noremap` expansion through its `startIndex`, which starts at the default
+keymap unless the keys begin with `<Plug>` (see the next section), so no
 `noremap` check is needed inside `userEscMappingClaims`; an explicit one was
 written and then removed after no test could distinguish its presence.
 
 Normal mode is unaffected: `handleEsc()` already fell through to the normal
 dispatch path there, so the guard is applied only when `insertMode` or
 `visualMode` is set.
+
+### `<Plug>` names remap from a noremap rhs
+
+**File**: `src/vim.js` — `commandMatches`
+**Test**: `test/vim_test.js` — `noremap_plug`
+
+Upstream's `commandMatches` searches only the default keymap while it resolves
+keys from a `noremap` expansion
+(`startIndex = noremap ? keyMap.length - defaultKeymapLength : 0`). A `<Plug>`
+name in a noremap rhs therefore never reached the user mapping that defines it:
+`nnoremap Q <Plug>(x)`, and every Lua `vim.keymap.set`, which is noremap by
+default, ran the name as literal keys. Its `i` could switch to insert mode and
+type the rest of the name into the document.
+
+Vim and Neovim remap a `<Plug>` name even from a noremap rhs, since that is how
+a user reaches a plugin's mapping, and keep the keys after it noremap. Measured
+on Neovim 0.12.5 with `nmap <Plug>(down) j`, `nmap l k` and
+`nnoremap Q <Plug>(down)l`: `Q` runs `j` and then a plain `l`, not the remapped
+`k`.
+
+The search now starts at the user mappings when the keys being resolved begin
+with `<Plug>`, compared case-insensitively, and at the defaults otherwise. The
+`noremap` flag itself is untouched, so the keys after the name are still
+resolved noremap: in the test, `Q` lands one line down and one column right.
+Removing the `<Plug>` exception fails the test: `R` runs the name as keys and
+leaves the cursor at line 2, column 2 instead of line 1, column 0 (zero-based).
 
 ### Visual operator cursor re-clamping after `exitVisualMode`
 
