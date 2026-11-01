@@ -7937,6 +7937,31 @@ testVim('leaveVimMode_twice', function(cm, vim, helpers) {
   eq(null, cm.state.vim);
 }, { value: 'abc' });
 
+// Removing a command leaves a user mapping on the same keys in place.
+testVim('removeMapCommand_keeps_user_mapping', function(cm, vim, helpers) {
+  CodeMirror.Vim.map('gz', 'x', 'normal');
+  CodeMirror.Vim.mapCommand('gz', 'motion', 'moveToEol', {});
+  CodeMirror.Vim.removeMapCommand('gz');
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'z');
+  eq('bc', cm.getValue());
+  helpers.doEx('mapclear');
+}, { value: 'abc' });
+
+// With `toKeys`, unmap removes that user mapping and nothing else: not the
+// command for the same keys in front of it, and not a different mapping.
+testVim('unmap_exact_mapping', function(cm, vim, helpers) {
+  CodeMirror.Vim.map('gz', 'x', 'normal');
+  CodeMirror.Vim.mapCommand('gz', 'motion', 'moveToEol', {}, { context: 'normal' });
+  is(!CodeMirror.Vim.unmap('gz', 'normal', { toKeys: 'dd' }));
+  is(CodeMirror.Vim.unmap('gz', 'normal', { toKeys: 'x' }));
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'z');
+  eq('abc', cm.getValue());
+  eqCursorPos(new Pos(0, 2), cm.getCursor());
+  CodeMirror.Vim.removeMapCommand('gz');
+}, { value: 'abc' });
+
 // --- getKeymap() API tests ---
 
 testVim('getKeymap_returns_array', function(cm, vim, helpers) {

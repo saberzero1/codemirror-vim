@@ -467,6 +467,28 @@ features are toggled. Unlike `Vim.unmap()` which matches by context,
 `removeMapCommand` removes all entries with matching keys regardless of
 context.
 
+It leaves `keyToKey` entries alone, which are the user's mappings rather than
+commands; in Vim the two are separate tables. Removing every entry for the keys
+used to delete them too: the host tears its feature bindings down and
+re-registers them whenever a setting changes, which removed a vimrc
+`nmap gw <Plug>(easymotion-bd-w)` along with its own `gw` operator. Test:
+`removeMapCommand_keeps_user_mapping`, which fails with the mapping gone when
+the exception is removed.
+
+### Exact `unmap` of one user mapping
+
+**File**: `src/vim.js` — `unmap`
+**Test**: `test/vim_test.js` — `unmap_exact_mapping`
+
+`unmap(lhs, ctx, { toKeys, noremap })` removes only the user mapping from `lhs`
+to `toKeys`, and `noremap` too when it is given. It never removes a command
+entry for the same keys, which plain `unmap` does when that entry comes first,
+and never falls back to splitting a context-less entry into per-mode copies.
+A host that re-registers its own bindings uses it to lift a user's mapping off
+before re-registering and put it back on top afterwards, so the user's mapping
+keeps priority without duplicates. Ignoring the option fails the test: the
+first call, for a mapping that does not exist, removes the command instead.
+
 ### Per-mode `unmap` of context-less mappings
 
 **File**: `src/vim.js` — `ExCommandDispatcher.unmap`, `vimApi.mapclear`

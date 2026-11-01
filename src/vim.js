@@ -1530,7 +1530,9 @@ export function initVim(CM) {
       keys = normalizeKeyString(keys);
       var found = false;
       for (var i = defaultKeymap.length - 1; i >= 0; i--) {
-        if (defaultKeymap[i].keys == keys) {
+        // A command's removal leaves the user's mappings for the same keys
+        // alone: in Vim, mappings and commands are separate tables.
+        if (defaultKeymap[i].keys == keys && defaultKeymap[i].type != 'keyToKey') {
           defaultKeymap.splice(i, 1);
           removeUsedKeys(keys);
           found = true;
@@ -8664,9 +8666,14 @@ export function initVim(CM) {
         _mapCommand(mapping);
       }
     }
-    /**@type {(lhs: string, ctx: string, options?: {includeDefaults?: boolean}) => boolean|void} */
+    /**@type {(lhs: string, ctx: string, options?: {includeDefaults?: boolean, toKeys?: string, noremap?: boolean}) => boolean|void} */
     unmap(lhs, ctx, options) {
       var includeDefaults = options && options.includeDefaults;
+      // With `toKeys`, only the user mapping `lhs` -> `toKeys` is removed:
+      // never a command entry for the same keys, and never a mode split of
+      // a context-less entry. A host re-registering its own bindings uses it
+      // to lift a user's mapping off and put it back on top.
+      var exact = options && typeof options.toKeys == 'string' ? options : null;
       if (lhs != ':' && lhs.charAt(0) == ':') {
         if (ctx) { throw Error('Mode not supported for ex mappings'); }
         var commandName = lhs.substring(1);
@@ -8682,12 +8689,19 @@ export function initVim(CM) {
             if (defaultKeymap[i]._isDefault && !includeDefaults) {
               continue;
             }
+            var entry = /**@type {any}*/ (defaultKeymap[i]);
+            if (exact && (entry.type != 'keyToKey'
+                || entry.toKeys != exact.toKeys
+                || (exact.noremap !== undefined
+                  && !!entry.noremap != !!exact.noremap))) {
+              continue;
+            }
             defaultKeymap.splice(i, 1);
             removeUsedKeys(keys);
             return true;
           }
         }
-        if (ctx) {
+        if (ctx && !exact) {
           var allModeContexts = ['normal', 'visual', 'operatorPending'];
           for (var i = 0; i < defaultKeymap.length; i++) {
             if (keys == defaultKeymap[i].keys
