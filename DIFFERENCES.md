@@ -85,6 +85,32 @@ generically — without popover-specific code in the fork.
 Pass `null` to clear the callback and restore the default behavior (Escape
 consumed silently in idle normal mode).
 
+### `setJumpRecordedCallback` API
+
+**File**: `src/vim.js` — `recordJumpPosition`
+**Test**: `test/vim_test.js` — `jumplist_recorded_callback`, `jumplist_recorded_callback_throws`
+
+`Vim.setJumpRecordedCallback(fn)` registers a callback that runs after every
+jump is added to the jump list. It receives the adapter (`cm`) and copies of
+the positions the jump went from and to. A motion that returns a range reports
+the range's head. An ordinary motion is not a jump and reports nothing. Neither
+does walking the list with `<C-o>`/`<C-i>`, which adds no jump.
+
+A host that keeps a jump list of its own uses this to keep its list in step.
+The Vim Motions plugin keeps one list of note switches and the jumps within
+each note, in the order they happened. Without the callback it could not place
+a jump made inside a note after a switch, so `<C-o>` left the note before
+visiting it.
+
+An error thrown by the callback is logged, unless `suppressErrorLogging` is
+set, and does not reach the motion. The jump is recorded first, so the
+callback cannot break the jump list either. Not calling the callback fails the
+first test, which then records no call where it expects
+`[[true, 2, 1, 9, 0]]`. Letting a throw escape fails the second, because it
+aborts the `G` before the cursor moves.
+
+Pass `null` to clear the callback.
+
 ### `resetForkedVimState` API
 
 **File**: `src/index.ts`

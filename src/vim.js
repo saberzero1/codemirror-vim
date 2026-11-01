@@ -867,6 +867,8 @@ export function initVim(CM) {
   var _idleEscapeCallback = null;
   var _tokenClassifier = null;
   var _scrolloffSource = null;
+  /** @type {((cm: CodeMirror, from: Pos, to: Pos) => void) | null} */
+  var _jumpRecordedCallback = null;
   function resetVimGlobalState() {
     vimGlobalState = {
       // The current search query.
@@ -996,6 +998,15 @@ export function initVim(CM) {
     /**@type {(fn: (() => number) | null) => void} */
     setScrolloffSource: function(fn) {
       _scrolloffSource = fn || null;
+    },
+    /**
+     * Called after each jump is added to the jump list, with the positions
+     * the jump went from and to, so a host can keep a jump list of its own
+     * in step with this one.
+     * @type {(fn: ((cm: CodeMirror, from: Pos, to: Pos) => void) | null) => void}
+     */
+    setJumpRecordedCallback: function(fn) {
+      _jumpRecordedCallback = fn || null;
     },
 
     suppressErrorLogging: false,
@@ -6862,6 +6873,18 @@ export function initVim(CM) {
   function recordJumpPosition(cm, oldCur, newCur) {
     if (!cursorEqual(oldCur, newCur)) {
       vimGlobalState.jumpList.add(cm, oldCur, newCur);
+      if (_jumpRecordedCallback) {
+        // A motion returning a range jumps to its head.
+        var to = Array.isArray(newCur) ? newCur[1] : newCur;
+        try {
+          _jumpRecordedCallback(cm, copyCursor(oldCur), copyCursor(to));
+        } catch (e) {
+          // The host's bookkeeping must not undo the motion.
+          if (!vimApi.suppressErrorLogging) {
+            console['log'](e);
+          }
+        }
+      }
     }
   }
 

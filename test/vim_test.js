@@ -341,6 +341,44 @@ testJumplist('jumplist_skip_deleted_mark<c-o>',
 testJumplist('jumplist_skip_deleted_mark<c-i>',
              ['*', 'n', 'n', 'k', 'd', 'k', '<C-o>', '<C-i>', '<C-i>'],
              [1,0], [0,2]);
+testVim('jumplist_recorded_callback', function(cm, vim, helpers) {
+  CodeMirror.Vim.resetVimGlobalState_();
+  var calls = [];
+  CodeMirror.Vim.setJumpRecordedCallback(function(target, from, to) {
+    calls.push([target === cm, from.line, from.ch, to.line, to.ch]);
+  });
+  try {
+    cm.setCursor(2, 1);
+    helpers.doKeys('G');
+    // Not jumps: an ordinary motion, and the walk itself.
+    helpers.doKeys('k');
+    helpers.doKeys('<C-o>');
+    eq(JSON.stringify([[true, 2, 1, 9, 0]]), JSON.stringify(calls));
+    CodeMirror.Vim.setJumpRecordedCallback(null);
+    helpers.doKeys('g', 'g');
+    eq(1, calls.length);
+  } finally {
+    CodeMirror.Vim.setJumpRecordedCallback(null);
+  }
+}, {value: jumplistScene});
+testVim('jumplist_recorded_callback_throws', function(cm, vim, helpers) {
+  CodeMirror.Vim.resetVimGlobalState_();
+  var suppressed = CodeMirror.Vim.suppressErrorLogging;
+  CodeMirror.Vim.suppressErrorLogging = true;
+  CodeMirror.Vim.setJumpRecordedCallback(function() {
+    throw new Error('host failure');
+  });
+  try {
+    cm.setCursor(2, 1);
+    helpers.doKeys('G');
+    helpers.assertCursorAt(9, 0);
+    helpers.doKeys('<C-o>');
+    helpers.assertCursorAt(2, 1);
+  } finally {
+    CodeMirror.Vim.setJumpRecordedCallback(null);
+    CodeMirror.Vim.suppressErrorLogging = suppressed;
+  }
+}, {value: jumplistScene});
 
 /**
  * @param name Name of the test
