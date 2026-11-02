@@ -9916,6 +9916,11 @@ export function initVim(CM) {
     } else if (!vim.insertMode) {
       // Reset lastHPos if selection was modified by something outside of vim mode e.g. by mouse.
       vim.lastHPos = cm.getCursor().ch;
+      // And the screen column gj/gk keep, as Vim resets 'curswant' on a
+      // click: kept, gj after a click went back to the column of the gj
+      // before it. Measured by the next vertical motion, since layout cannot
+      // be read during the update this runs in.
+      vim.lastMotion = null;
     }
   }
 

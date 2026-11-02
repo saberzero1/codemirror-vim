@@ -976,6 +976,37 @@ Folded ranges are excluded from the multi-line clamp via `foldedRanges()` —
 folds legitimately collapse multiple document lines into a single visual
 line.
 
+### `gj`/`gk` column after a click
+
+**File**: `src/vim.js` — `handleExternalSelection`
+**Test**: `test/vim_test.js` — `gj_after_external_cursor_move`
+
+A cursor moved from outside vim, by a click or by the host, now resets the
+screen column `gj`/`gk` keep, as Vim resets `'curswant'` on a click.
+Upstream reset only `lastHPos`, the character column of `j`/`k`, and left
+`lastHSPos`, the pixel column of `gj`/`gk`, as it was. So `gj` after a click
+went back to the column of the `gj` before it. Upstream's own `gj_gk` test
+works around this with a stray `h` after `cm.setCursor`.
+
+The column cannot be measured where the reset happens: `onCursorActivity`
+runs during CodeMirror's update, and reading layout there throws. So the
+reset clears `vim.lastMotion`, and the next vertical motion measures its
+column from the cursor, as it does after any motion that is not vertical.
+Without it the test lands on `[0,14]`, the old column, instead of `[0,11]`.
+
+### `gj` onto a short last display row
+
+**File**: `src/cm_adapter.ts` — `findPosV`
+**Test**: `test/vim_test.js` — `gj_onto_shorter_last_row`
+
+`gj` from the row above a short last display row now moves to the end of
+that row, as Neovim's does. `moveVertically` clips such a move to the end of
+the document. Upstream then called it a hit on the side and did not move,
+because its check compared the character column with the goal in pixels.
+`hitSide` is now set only when the clipped cursor is on the row the move
+started from, which is the end of the document in fact. Without the change
+the test stays at `[0,59]` instead of `[0,66]`.
+
 ### Scroll-space `charCoords` / `coordsChar`
 
 **File**: `src/cm_adapter.ts`

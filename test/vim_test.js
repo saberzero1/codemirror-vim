@@ -606,6 +606,33 @@ testVim('gj_gk', function(cm, vim, helpers) {
   var endingCharCoords = cm.charCoords(endingPos);
   is(topLeftCharCoords.left == endingCharCoords.left, 'gj should end up on column 0');
 },{ lineNumbers: false, lineWrapping:true, value: 'Thislineisintentionallylongtotestmovementofgjandgkoverwrappedlines.' });
+testVim('gj_after_external_cursor_move', function(cm, vim, helpers) {
+  cm.setSize(120);
+  cm.setCursor(0, 4);
+  helpers.doKeys('g', 'j');
+  var rowLength = cm.getCursor().ch - 4;
+  // Moved from outside vim, as a mouse click does.
+  cm.setCursor(0, 1);
+  helpers.doKeys('g', 'j');
+  helpers.assertCursorAt(0, 1 + rowLength);
+},{ lineNumbers: false, lineWrapping:true, value: 'Thislineisintentionallylongtotestmovementofgjandgkoverwrappedlines.' });
+testVim('gj_onto_shorter_last_row', function(cm, vim, helpers) {
+  cm.setSize(120);
+  var length = cm.getLine(0).length;
+  cm.setCursor(0, 0);
+  helpers.doKeys('g', 'j');
+  var rowLength = cm.getCursor().ch;
+  is(length % rowLength != 0, 'the last row must be shorter than the others');
+  var lastRowStart = length - (length % rowLength);
+  // The last character of the row above the last one, the goal set by a
+  // horizontal motion.
+  cm.setCursor(0, lastRowStart - 2);
+  helpers.doKeys('l');
+  helpers.doKeys('g', 'j');
+  helpers.assertCursorAt(0, length - 1);
+  helpers.doKeys('g', 'j');
+  helpers.assertCursorAt(0, length - 1);
+},{ lineNumbers: false, lineWrapping:true, value: 'Thislineisintentionallylongtotestmovementofgjandgkoverwrappedlines.' });
 testVim('g0_g$', function(cm, vim, helpers) {
   cm.setSize(120);
   var topLeftCharCoords = cm.charCoords(makeCursor(0, 0));

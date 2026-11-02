@@ -653,18 +653,19 @@ export class CodeMirror {
     }
 
     let pos = posFromIndex(doc, range.head) as Pos&{hitSide?: boolean, focusBefore?: () => void};
-    // set hitside to true if there was no place to move and cursor was clipped to the edge
-    // of document. Needed for gj/gk
+    // Set hitSide when there was no display row to move to and the cursor was
+    // clipped to the edge of the document, which gj/gk treat as not moving.
+    // Clipped from a row above the last one, the cursor did move: to the end
+    // of a last row shorter than the goal, as Vim's gj does. The old test
+    // compared the character column with the goal in pixels, and called that
+    // move a hit, so gj stopped short of a short last row.
+    const sameRow = (a: number, b: number) => {
+      const ca = cm6.coordsAtPos(a), cb = cm6.coordsAtPos(b);
+      return !!ca && !!cb && Math.abs(ca.top - cb.top) < cm6.defaultLineHeight * 0.5;
+    };
     if (
-      (
-        amount < 0 && 
-        range.head == 0 && goalColumn != 0 &&
-        start.line == 0 && start.ch != 0
-      ) || (
-        amount > 0 && 
-        range.head == doc.length && pos.ch != goalColumn
-        && start.line == pos.line
-      )
+      (amount < 0 && range.head == 0 && sameRow(startOffset, 0)) ||
+      (amount > 0 && range.head == doc.length && sameRow(startOffset, doc.length))
     ) {
       pos.hitSide = true;
     }
