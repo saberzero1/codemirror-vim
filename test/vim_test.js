@@ -3102,6 +3102,29 @@ testVim('visual_line', function(cm, vim, helpers) {
   helpers.doKeys('l', 'V', 'l', 'j', 'j', 'd');
   eq(' 4\n 5', cm.getValue());
 }, { value: ' 1\n 2\n 3\n 4\n 5' });
+// The editor's selection covers the whole lines of a visual-line selection,
+// in the direction it was made, so anything reading it sees what is selected
+// (#231). Vim's own head keeps its column, which is where the cursor is drawn.
+testVim('visual_line_editor_selection', function(cm, vim, helpers) {
+  cm.setCursor(0, 6);
+  helpers.doKeys('V');
+  eq('alpha beta', cm.getSelection());
+  eqCursorPos(new Pos(0, 0), cm.getCursor('anchor'));
+  eqCursorPos(new Pos(0, 10), cm.getCursor('head'));
+  helpers.doKeys('j');
+  eq('alpha beta\nsecond line', cm.getSelection());
+  eqCursorPos(new Pos(1, 11), cm.getCursor('head'));
+  eqCursorPos(new Pos(1, 6), vim.sel.head);
+}, { value: 'alpha beta\nsecond line\nthird' });
+testVim('visual_line_editor_selection_backwards', function(cm, vim, helpers) {
+  cm.setCursor(2, 2);
+  helpers.doKeys('V', 'k');
+  eq('second line\nthird', cm.getSelection());
+  eqCursorPos(new Pos(2, 5), cm.getCursor('anchor'));
+  eqCursorPos(new Pos(1, 0), cm.getCursor('head'));
+  helpers.doKeys('<Esc>');
+  eqCursorPos(cm.getCursor('anchor'), cm.getCursor('head'));
+}, { value: 'alpha beta\nsecond line\nthird' });
 testVim('visual_block_move_to_eol', function(cm, vim, helpers) {
   // moveToEol should move all block cursors to end of line
   cm.setCursor(0, 0);

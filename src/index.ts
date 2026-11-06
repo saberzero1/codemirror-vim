@@ -302,12 +302,8 @@ const vimPlugin = ViewPlugin.fromClass(
       }
 
       let isCopy = key === "<C-c>" && !CodeMirror.isMac;
-      if (isCopy && cm.somethingSelected()) {
-        this.waitForCopy = true;
-        return true;
-      }
-      // Visual-line uses cursor-only CM6 selection (no spanning range),
-      // so somethingSelected() is false. Copy linewise text from vim.sel.
+      // A visual-line copy is linewise, so it ends in a newline, which the
+      // browser's copy of the selected lines would not.
       if (isCopy && vim.visualMode && vim.visualLine && vim.sel) {
         let startLine = Math.min(vim.sel.anchor.line, vim.sel.head.line);
         let endLine = Math.max(vim.sel.anchor.line, vim.sel.head.line);
@@ -316,6 +312,10 @@ const vimPlugin = ViewPlugin.fromClass(
           lines.push(cm.getLine(i));
         }
         navigator.clipboard.writeText(lines.join("\n") + "\n");
+        return true;
+      }
+      if (isCopy && cm.somethingSelected()) {
+        this.waitForCopy = true;
         return true;
       }
 
@@ -328,27 +328,6 @@ const vimPlugin = ViewPlugin.fromClass(
         e.preventDefault();
         e.stopPropagation();
         this.blockCursor.scheduleRedraw();
-      } else if (vim.visualMode && vim.visualLine && vim.sel) {
-        // Vim didn't handle this key — it will propagate to Obsidian.
-        // Expand CM6 selection to full linewise range so Obsidian commands
-        // (Tab/indent, formatting toggles) operate on all selected lines.
-        let startLine = Math.min(vim.sel.anchor.line, vim.sel.head.line);
-        let endLine = Math.max(vim.sel.anchor.line, vim.sel.head.line);
-        let doc = this.view.state.doc;
-        let from = doc.line(startLine + 1).from;
-        let to = doc.line(endLine + 1).to;
-        this.view.dispatch({ selection: {anchor: from, head: to} });
-        // Restore cursor-only selection after Obsidian processes the command
-        Promise.resolve().then(() => {
-          let vimState = cm.state.vim;
-          if (vimState && vimState.visualLine && vimState.sel) {
-            cm.operation(() => {
-              // @ts-ignore
-              if (cm.curOp) cm.curOp.isVimOp = true;
-              cm.setCursor(vimState!.sel.head.line, 0);
-            });
-          }
-        });
       }
 
       this.updateStatus();

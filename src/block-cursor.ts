@@ -415,6 +415,17 @@ function resolveShape(cm: CodeMirror): CursorShape {
   return shapes.normal ?? 'block';
 }
 
+/**
+ * Where the cursor of a visual-line selection is drawn: vim's own head, held
+ * on the line's last character the way a normal-mode cursor is.
+ */
+function visualLineCursorOffset(view: EditorView, head: {line: number, ch: number}): number {
+  let doc = view.state.doc;
+  let line = doc.line(Math.max(1, Math.min(doc.lines, head.line + 1)));
+  let ch = Math.max(0, Math.min(head.ch, line.length - 1));
+  return line.from + ch;
+}
+
 function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange, primary: boolean,
                        nativeCaretUnavailable = false): Piece | null {
   let head = cursor.head;
@@ -436,7 +447,11 @@ function measureCursor(cm: CodeMirror, view: EditorView, cursor: SelectionRange,
       fatCursor = true;
       if (vim.visualBlock && !primary)
         return null;
-      if (cursor.anchor < cursor.head) {
+      if (vim.visualMode && vim.visualLine && vim.sel && primary) {
+        // The selection spans whole lines, so its head is a line boundary.
+        // Vim's cursor keeps its column, which is where Neovim draws it.
+        head = visualLineCursorOffset(view, vim.sel.head);
+      } else if (cursor.anchor < cursor.head) {
         let letter = head < view.state.doc.length ? view.state.sliceDoc(head, head + 1) : "";
         if (letter !== "\n") {
           head--;

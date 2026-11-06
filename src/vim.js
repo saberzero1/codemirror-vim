@@ -6590,20 +6590,12 @@ export function initVim(CM) {
     if (!mode) {
       mode = vim.visualLine ? 'line' : vim.visualBlock ? 'block' : 'char';
     }
-    if (vim.visualLine) {
-      // In visual-line mode, set a cursor-only CM6 selection at the head
-      // position instead of a spanning range. This prevents editors like
-      // Obsidian from uncollapsing hidden markup (links, wikilinks) when
-      // the selection range overlaps replaced content in Live Preview.
-      // The visual highlight is provided independently by the
-      // linewiseVisualHighlight ViewPlugin (reads vim.sel directly).
-      // Operators (y/d/c) recompute their own selection from vim.sel
-      // at dispatch time (see operator section in processCommand).
-      cm.setCursor(sel.head.line, 0);
-    } else {
-      var cmSel = makeCmSelection(cm, sel, mode);
-      cm.setSelections(cmSel.ranges, cmSel.primary);
-    }
+    // Visual-line hands the editor the whole lines it covers, as every other
+    // visual mode hands over its range: whatever reads the editor's selection
+    // (the host, other extensions) sees what is selected. The block cursor is
+    // drawn at vim.sel.head instead of the range's end (see block-cursor.ts).
+    var cmSel = makeCmSelection(cm, sel, mode);
+    cm.setSelections(cmSel.ranges, cmSel.primary);
   }
   /**
    * @arg {CodeMirror} cm 
@@ -6630,10 +6622,10 @@ export function initVim(CM) {
         if (head.line > lastLine) {
           head.line = lastLine;
         }
-        head.ch = exclusive ? lineLength(cm, head.line) : 0;
+        head.ch = lineLength(cm, head.line);
       } else {
         head.ch = 0;
-        anchor.ch = exclusive ? lineLength(cm, anchor.line) : 0;
+        anchor.ch = lineLength(cm, anchor.line);
       }
       return {
         ranges: [{anchor: anchor, head: head}],

@@ -1079,8 +1079,8 @@ character. The original `letter != "\n"` guard (commit `8e8ea52`, empty-line
 fix) prevented the adjustment at EOL on non-empty lines, causing the block
 cursor to render past the visible line content in charwise visual mode.
 The fix uses the vim state to scope the EOL decrement: linewise visual
-skips the adjustment (cursor-only CM6 selection manages positioning
-independently), while charwise and blockwise visual both apply the
+never reaches it (its cursor is drawn at `vim.sel.head`, see "Linewise visual
+cursor positioning"), while charwise and blockwise visual both apply the
 step-back to render the cursor on the last visible character. The
 blockwise exception was originally added (commit `b68fdd9`) when
 `makeCmSelection` did not clamp `toCh` per-line, so the head never
@@ -1787,27 +1787,28 @@ uses the vim-aware indent string.
 
 ### Linewise visual cursor positioning
 
-**Files**: `src/vim.js` — `makeCmSelection`, `src/index.ts` — `linewiseVisualHighlight`
+**Files**: `src/block-cursor.ts` — `measureCursor`, `visualLineCursorOffset`;
+`src/index.ts` — `linewiseVisualHighlight`
 
-`V` (linewise visual mode) now positions the cursor at column 0 of the head
-line, matching Neovim. Previously, CM6's exclusive selection model required
-setting `head.ch = lineLength(line)` to include the full line in the
-selection range, which caused the cursor to appear at the end of the line.
+The editor's selection in `V` covers whole lines (see "Visual-line editor
+selection" below), so its head is a line boundary: the end of the last line
+when the selection runs down, the start of the first when it runs up. The
+block cursor is therefore drawn at `vim.sel.head` instead, held on the line's
+last character the way a normal-mode cursor is. It keeps its column, which is
+where Neovim draws it: `wwVj` on `alpha beta gamma` / `second line here`
+reports `col('.') == 12` in Neovim 0.12.5.
 
-The fix uses two mechanisms:
+Upstream drew the cursor at the selection head, the end of the line. An
+earlier revision of this fork drew it at column 0 by putting the selection
+head there, which also cut the head line out of the editor's selection.
 
-1. `makeCmSelection` in `'line'` mode now sets `head.ch = 0` when the
-   `exclusive` parameter is falsy (the display path via `updateCmSelection`).
-   When `exclusive` is truthy (the operator path), the old
-   `head.ch = lineLength(...)` behavior is preserved so operators continue
-   to receive correct full-line ranges.
-
-2. A `ViewPlugin` (`linewiseVisualHighlight`) reads the vim visual state
-   (`vim.visualMode && vim.visualLine`) and provides `Decoration.line`
-   decorations with the `.cm-vim-linewise-selection` class for each line in
-   the inclusive range `[min(anchor.line, head.line), max(...)]`. This
-   provides the full-line visual highlight that the CM6 selection can no
-   longer provide (since the selection head is now at `ch:0`).
+A `ViewPlugin` (`linewiseVisualHighlight`) reads the vim visual state
+(`vim.visualMode && vim.visualLine`) and provides `Decoration.line`
+decorations with the `.cm-vim-linewise-selection` class for each line in the
+inclusive range `[min(anchor.line, head.line), max(...)]`, so the highlight
+spans the full line width rather than only the text. The native `::selection`
+is hidden in visual-line mode (`.cm-vimVisualLine`) so the two do not paint
+twice.
 
 Theme rules for `.cm-vim-linewise-selection` are included in `vimStyle`
 (both light and dark variants).
@@ -2457,64 +2458,59 @@ Edge cases handled:
 - Lines shorter than the block column: `fromCh` clamps to `lineLen`, producing
   a zero-width range at the line end
 
-## Visual-line cursor-only CM6 selection
+## Visual-line editor selection
 
-**Files**: `src/vim.js`, `src/index.ts`, `src/block-cursor.ts`
+**Files**: `src/vim.js` — `updateCmSelection`, `makeCmSelection`;
+`src/index.ts`; `src/block-cursor.ts`
 
-In visual-line mode (`V`), the CM6 `EditorSelection` is set to a cursor-only
-position at `sel.head` instead of a spanning range across the selected lines.
-This prevents editors with Live Preview (like Obsidian) from uncollapsing
-hidden markup (`Decoration.replace` ranges) when the selection overlaps them.
+In visual-line mode (`V`) the editor's `EditorSelection` covers the whole
+lines selected, as upstream does and as every other visual mode hands over
+its range: forward, from the first line's start to the last line's end;
+backward, from the bottom line's end to the top line's start. Anything that
+reads the editor's selection — the host application, other extensions, the
+CM5 adapter's `listSelections()`/`getSelection()`/`somethingSelected()` —
+sees what is selected.
 
-The visual highlight is provided independently by the `linewiseVisualHighlight`
-ViewPlugin, which reads `vim.sel` directly and applies `Decoration.line()`
-decorations to each line in the selection range. Operators (`y`, `d`, `c`)
-recompute their own CM6 selection from `vim.sel` at dispatch time via
-`makeCmSelection(cm, sel, 'line', exclusive=true)` — they do not depend on
-the "display" selection.
+### History
+
+This fork used to give the editor a cursor-only selection at the head line
+in visual-line mode, because Obsidian's Live Preview reveals hidden markup
+(collapsed links, formatting marks, callouts) wherever the selection overlaps
+it, and lines reflowed as `j`/`k` extended a `V` selection. The cost was that
+nothing outside vim could see the selection: `EditorState.selection` and
+`listSelections()` reported anchor and head at one point (motions#231), and
+the host needed a patch layer over its own editor API, its command registry
+and every command's `checkCallback` to make selection commands work at all.
+That trade-off was reversed: a `V` selection now reveals markup on the lines
+it covers exactly as a `v` selection over them does.
 
 ### Changes
 
-- `updateCmSelection` (`vim.js`): when `vim.visualLine` is true, calls
-  `cm.setCursor(sel.head.line, 0)` instead of
-  `cm.setSelections(makeCmSelection(...).ranges)`. Column 0 is used
-  (matching Neovim) to avoid landing inside widget decorations
-  (checkboxes, collapsed links) on the head line.
-- `joinLines` action (`vim.js`): reads `vim.sel.anchor`/`vim.sel.head` via
-  `copyCursor()` instead of `cm.getCursor('anchor')`/`cm.getCursor('head')`
-  in visual mode, since the CM6 selection is now cursor-only.
-- `replace` action (`vim.js`): reads from `vim.sel` instead of
-  `cm.getCursor('start'/'end')` in visual mode, with line boundary expansion
-  (`Pos(line, 0)` to `Pos(line, lineLength)`) for visual-line.
-- `updateClass` (`index.ts`): adds/removes `.cm-vimVisualLine` class on
-  `scrollDOM` when `vim.visualMode && vim.visualLine` changes.
-- `themeSpec` (`block-cursor.ts`): the `::selection` transparency rule now
-  covers `.cm-vimMode.cm-vimVisualLine .cm-line` in addition to
-  `.cm-vimMode:not(.cm-vimVisual) .cm-line`.
-- Ctrl+C handler (`index.ts`): when `vim.visualLine` is true and
-  `somethingSelected()` returns false, computes linewise text from `vim.sel`
-  and copies to clipboard via `navigator.clipboard.writeText()`.
-- Async motion callback (`vim.js`): the `.then()` handler for async motions
-  (EasyMotion) in visual mode now wraps `updateCmSelection(cm)` in
-  `cm.operation()` with `isVimOp = true`. Without this, the cursor-only
-  selection dispatch triggers `handleExternalSelection`, which sees
-  `visualMode && !somethingSelected()` and exits visual mode.
-
-- Unhandled key passthrough (`index.ts`): when `handleKey` returns false
-  (vim didn't handle the key) and the editor is in visual-line mode, the
-  CM6 selection is temporarily expanded to the full linewise range before
-  the event propagates to Obsidian. A `Promise.resolve().then()` microtask
-  restores cursor-only selection after Obsidian's command executes. This
-  ensures Obsidian commands (Tab/indent, formatting toggles) operate on
-  all selected lines.
+- `updateCmSelection` (`vim.js`): `V` uses `makeCmSelection(..., 'line')` like
+  the other modes instead of `cm.setCursor(sel.head.line, 0)`.
+- `makeCmSelection` (`vim.js`): `'line'` mode puts the far end of the range at
+  the line's length whether or not `exclusive` is set. The display path used
+  to put it at column 0, which left the head line out of the selection.
+- `measureCursor` (`block-cursor.ts`): draws the primary cursor at
+  `vim.sel.head` in visual-line mode (see "Linewise visual cursor
+  positioning").
+- Unhandled-key passthrough (`index.ts`): removed. It expanded the selection
+  for the duration of a key vim did not handle and collapsed it again on a
+  microtask; with the selection already whole it would only have collapsed it.
+- Ctrl+C (`index.ts`): a visual-line copy is still written as linewise text
+  from `vim.sel` with a trailing newline, now checked ahead of the native-copy
+  path, which `somethingSelected()` would otherwise take.
+- `joinLines` and `replace` (`vim.js`) keep reading `vim.sel` in visual mode;
+  it agrees with the editor's selection now, and is what they mean.
 
 ### Visual-line paste fix
 
 `continuePaste` used `getSelectedAreaRange(cm, vim)` and `cm.getSelection()`
 to determine the replacement range and replaced text. Both read the CM6
-selection — which is cursor-only in visual-line mode (see above). The result
-was that `p`/`P` in visual-line mode inserted text at the cursor instead of
-replacing the selected lines.
+selection, which was cursor-only in visual-line mode at the time (see
+above). The result was that `p`/`P` in visual-line mode inserted text at the
+cursor instead of replacing the selected lines. The guard below still holds
+now that the selection is whole: it derives the same range.
 
 The fix adds a `vim.visualLine && vim.sel` guard before the `selectedText`
 computation. When true, `selectionStart` and `selectionEnd` are derived from
@@ -2533,13 +2529,6 @@ including the trailing newline, so the paste text keeps its trailing newline
 (a no-op — the text is left as-is). The exception is when the selection is on
 the last line of the document, where the range does NOT include a trailing
 newline — in that case the trailing newline is stripped to match.
-
-### Trade-offs
-
-- `cm.somethingSelected()` returns `false` in visual-line mode
-- `cm.getSelection()` returns `""` in visual-line mode
-- Third-party code that reads CM6 selection state during visual-line will not
-  see the selection; the canonical API is `window.CodeMirrorAdapter.Vim`
 
 ## New default keymap entries
 
