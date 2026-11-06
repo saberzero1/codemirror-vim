@@ -1,5 +1,5 @@
 import { EditorView, basicSetup } from "codemirror";
-import { CodeMirror, Vim, vim } from "..";
+import { CodeMirror, Vim, vim, notTypedAnnotation } from "..";
 import { xml } from "@codemirror/lang-xml";
 import { javascript } from "@codemirror/lang-javascript";
 import {vimTests} from "./vim_test.js"
@@ -93,6 +93,7 @@ describe("Vim extension", () => {
   CM.on = CodeMirror.on;
   CM.off = CodeMirror.off;
   CM.Vim = Vim;
+  CM.notTypedAnnotation = notTypedAnnotation;
   CM.Pos = function (a, b) {
     return new Pos(a, b);
   };

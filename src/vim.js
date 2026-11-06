@@ -9809,6 +9809,14 @@ export function initVim(CM) {
     if (!macroModeState.isPlaying) {
       var vim = cm.state.vim;
       while(changeObj) {
+        // A change the host marked as not typed is neither recorded nor
+        // allowed to arm `expectCursorActivityForChange`: a realign that moves
+        // no cursor would otherwise leave the flag set, and the user's next
+        // real cursor jump would not start a new insert.
+        if (changeObj.origin === '+notTyped') {
+          changeObj = changeObj.next;
+          continue;
+        }
         lastChange.expectCursorActivityForChange = true;
         // @ts-ignore
         if (lastChange.ignoreCount > 1) {
@@ -9867,6 +9875,10 @@ export function initVim(CM) {
       var lastChange = macroModeState.lastInsertModeChanges;
       if (lastChange.expectCursorActivityForChange) {
         lastChange.expectCursorActivityForChange = false;
+      } else if (cm.curOp && cm.curOp.notTyped) {
+        // Moved by a transaction the host marked as not typed, such as an
+        // insert-mode key moving to the next table cell: the insert goes on,
+        // as it does across a Neovim `<Cmd>` mapping that moves the cursor.
       } else if (vim._suppressUndoBreakOnMove) {
         vim._suppressUndoBreakOnMove = false;
       } else {

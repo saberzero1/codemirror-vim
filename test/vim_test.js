@@ -3105,6 +3105,51 @@ testVim('visual_line', function(cm, vim, helpers) {
 // The editor's selection covers the whole lines of a visual-line selection,
 // in the direction it was made, so anything reading it sees what is selected
 // (#231). Vim's own head keeps its column, which is where the cursor is drawn.
+// A host's insert-mode key that adds a line and moves to it is not typed:
+// Neovim 0.12.6 repeats `xy` after `ax`, such a `<Cmd>` mapping, `y<Esc>`.
+testVim('insert_not_typed_change_not_repeated', function(cm, vim, helpers) {
+  cm.setCursor(0, 2);
+  helpers.doKeys('a', 'x');
+  var end = cm.cm6.state.doc.line(1).to;
+  cm.cm6.dispatch({
+    changes: { from: end, insert: '\n|  |' },
+    selection: { anchor: end + 2 },
+    annotations: CodeMirror.notTypedAnnotation.of(true),
+  });
+  helpers.doKeys('y', '<Esc>');
+  eq('onex\n|y  |\ntarget', cm.getValue());
+  cm.setCursor(2, 0);
+  helpers.doKeys('.');
+  eq('onex\n|y  |\ntxyarget', cm.getValue());
+}, { value: 'one\ntarget' });
+// A not-typed cursor move does not start a new insert: Neovim repeats `abcd`.
+testVim('insert_not_typed_move_keeps_insert', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', 'a', 'b');
+  cm.cm6.dispatch({
+    selection: { anchor: 6 },
+    annotations: CodeMirror.notTypedAnnotation.of(true),
+  });
+  helpers.doKeys('c', 'd', '<Esc>');
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('abcdtarget', cm.getLine(1));
+}, { value: '1234567\ntarget' });
+// A not-typed edit that moves no cursor must not swallow the user's next real
+// cursor jump, which still starts a new insert.
+testVim('insert_not_typed_edit_then_real_move', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('i', 'a', 'b');
+  cm.cm6.dispatch({
+    changes: { from: cm.cm6.state.doc.line(2).to, insert: '  ' },
+    annotations: CodeMirror.notTypedAnnotation.of(true),
+  });
+  cm.setCursor(0, 5);
+  helpers.doKeys('c', 'd', '<Esc>');
+  cm.setCursor(1, 0);
+  helpers.doKeys('.');
+  eq('cdtarget  ', cm.getLine(1));
+}, { value: '1234567\ntarget' });
 testVim('visual_line_editor_selection', function(cm, vim, helpers) {
   cm.setCursor(0, 6);
   helpers.doKeys('V');

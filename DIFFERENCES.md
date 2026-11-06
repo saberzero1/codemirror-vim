@@ -3054,6 +3054,48 @@ category) produce no annotation.
 
 `MotionArgsPartial` includes `foldopen?: FoldopenCategory | null`.
 
+## `notTypedAnnotation` API
+
+Added `notTypedAnnotation`, a CM6 `AnnotationType<boolean>`. A host marks a
+transaction it dispatches on the user's behalf during insert mode — a row an
+insert-mode key adds, a realign, a cursor moved to the next table cell — with
+`notTypedAnnotation.of(true)`.
+
+Upstream records every change made during insert mode as typed text for `.`
+and macros, whatever its source: the adapter's change objects carry no
+origin, and `onChange` treats an absent origin as input. So a host edit made
+mid-insert was replayed by `.` at the new position, and a host cursor move
+started a new insert. Neovim leaves text a `<Cmd>` mapping sets through the
+API out of the redo buffer, and such a mapping's cursor move does not start a
+new insert. Measured on 0.12.6:
+
+| Session | `.` repeats |
+| --- | --- |
+| `ax`, a `<Cmd>` mapping that adds a line and moves to it, `y<Esc>` | `xy` |
+| `axy`, a `<Cmd>` mapping that edits another line, `z<Esc>` | `xyz` |
+| `iab`, a `<Cmd>` mapping that only moves the cursor, `cd<Esc>` | `abcd` |
+| `ax`, a key mapping to `<br>`, `y<Esc>` | `x<br>y` |
+
+### Implementation
+
+- `cm_adapter.ts` `onChange(update)` gives every change object of an update
+  carrying the annotation the origin `+notTyped`, which `onChange` in
+  `vim.js` does not record. `onChange` and `onSelectionChange(update)` also set
+  `curOp.notTyped`.
+- `vim.js` `onChange` skips such a change entirely, without arming
+  `expectCursorActivityForChange`: a realign that moves no cursor would
+  otherwise leave the flag set, and the user's next real cursor jump would not
+  start a new insert.
+- `vim.js` `onCursorActivity` does not start a new insert for a cursor move in
+  an operation with `curOp.notTyped`.
+
+Tests: `insert_not_typed_change_not_repeated`,
+`insert_not_typed_move_keeps_insert`, `insert_not_typed_edit_then_real_move`.
+Without the origin the first replays the added line and the third replays the
+padding as typed (`ab  cd`); without the cursor-activity exemption the first
+two fail; arming the flag for a not-typed change makes the third repeat
+`abcd` across a real cursor jump.
+
 ## Insert-mode `<C-G>j` / `<C-G>k` (line navigation)
 
 **File**: `src/vim.js`

@@ -20,6 +20,28 @@ import {vimState, CM5RangeInterface, type FoldopenCategory} from "./types"
  */
 export const foldopenAnnotation: AnnotationType<FoldopenCategory | null> = Annotation.define<FoldopenCategory | null>();
 
+/**
+ * Marks a transaction a host dispatches on the user's behalf during insert
+ * mode — a table row added by an insert-mode key, a realign, a cursor moved to
+ * the next cell — as not typed.
+ *
+ * Its edits are left out of the text `.` and macros replay, and its cursor
+ * move does not start a new insert for them. That is what Neovim does with
+ * text a `<Cmd>` mapping sets through the API: measured on 0.12.6, `ax`, a
+ * mapping that adds a line and moves to it, then `y<Esc>` leaves `.` repeating
+ * `xy`, and a mapping that only moves the cursor between `ab` and `cd` leaves
+ * `abcd`. Without the mark the vim engine records every change made in insert
+ * mode as typed text, whatever its source.
+ */
+export const notTypedAnnotation: AnnotationType<boolean> = Annotation.define<boolean>();
+
+/** The change origin the vim engine leaves out of insert-mode recording. */
+export const NOT_TYPED_ORIGIN = "+notTyped";
+
+function hasNotTyped(update: ViewUpdate): boolean {
+  return update.transactions.some((tr) => tr.annotation(notTypedAnnotation) === true);
+}
+
 let _livePreviewField: StateField<boolean> | null = null;
 let _propertiesSourceFn: (() => boolean) | null = null;
 
@@ -107,6 +129,8 @@ interface Operation {
   change?: any,
   changeHandlers?: Function[],
   $changeStart?: number,
+  /** The operation carries a transaction marked with `notTypedAnnotation`. */
+  notTyped?: boolean,
 }
 
 // workaround for missing api for merging transactions
@@ -817,11 +841,14 @@ export class CodeMirror {
       this.virtualSelection.ranges = this.virtualSelection.ranges.map(range => range.map(update.changes))
     }
     var curOp = this.curOp = this.curOp || ({} as Operation);
+    var notTyped = hasNotTyped(update);
+    if (notTyped) curOp.notTyped = true;
     update.changes.iterChanges((fromA: number, toA: number, fromB: number, toB: number, text: Text) => {
       if (curOp.$changeStart == null || curOp.$changeStart > fromB) 
         curOp.$changeStart = fromB;
       this.$lastChangeEndOffset = toB;
-      var change = { text: text.toJSON() };
+      var change: { text: string[], origin?: string, next?: any } = { text: text.toJSON() };
+      if (notTyped) change.origin = NOT_TYPED_ORIGIN;
       if (!curOp.lastChange) {
         curOp.lastChange = curOp.change = change;
       } else {
@@ -831,8 +858,9 @@ export class CodeMirror {
     if (!curOp.changeHandlers)
       curOp.changeHandlers = this._handlers["change"] && this._handlers["change"].slice();
   };
-  onSelectionChange() {
+  onSelectionChange(update?: ViewUpdate) {
     var curOp = this.curOp = this.curOp || ({} as Operation);
+    if (update && hasNotTyped(update)) curOp.notTyped = true;
     if (!curOp.cursorActivityHandlers)
       curOp.cursorActivityHandlers = this._handlers["cursorActivity"] && this._handlers["cursorActivity"].slice();
     this.curOp.cursorActivity = true;
