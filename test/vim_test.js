@@ -8107,6 +8107,46 @@ operatorfuncMarksCase('iw', ['g', '@', 'i', 'w'], 'char 0:0-0:1');
 operatorfuncMarksCase('aw', ['g', '@', 'a', 'w'], 'char 0:0-0:2');
 operatorfuncMarksCase('lb', ['l', 'g', '@', 'b'], 'char 0:0-0:0');
 
+// `unmap(lhs, ctx, { action })` removes only a mapping of lhs to that action:
+// a user's key mapping on the same keys, and other actions, stay.
+testVim('unmap_exact_action_leaves_other_mappings', function(cm, vim, helpers) {
+  var calls = [];
+  CodeMirror.Vim.defineAction('testExactA', function() { calls.push('a'); });
+  CodeMirror.Vim.defineAction('testExactB', function() { calls.push('b'); });
+  CodeMirror.Vim.mapCommand('Q', 'action', 'testExactA', {}, { context: 'normal' });
+  CodeMirror.Vim.mapCommand('Q', 'action', 'testExactB', {}, { context: 'normal' });
+  CodeMirror.Vim.mapCommand('Q', 'action', 'testExactA', {}, { context: 'normal' });
+  function qs() {
+    return CodeMirror.Vim.getKeymap('normal')
+      .filter(function(k) { return k.keys === 'Q'; })
+      .map(function(k) { return k.action; }).join(',');
+  }
+  eq('testExactA,testExactB,testExactA', qs());
+  is(CodeMirror.Vim.unmap('Q', 'normal', { action: 'testExactA' }));
+  eq('testExactB,testExactA', qs());
+  is(CodeMirror.Vim.unmap('Q', 'normal', { action: 'testExactA' }));
+  eq('testExactB', qs());
+  is(!CodeMirror.Vim.unmap('Q', 'normal', { action: 'testExactA' }));
+  helpers.doKeys('Q');
+  eq('b', calls.join(''));
+  CodeMirror.Vim.mapclear();
+}, { value: 'a' });
+
+// The exact `toKeys` match normalizes the rhs the way the mapping stored it:
+// a literal space is kept as <Space>.
+testVim('unmap_exact_toKeys_with_a_space', function(cm, vim, helpers) {
+  CodeMirror.Vim.map('Q', ' x', 'normal');
+  function qs() {
+    return CodeMirror.Vim.getKeymap('normal')
+      .filter(function(k) { return k.keys === 'Q'; })
+      .map(function(k) { return k.toKeys; }).join(',');
+  }
+  eq('<Space>x', qs());
+  is(CodeMirror.Vim.unmap('Q', 'normal', { toKeys: ' x', noremap: false }));
+  eq('', qs());
+  CodeMirror.Vim.mapclear();
+}, { value: 'a' });
+
 testVim('cr_still_moves_to_first_nonblank_in_normal_mode', function(cm, vim, helpers) {
   cm.setCursor(0, 2);
   helpers.doKeys('2', '<CR>');

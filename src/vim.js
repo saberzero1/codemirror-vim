@@ -8735,7 +8735,7 @@ export function initVim(CM) {
         _mapCommand(mapping);
       }
     }
-    /**@type {(lhs: string, ctx: string, options?: {includeDefaults?: boolean, toKeys?: string, noremap?: boolean}) => boolean|void} */
+    /**@type {(lhs: string, ctx: string, options?: {includeDefaults?: boolean, toKeys?: string, noremap?: boolean, action?: string}) => boolean|void} */
     unmap(lhs, ctx, options) {
       var includeDefaults = options && options.includeDefaults;
       // With `toKeys`, only the user mapping `lhs` -> `toKeys` is removed:
@@ -8743,6 +8743,10 @@ export function initVim(CM) {
       // a context-less entry. A host re-registering its own bindings uses it
       // to lift a user's mapping off and put it back on top.
       var exact = options && typeof options.toKeys == 'string' ? options : null;
+      // With `action`, only a user mapping of `lhs` to that action is removed,
+      // the same way: a host putting its own action mapping back on top lifts
+      // its earlier copy first instead of stacking another one under it.
+      var exactAction = options && typeof options.action == 'string' ? options.action : null;
       if (lhs != ':' && lhs.charAt(0) == ':') {
         if (ctx) { throw Error('Mode not supported for ex mappings'); }
         var commandName = lhs.substring(1);
@@ -8759,8 +8763,12 @@ export function initVim(CM) {
               continue;
             }
             var entry = /**@type {any}*/ (defaultKeymap[i]);
+            if (exactAction && (entry.type != 'action' || entry.action != exactAction
+                || entry._isDefault)) {
+              continue;
+            }
             if (exact && (entry.type != 'keyToKey'
-                || entry.toKeys != exact.toKeys
+                || entry.toKeys != normalizeKeyString(exact.toKeys || "")
                 || (exact.noremap !== undefined
                   && !!entry.noremap != !!exact.noremap))) {
               continue;
@@ -8770,7 +8778,7 @@ export function initVim(CM) {
             return true;
           }
         }
-        if (ctx && !exact) {
+        if (ctx && !exact && !exactAction) {
           var allModeContexts = ['normal', 'visual', 'operatorPending'];
           for (var i = 0; i < defaultKeymap.length; i++) {
             if (keys == defaultKeymap[i].keys

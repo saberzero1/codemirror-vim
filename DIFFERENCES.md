@@ -677,6 +677,10 @@ for recovery. Three API changes protect against accidental keymap corruption:
    forwards the `options` parameter to `exCommandDispatcher.unmap()` so
    callers can remove default bindings when needed (e.g. unmapping `,` to
    allow multi-key sequences like `,,w` to accumulate as a prefix).
+   `{ action: name }` removes only a user mapping of `lhs` to that action,
+   as `{ toKeys }` does for a key mapping: a host putting its own action
+   mapping back on top lifts its earlier copy first, without touching a
+   user's mapping on the same keys.
 
 2. **`Vim.resetKeymap()`**: New API method that rebuilds the `defaultKeymap`
    array from the frozen snapshot. User-defined mappings are preserved;
