@@ -8018,6 +8018,39 @@ testVim('resetKeymap_restores_defaults_after_force_unmap', function(cm, vim, hel
   helpers.assertCursorAt(1, 0);
 }, { value: 'line one\nline two' });
 
+// A noremap expansion searched only the last `defaultKeymapLength` entries of
+// the keymap, so each default removed with includeDefaults moved the boundary
+// one entry into the user's mappings. motions#236: a space leader removes the
+// default <Space>, and `j` mapped to an expression that returns `3j` then
+// found its own mapping and recursed until the stack overflowed.
+testVim('noremap_skips_user_mappings_after_default_removed', function(cm, vim, helpers) {
+  CodeMirror.Vim.noremap('j', '2j', 'normal');
+  CodeMirror.Vim.unmap('<Space>', undefined, { includeDefaults: true });
+  cm.setCursor(0, 0);
+  helpers.doKeys('j');
+  helpers.assertCursorAt(2, 0);
+  CodeMirror.Vim.mapclear();
+  CodeMirror.Vim.resetKeymap();
+}, { value: 'l0\nl1\nl2\nl3\nl4' });
+
+testVim('noremap_feedKeys_from_action_after_default_removed', function(cm, vim, helpers) {
+  var calls = 0;
+  CodeMirror.Vim.defineAction('testCountedJ', function(cm, actionArgs) {
+    calls++;
+    var keys = actionArgs.repeatIsExplicit ? actionArgs.repeat + 'j' : 'gj';
+    CodeMirror.Vim.feedKeys(cm, keys, { noremap: true });
+  });
+  CodeMirror.Vim.mapCommand('j', 'action', 'testCountedJ', {}, { context: 'normal' });
+  CodeMirror.Vim.unmap('<Space>', undefined, { includeDefaults: true });
+  cm.setCursor(0, 0);
+  helpers.doKeys('3', 'j');
+  helpers.assertCursorAt(3, 0);
+  eq(1, calls);
+  eq('l0\nl1\nl2\nl3\nl4', cm.getValue());
+  CodeMirror.Vim.mapclear();
+  CodeMirror.Vim.resetKeymap();
+}, { value: 'l0\nl1\nl2\nl3\nl4' });
+
 testVim('resetKeymap_preserves_user_mappings', function(cm, vim, helpers) {
   CodeMirror.Vim.map('Q', 'j');
   CodeMirror.Vim.resetKeymap();

@@ -306,7 +306,6 @@ export function initVim(CM) {
     return Object.assign({}, cmd);
   });
   var usedKeys = Object.create(null);
-  var defaultKeymapLength = defaultKeymap.length;
 
   /**
    * Ex commands
@@ -951,7 +950,6 @@ export function initVim(CM) {
       for (var i = 0; i < defaultKeymap.length; i++) {
         if (defaultKeymap[i].keys) addUsedKeys(defaultKeymap[i].keys);
       }
-      defaultKeymapLength = DEFAULT_KEYMAP_SNAPSHOT.length;
     },
 
     // Testing hook.
@@ -6310,10 +6308,18 @@ export function initVim(CM) {
     // and Lua's vim.keymap.set are noremap by default. Neovim 0.12.5 with
     // `nmap <Plug>(down) j`, `nmap l k`, `nnoremap Q <Plug>(down)l`: Q runs j
     // and then a plain l.
-    var startIndex = noremap && !/^<plug>/i.test(keys)
-      ? keyMap.length - defaultKeymapLength : 0;
-    for (var i = startIndex; i < keyMap.length; i++) {
+    //
+    // A default is told apart by its flag, not by its position: the defaults
+    // used to be taken as the last `defaultKeymapLength` entries, so each one
+    // removed with `unmap(..., { includeDefaults: true })` put a user mapping
+    // inside that range. With a space leader the host removes the default
+    // <Space>, and `nnoremap <expr> j v:count ? v:count . 'j' : 'gj'` then
+    // found itself in its own rhs and recursed until the stack overflowed
+    // (motions#236).
+    var defaultsOnly = noremap && !/^<plug>/i.test(keys);
+    for (var i = 0; i < keyMap.length; i++) {
       var command = keyMap[i];
+      if (defaultsOnly && !command._isDefault) { continue; }
       if (context == 'insert' && command.context != 'insert' ||
           (command.context && command.context != context) ||
           inputState.operator && command.type == 'action' && !command.operatorPending ||
@@ -6324,8 +6330,9 @@ export function initVim(CM) {
     // Select mode fallback: if no full matches in select context,
     // try visual context (Neovim falls back to :vmap when no :smap exists)
     if (context === 'select' && full.length === 0) {
-      for (var i = startIndex; i < keyMap.length; i++) {
+      for (var i = 0; i < keyMap.length; i++) {
         var command = keyMap[i];
+        if (defaultsOnly && !command._isDefault) { continue; }
         if (command.context === 'visual' &&
             !(inputState.operator && command.type == 'action' && !command.operatorPending) &&
             (match = commandMatch(keys, command.keys))) {

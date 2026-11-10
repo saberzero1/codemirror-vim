@@ -681,7 +681,7 @@ for recovery. Three API changes protect against accidental keymap corruption:
 2. **`Vim.resetKeymap()`**: New API method that rebuilds the `defaultKeymap`
    array from the frozen snapshot. User-defined mappings are preserved;
    defaults are restored from fresh copies. `usedKeys` is rebuilt from
-   scratch and `defaultKeymapLength` is recalibrated. Intended for host
+   scratch. Intended for host
    environments (Obsidian) where the module-level singleton survives
    plugin enable/disable cycles.
 
@@ -689,6 +689,15 @@ for recovery. Three API changes protect against accidental keymap corruption:
    `defaultKeymapLength` index (fragile if other code splices the array),
    `mapclear()` now partitions entries by the `_isDefault` flag.
    `usedKeys` is rebuilt after clearing.
+
+4. **A noremap expansion uses the `_isDefault` flag too**: `commandMatches`
+   used to search only the last `defaultKeymapLength` entries while expanding
+   a noremap rhs. Each default removed with `includeDefaults` then put one user
+   mapping inside that range, so a noremap rhs could reach the user's own
+   mapping. In motions#236 a space leader removed the default `<Space>`, and
+   an expr mapping on `j` returning `3j` re-entered itself until the stack
+   overflowed. It now skips every entry not flagged `_isDefault`, and
+   `defaultKeymapLength` is gone.
 
 `_mapCommand()` marks new entries as `_isDefault: false` to distinguish
 user-defined mappings from defaults.
