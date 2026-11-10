@@ -106,7 +106,9 @@ export function initVim(CM) {
     { keys: '<End>', type: 'keyToKey', toKeys: '$' },
     { keys: '<PageUp>', type: 'keyToKey', toKeys: '<C-b>' },
     { keys: '<PageDown>', type: 'keyToKey', toKeys: '<C-f>' },
-    { keys: '<CR>', type: 'keyToKey', toKeys: 'j^', context: 'normal' },
+    // Vim's <CR> is `+`: a linewise motion, so `d<CR>` deletes two lines and
+    // visual <CR> moves down. It was a normal-mode-only `j^`.
+    { keys: '<CR>', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true, linewise: true }},
     { keys: '<Ins>', type: 'keyToKey', toKeys: 'i', context: 'normal'},
     { keys: '<Ins>', type: 'action', action: 'toggleOverwrite', context: 'insert' },
     { keys: '<C-g>s<character>', type: 'action', action: 'surroundInsert', context: 'insert' },
@@ -158,9 +160,13 @@ export function initVim(CM) {
     { keys: "gM", type: "motion", motion: "moveToMiddleOfTextLine", motionArgs: { foldopen: 'hor' } },
     { keys: '0', type: 'motion', motion: 'moveToStartOfLine', motionArgs: { foldopen: 'hor' }},
     { keys: '^', type: 'motion', motion: 'moveToFirstNonWhiteSpaceCharacter', motionArgs: { foldopen: 'hor' }},
-    { keys: '+', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true }},
-    { keys: '-', type: 'motion', motion: 'moveByLines', motionArgs: { forward: false, toFirstChar:true }},
-    { keys: '_', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true, repeatOffset:-1 }},
+    // `+`, `-` and `_` are linewise in Vim. Without the flag an operator took
+    // them charwise: Neovim 0.12.6's `d3_` on five lines deletes three, where
+    // this deleted from the cursor to the start of the third line's text and
+    // left an empty line, and `3g@_` reported lines 0-1 instead of 0-2.
+    { keys: '+', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true, linewise: true }},
+    { keys: '-', type: 'motion', motion: 'moveByLines', motionArgs: { forward: false, toFirstChar:true, linewise: true }},
+    { keys: '_', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true, repeatOffset:-1, linewise: true }},
     { keys: '$', type: 'motion', motion: 'moveToEol', motionArgs: { inclusive: true, foldopen: 'hor' }},
     { keys: '%', type: 'motion', motion: 'moveToMatchedSymbol', motionArgs: { inclusive: true, toJumplist: true, foldopen: 'percent' }},
     { keys: 'f<character>', type: 'motion', motion: 'moveToCharacter', motionArgs: { forward: true , inclusive: true, foldopen: 'hor' }},
@@ -3957,10 +3963,22 @@ export function initVim(CM) {
       }
       var type = args.linewise ? 'line' :
                  (cm.state.vim && cm.state.vim.visualBlock) ? 'block' : 'char';
+      var vim = cm.state.vim;
       var from = ranges[0].anchor || ranges[0].head;
       var to = ranges[ranges.length - 1].head || ranges[ranges.length - 1].anchor;
       if (cursorIsBefore(to, from)) { var tmp = from; from = to; to = tmp; }
-      var vim = cm.state.vim;
+      // '[ and '] are where the text the operator covers starts and ends, as
+      // in Neovim, not the edges of the range handed to the operator. That
+      // range ends past the text: on the next line's column 0 for a linewise
+      // motion and one character on for a charwise one, so `g@j` marked three
+      // lines and `g@w` one character too many. Neovim 0.12.6 on "  a\nb\nc":
+      // `g@j` gives 0:0-1:0, `g@_` 0:0-0:2, `jjg@k` 1:0-2:0, `Vjg@` 0:0-1:0,
+      // `vjg@` 0:0-1:0, `g@w` 0:0-0:1 and `g@e` 0:0-0:2.
+      if (type !== 'block') {
+        var marked = operatorfuncMarks(cm, vim, args.linewise, from, to, oldAnchor, newHead);
+        from = marked.from;
+        to = marked.to;
+      }
       if (vim.marks && vim.marks['[']) vim.marks['['].clear();
       if (vim.marks && vim.marks[']']) vim.marks[']'].clear();
       vim.marks['['] = cm.setBookmark(from);
@@ -3975,6 +3993,35 @@ export function initVim(CM) {
       return cm.getCursor();
     },
   };
+
+  /**
+   * The '[ and '] positions for `g@`: a visual selection's own ends, a
+   * linewise motion's start and end, or the last character a charwise range
+   * covers.
+   * @arg {CodeMirrorV} cm @arg {vimState} vim @arg {boolean|undefined} linewise
+   * @arg {Pos} from @arg {Pos} to @arg {Pos|undefined} oldAnchor @arg {Pos|undefined} newHead
+   */
+  function operatorfuncMarks(cm, vim, linewise, from, to, oldAnchor, newHead) {
+    var a, b;
+    if (vim.visualMode && vim.sel) {
+      a = vim.sel.anchor; b = vim.sel.head;
+    } else if (linewise && oldAnchor && newHead) {
+      a = oldAnchor; b = newHead;
+    }
+    if (a && b) {
+      if (cursorIsBefore(b, a)) { var tmp = a; a = b; b = tmp; }
+      return { from: copyCursor(a), to: copyCursor(b) };
+    }
+    if (linewise) {
+      var lastLine = to.ch == 0 && to.line > from.line ? to.line - 1 : to.line;
+      return { from: new Pos(from.line, 0), to: new Pos(lastLine, 0) };
+    }
+    if (to.ch > 0) return { from: from, to: new Pos(to.line, to.ch - 1) };
+    if (to.line > from.line) {
+      return { from: from, to: new Pos(to.line - 1, Math.max(lineLength(cm, to.line - 1) - 1, 0)) };
+    }
+    return { from: from, to: to };
+  }
 
   /** @arg {string} name  @arg {import("./types").OperatorFn} fn */
   function defineOperator(name, fn) {

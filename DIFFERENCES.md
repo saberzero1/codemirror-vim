@@ -2991,10 +2991,31 @@ Added `{ keys: 'g@', type: 'operator', operator: 'operatorfunc' }` to
 The operator:
 - Reads the callback from `vimGlobalState._operatorfuncCallback`
 - Determines the motion type (`'line'`, `'char'`, or `'block'`)
-- Sets `'[` and `']` marks to the motion range (Neovim compatibility)
+- Sets `'[` and `']` to where the covered text starts and ends, as Neovim
+  does (`operatorfuncMarks`): a visual selection's own ends, a linewise
+  motion's start and end, or the last character of a charwise range. They
+  used to be the edges of the range handed to the operator, which ends past
+  the text, so `']` sat on the next line's column 0 after a linewise motion
+  and one character on after a charwise one. mini.comment comments the lines
+  from `'[` to `']`, so `gcj` commented three lines. Measured against Neovim
+  0.12.6 for `j`, `2j`, `_`, `3_`, `G`, `k`, `w`, `e`, `$`, `iw`, `aw`, `b`,
+  `ip`, `Vj` and `vj`. Blockwise marks are unchanged.
 - Saves and restores `vim.inputState` around the callback to prevent
   reentrant corruption
 - Calls the callback with `(cm, type)`
+
+## `+`, `-`, `_` and `<CR>` are linewise
+
+**File**: `src/vim.js`
+
+Vim documents all four as linewise motions; upstream defines `+`, `-` and
+`_` without `linewise`, and `<CR>` as a normal-mode-only `keyToKey` to `j^`.
+An operator therefore took them charwise: Neovim 0.12.6's `d3_` on
+`"  a\nb\nc\nd\ne"` leaves `d|e`, where this left `|c|d|e`; `c2_` lost the
+indent; `3g@_` covered two lines, so mini.comment's `3gcc` commented two; and
+`d<CR>` matched nothing. All four now carry `linewise: true`, and `<CR>` is a
+context-free `moveByLines` motion like `+`, so it also works after an
+operator and in visual mode.
 
 ## Insert-mode `<C-G>u` / `<C-G>U` (undo break control)
 

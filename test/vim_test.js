@@ -8051,6 +8051,70 @@ testVim('noremap_feedKeys_from_action_after_default_removed', function(cm, vim, 
   CodeMirror.Vim.resetKeymap();
 }, { value: 'l0\nl1\nl2\nl3\nl4' });
 
+// `_`, `+`, `-` and <CR> are linewise motions in Vim. Expected values are
+// Neovim 0.12.6's on the same five lines, cursor at the start of the first.
+var linewiseMotionDoc = '  a\nb\nc\nd\ne';
+function linewiseMotionCase(name, keys, text, reg) {
+  testVim('linewise_motion_' + name, function(cm, vim, helpers) {
+    cm.setCursor(0, 0);
+    helpers.doKeys.apply(helpers, keys);
+    eq(text, cm.getValue().split('\n').join('|'));
+    if (reg !== undefined) {
+      var register = helpers.getRegisterController().getRegister();
+      eq(reg, register.toString());
+      is(register.linewise);
+    }
+  }, { value: linewiseMotionDoc });
+}
+linewiseMotionCase('d3_', ['d', '3', '_'], 'd|e', '  a\nb\nc\n');
+linewiseMotionCase('d_', ['d', '_'], 'b|c|d|e', '  a\n');
+linewiseMotionCase('d+', ['d', '+'], 'c|d|e', '  a\nb\n');
+linewiseMotionCase('d2+', ['d', '2', '+'], 'd|e', '  a\nb\nc\n');
+linewiseMotionCase('jjd-', ['j', 'j', 'd', '-'], '  a|d|e', 'b\nc\n');
+linewiseMotionCase('y2_', ['y', '2', '_'], '  a|b|c|d|e', '  a\nb\n');
+linewiseMotionCase('c2_', ['c', '2', '_', 'X', '<Esc>'], '  X|c|d|e', '  a\nb\n');
+linewiseMotionCase('d_CR', ['d', '<CR>'], 'c|d|e', '  a\nb\n');
+
+// '[ and '] around `g@`, against Neovim 0.12.6 on the same five lines with
+// the cursor at the start of the first.
+function operatorfuncMarksCase(name, keys, expected) {
+  testVim('operatorfunc_marks_' + name, function(cm, vim, helpers) {
+    var got = null;
+    CodeMirror.Vim.setOperatorfunc(function(_cm, type) {
+      var s = vim.marks['['].find(), e = vim.marks[']'].find();
+      got = type + ' ' + s.line + ':' + s.ch + '-' + e.line + ':' + e.ch;
+    });
+    cm.setCursor(0, 0);
+    helpers.doKeys.apply(helpers, keys);
+    CodeMirror.Vim.setOperatorfunc(null);
+    eq(expected, got);
+  }, { value: linewiseMotionDoc });
+}
+operatorfuncMarksCase('j', ['g', '@', 'j'], 'line 0:0-1:0');
+operatorfuncMarksCase('2j', ['g', '@', '2', 'j'], 'line 0:0-2:0');
+operatorfuncMarksCase('underscore', ['g', '@', '_'], 'line 0:0-0:2');
+operatorfuncMarksCase('3_underscore', ['3', 'g', '@', '_'], 'line 0:0-2:0');
+operatorfuncMarksCase('G', ['g', '@', 'G'], 'line 0:0-4:0');
+operatorfuncMarksCase('4j', ['g', '@', '4', 'j'], 'line 0:0-4:0');
+operatorfuncMarksCase('jjk', ['j', 'j', 'g', '@', 'k'], 'line 1:0-2:0');
+operatorfuncMarksCase('w', ['g', '@', 'w'], 'char 0:0-0:1');
+operatorfuncMarksCase('e', ['g', '@', 'e'], 'char 0:0-0:2');
+operatorfuncMarksCase('dollar', ['g', '@', '$'], 'char 0:0-0:2');
+operatorfuncMarksCase('Vj', ['V', 'j', 'g', '@'], 'line 0:0-1:0');
+operatorfuncMarksCase('vj', ['v', 'j', 'g', '@'], 'char 0:0-1:0');
+operatorfuncMarksCase('ip', ['g', '@', 'i', 'p'], 'line 0:0-4:0');
+operatorfuncMarksCase('iw', ['g', '@', 'i', 'w'], 'char 0:0-0:1');
+operatorfuncMarksCase('aw', ['g', '@', 'a', 'w'], 'char 0:0-0:2');
+operatorfuncMarksCase('lb', ['l', 'g', '@', 'b'], 'char 0:0-0:0');
+
+testVim('cr_still_moves_to_first_nonblank_in_normal_mode', function(cm, vim, helpers) {
+  cm.setCursor(0, 2);
+  helpers.doKeys('2', '<CR>');
+  helpers.assertCursorAt(2, 2);
+  helpers.doKeys('<CR>');
+  helpers.assertCursorAt(3, 0);
+}, { value: 'a\nb\n  c\nd' });
+
 testVim('resetKeymap_preserves_user_mappings', function(cm, vim, helpers) {
   CodeMirror.Vim.map('Q', 'j');
   CodeMirror.Vim.resetKeymap();
