@@ -703,6 +703,16 @@ for recovery. Three API changes protect against accidental keymap corruption:
    overflowed. It now skips every entry not flagged `_isDefault`, and
    `defaultKeymapLength` is gone.
 
+5. **A host's own commands are built-ins to a noremap rhs**: a host passes
+   `mapCommand(keys, type, name, args, { builtin: true })` for the commands it
+   adds as part of the editor, and a noremap expansion reaches those as it
+   reaches a default, while still skipping user mappings. Without it,
+   `nnoremap X K`, `feedKeys(cm, 'K', { noremap: true })` and `:normal! K`
+   found nothing for a key only the host defines (motions#234). It is a
+   separate flag rather than `_isDefault` because nothing else changes:
+   `resetKeymap`, `mapclear`, `unmap`, the prefix deferral and the user
+   `<Esc>` claim still treat these entries as the host's mappings.
+
 `_mapCommand()` marks new entries as `_isDefault: false` to distinguish
 user-defined mappings from defaults.
 

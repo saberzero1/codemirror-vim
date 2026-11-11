@@ -6363,10 +6363,18 @@ export function initVim(CM) {
     // <Space>, and `nnoremap <expr> j v:count ? v:count . 'j' : 'gj'` then
     // found itself in its own rhs and recursed until the stack overflowed
     // (motions#236).
+    //
+    // A host registers its own commands with `mapCommand(..., { builtin:
+    // true })`. They are the editor's built-ins as far as the user can tell,
+    // so a noremap rhs reaches them as it reaches `j`: `nnoremap X K` runs
+    // the host's `K`, not a user mapping on `K`. They are not defaults in any
+    // other sense — `resetKeymap`, `mapclear`, `unmap` and the prefix
+    // deferral still treat them as the host's mappings — which is why this is
+    // its own flag rather than `_isDefault` (motions#234).
     var defaultsOnly = noremap && !/^<plug>/i.test(keys);
     for (var i = 0; i < keyMap.length; i++) {
       var command = keyMap[i];
-      if (defaultsOnly && !command._isDefault) { continue; }
+      if (defaultsOnly && !command._isDefault && !command.builtin) { continue; }
       if (context == 'insert' && command.context != 'insert' ||
           (command.context && command.context != context) ||
           inputState.operator && command.type == 'action' && !command.operatorPending ||
@@ -6379,7 +6387,7 @@ export function initVim(CM) {
     if (context === 'select' && full.length === 0) {
       for (var i = 0; i < keyMap.length; i++) {
         var command = keyMap[i];
-        if (defaultsOnly && !command._isDefault) { continue; }
+        if (defaultsOnly && !command._isDefault && !command.builtin) { continue; }
         if (command.context === 'visual' &&
             !(inputState.operator && command.type == 'action' && !command.operatorPending) &&
             (match = commandMatch(keys, command.keys))) {

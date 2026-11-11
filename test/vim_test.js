@@ -8051,6 +8051,59 @@ testVim('noremap_feedKeys_from_action_after_default_removed', function(cm, vim, 
   CodeMirror.Vim.resetKeymap();
 }, { value: 'l0\nl1\nl2\nl3\nl4' });
 
+// motions#234: a host's own commands, registered with `builtin: true`, are
+// built-ins to a noremap rhs, which skips only the user's mappings. Without
+// the flag `nnoremap X K` and `feedKeys(cm, 'K', { noremap: true })` found
+// nothing and did nothing.
+function defineHostK(calls) {
+  CodeMirror.Vim.defineAction('testHostK', function() { calls.host++; });
+  CodeMirror.Vim.mapCommand('K', 'action', 'testHostK', {}, { context: 'normal', builtin: true });
+}
+testVim('noremap_reaches_host_builtin', function(cm, vim, helpers) {
+  var calls = { host: 0 };
+  defineHostK(calls);
+  CodeMirror.Vim.noremap('X', 'K', 'normal');
+  helpers.doKeys('X');
+  eq(1, calls.host);
+  CodeMirror.Vim.mapclear();
+  CodeMirror.Vim.resetKeymap();
+}, { value: 'abc' });
+testVim('noremap_feedKeys_reaches_host_builtin_past_user_mapping', function(cm, vim, helpers) {
+  var calls = { host: 0, user: 0 };
+  defineHostK(calls);
+  CodeMirror.Vim.defineAction('testUserK', function(cm) {
+    calls.user++;
+    CodeMirror.Vim.feedKeys(cm, 'K', { noremap: true });
+  });
+  CodeMirror.Vim.mapCommand('K', 'action', 'testUserK', {}, { context: 'normal' });
+  helpers.doKeys('K');
+  eq(1, calls.user);
+  eq(1, calls.host);
+  CodeMirror.Vim.mapclear();
+  CodeMirror.Vim.resetKeymap();
+}, { value: 'abc' });
+testVim('noremap_skips_unflagged_host_command', function(cm, vim, helpers) {
+  var calls = 0;
+  CodeMirror.Vim.defineAction('testPlainK', function() { calls++; });
+  CodeMirror.Vim.mapCommand('K', 'action', 'testPlainK', {}, { context: 'normal' });
+  CodeMirror.Vim.noremap('X', 'K', 'normal');
+  helpers.doKeys('X');
+  eq(0, calls);
+  helpers.doKeys('K');
+  eq(1, calls);
+  CodeMirror.Vim.mapclear();
+  CodeMirror.Vim.resetKeymap();
+}, { value: 'abc' });
+testVim('host_builtin_is_still_a_host_mapping_to_resetKeymap', function(cm, vim, helpers) {
+  var calls = { host: 0 };
+  defineHostK(calls);
+  CodeMirror.Vim.resetKeymap();
+  helpers.doKeys('K');
+  eq(1, calls.host);
+  CodeMirror.Vim.mapclear();
+  CodeMirror.Vim.resetKeymap();
+}, { value: 'abc' });
+
 // `_`, `+`, `-` and <CR> are linewise motions in Vim. Expected values are
 // Neovim 0.12.6's on the same five lines, cursor at the start of the first.
 var linewiseMotionDoc = '  a\nb\nc\nd\ne';

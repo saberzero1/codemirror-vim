@@ -296,6 +296,8 @@ type allCommands = {
     noremap?: boolean,
     operatorPending?: boolean,
     _isDefault?: boolean,
+    /** A host's own command: a noremap rhs reaches it as it reaches a default. */
+    builtin?: boolean,
     _backtrackSuffix?: string,
 }
 export type motionCommand = allCommands & {
