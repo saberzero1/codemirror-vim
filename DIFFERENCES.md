@@ -1953,6 +1953,14 @@ used to match brackets. It is a jump and, as Neovim 0.12.6 measures although
 its help says linewise, a charwise exclusive motion; past 100 it fails,
 cancelling an operator.
 
+`:join` leaves the cursor on the joined line's first non-blank; it used to
+put it on column 0. `:copy`/`:t` and `:move` put it on the last line they
+copy or move, at the `startofline` column taken before the command, as
+Neovim's do; they used to use the first non-blank. (`:move` is not in the
+default ex command map, so `:m` resolves to `:marks` unless a host defines it;
+the plugin does.) `Vim.curswant(cm)` and `Vim.startOfLineColumn(cm, line,
+want)` expose the same rule to a host command.
+
 ### Operator range adjustments
 
 Three of Vim's rules for an operator's range, in this order:

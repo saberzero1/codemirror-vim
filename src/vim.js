@@ -1559,6 +1559,19 @@ export function initVim(CM) {
     defineRegister: defineRegister,
 
     exitVisualMode: exitVisualMode,
+    /**
+     * Vim's curswant for the cursor of `cm`: the screen column a vertical
+     * motion kept, Infinity while a `$` is sticky, or the cursor's own.
+     * Take it before an edit moves the cursor's line.
+     * @arg {CodeMirrorV} cm @returns {number}
+     */
+    curswant: function(cm) { return curswant(cm, cm.state.vim, cm.getCursor()); },
+    /**
+     * Where 'startofline' puts the cursor on `line`: the first non-blank
+     * with it, curswant `want` without, as Vim's beginline(BL_SOL | BL_FIX).
+     * @arg {CodeMirror} cm @arg {number} line @arg {number} want @returns {number}
+     */
+    startOfLineColumn: function(cm, line, want) { return startOfLineColumnFor(cm, line, want); },
     enterInsertMode: enterInsertMode,
     exitInsertMode: exitInsertMode,
 
@@ -9094,6 +9107,8 @@ export function initVim(CM) {
         return;
       }
       var count = srcLineEnd - srcLine + 1;
+      // Taken before the move shifts the cursor's line.
+      var want = curswant(cm, cm.state.vim, cm.getCursor());
       var text = cm.getRange(new Pos(srcLine, 0), new Pos(srcLineEnd + 1, 0));
       if (srcLineEnd === cm.lastLine() && srcLine > 0) {
         text = '\n' + cm.getRange(new Pos(srcLine - 1, cm.getLine(srcLine - 1).length), new Pos(srcLineEnd, cm.getLine(srcLineEnd).length));
@@ -9111,9 +9126,12 @@ export function initVim(CM) {
         cm.replaceRange(text, new Pos(insertAt, 0));
       }
       var finalLine = Math.min(dest + count, cm.lastLine());
-      cm.setCursor(new Pos(finalLine, findFirstNonWhiteSpaceCharacter(cm.getLine(finalLine))));
+      // On the last moved line, at the 'startofline' column, as Neovim's :m.
+      cm.setCursor(new Pos(finalLine, startOfLineColumnFor(cm, finalLine, want)));
     },
     copy: function(cm, params) {
+      // Taken before the copy shifts the cursor's line.
+      var want = curswant(cm, cm.state.vim, cm.getCursor());
       var argString = params.argString ? trim(params.argString) : '';
       if (!argString) {
         showConfirm(cm, 'Argument required');
@@ -9136,7 +9154,8 @@ export function initVim(CM) {
       }
       var count = srcLineEnd - srcLine + 1;
       var finalLine = dest + count;
-      cm.setCursor(new Pos(finalLine, findFirstNonWhiteSpaceCharacter(cm.getLine(finalLine))));
+      // On the last copied line, at the 'startofline' column, as Neovim's :t.
+      cm.setCursor(new Pos(finalLine, startOfLineColumnFor(cm, finalLine, want)));
     },
     t: function(cm, params) {
       this.copy(cm, params);
@@ -9655,7 +9674,8 @@ export function initVim(CM) {
       var bang = !!(params.argString && params.argString.trim() === '!');
       cm.setCursor(new Pos(line, 0));
       actions.joinLines(cm, {repeat: lineEnd - line + 1, keepSpaces: bang}, cm.state.vim);
-      cm.setCursor(new Pos(line, 0));
+      // The first non-blank of the joined line, as Neovim's :join leaves it.
+      cm.setCursor(new Pos(line, findFirstNonWhiteSpaceCharacter(cm.getLine(line))));
     },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     delmarks: function(cm, params) {

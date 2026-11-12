@@ -2521,6 +2521,33 @@ wideCase([1, 0], ['7', '|'], [1, 6]);
 wideCase([0, 0], ['5', '|'], [0, 2]);
 wideCase([4, 0], ['8', '|'], [4, 3]);
 
+// :join leaves the cursor on the joined line's first non-blank, and :t puts
+// it on the last line it copies, at the 'startofline' column taken before
+// the command. (:m is not mapped here; the host defines it.) Each row is
+// Neovim 0.12.6 with tabstop=4.
+var exLines = '  one two\n\tthree four\nfive six\n    seven';
+function exCursorCase(start, ex, expected, sol) {
+  testVim('ex_cursor_' + ex.replace(/\W+/g, '_') + '_' + start.join('_') + (sol ? '_sol' : ''), function(cm, vim, helpers) {
+    if (sol) CodeMirror.Vim.setOption('startofline', true);
+    try {
+      cm.setCursor(start[0], start[1]);
+      helpers.doEx(ex);
+      helpers.assertCursorAt(expected[0], expected[1]);
+    } finally {
+      if (sol) CodeMirror.Vim.setOption('startofline', false);
+    }
+  }, Object.assign({ value: exLines }, shiftTabs));
+}
+exCursorCase([0, 5], 'j', [0, 2]);
+exCursorCase([1, 4], '2,3j', [1, 1]);
+exCursorCase([0, 5], 'j', [0, 2], true);
+exCursorCase([0, 6], 't 2', [2, 6]);
+exCursorCase([2, 3], 'co 0', [0, 3]);
+exCursorCase([0, 6], 't 2', [2, 2], true);
+exCursorCase([2, 3], 'co 0', [0, 0], true);
+exCursorCase([0, 6], 'd', [0, 1]);
+exCursorCase([0, 6], 'd', [0, 1], true);
+
 // G and gg keep the screen column the same way without 'startofline', and
 // go to the first non-blank with it. Neovim 0.12.6, tabstop=4.
 var solLines = '\tfoo bar baz\n  x\n        long line here\nab\n\t\tend line';
