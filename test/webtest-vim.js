@@ -59,7 +59,8 @@ describe("Vim extension", () => {
       extensions: [
         vim({}),
         basicSetup,
-        options.mode == "xml" ? xml() : javascript(),
+        // "plain": no language, so nothing indents a line for =.
+        options.mode == "plain" ? [] : options.mode == "xml" ? xml() : javascript(),
         EditorState.tabSize.of(options.tabSize || options.indentUnit || 4),
         indentUnit.of(
           options.indentWithTabs ? "\t" : " ".repeat(options.indentUnit || 2)

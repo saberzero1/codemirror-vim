@@ -1,5 +1,5 @@
 import { type AnnotationType, Annotation, EditorSelection, Text, MapMode, ChangeDesc, type StateField } from "@codemirror/state"
-import { StringStream, matchBrackets, indentUnit, ensureSyntaxTree, foldCode, foldedRanges } from "@codemirror/language"
+import { StringStream, matchBrackets, indentUnit, ensureSyntaxTree, foldCode, foldedRanges, getIndentation } from "@codemirror/language"
 import { EditorView, runScopeHandlers, ViewUpdate, Decoration } from "@codemirror/view"
 import { RegExpCursor, setSearchQuery, SearchQuery } from "@codemirror/search"
 import {
@@ -288,6 +288,15 @@ export class CodeMirror {
   firstLine() { return 0; };
   lastLine() { return this.cm6.state.doc.lines - 1; };
   lineCount() { return this.cm6.state.doc.lines };
+  /**
+   * The indent, in columns, the editor's language gives line `row` (0-based),
+   * or null where it has none: the line Vim's = indents as 'autoindent' does.
+   */
+  languageIndentation(row: number): number | null {
+    const state = this.cm6.state;
+    if (row < 0 || row >= state.doc.lines) return null;
+    return getIndentation(state, state.doc.line(row + 1).from);
+  };
   setCursor(line: number, ch: number): void;
   setCursor(line: Pos): void;
   setCursor(line: Pos | number, ch?: number) {

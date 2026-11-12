@@ -3936,10 +3936,52 @@ export function initVim(CM) {
       return new Pos(firstLine, columnAtVirtualColumn(firstText, args.curswant, tabSize));
     },
     indentAuto: function(cm, args, ranges) {
-      cm.execCommand("indentAuto");
-      var line = ranges[0].anchor.line;
+      // The editor's language indents a line where it can. Where it cannot,
+      // Vim's = without 'indentexpr', 'cindent' or 'lisp' gives each line the
+      // indent of the nearest non-blank line above, as re-indented, and
+      // empties a line of only blanks. The indent is built from its columns
+      // with 'expandtab' and 'tabstop', as > builds one.
+      var et = getOption('expandtab', cm);
+      var tabSize = cm.getOption('tabSize');
+      var useSpaces = (typeof et === 'boolean') ? et : !cm.getOption('indentWithTabs');
+      var first = Infinity, last = -1;
+      for (var r = 0; r < ranges.length; r++) {
+        var from = cursorMin(ranges[r].anchor, ranges[r].head);
+        var to = cursorMax(ranges[r].anchor, ranges[r].head);
+        var end = to.ch === 0 && to.line > from.line ? to.line - 1 : to.line;
+        first = Math.min(first, from.line);
+        last = Math.max(last, end);
+      }
+      for (var i = first; i <= last; i++) {
+        var text = cm.getLine(i);
+        var blank = !/\S/.test(text);
+        var cols = cm.languageIndentation ? cm.languageIndentation(i) : null;
+        if (cols == null) {
+          if (blank) {
+            if (text.length) cm.replaceRange('', new Pos(i, 0), new Pos(i, text.length));
+            continue;
+          }
+          cols = 0;
+          for (var j = i - 1; j >= cm.firstLine(); j--) {
+            var above = cm.getLine(j);
+            if (/\S/.test(above)) {
+              cols = cursorVirtualColumn(above, findFirstNonWhiteSpaceCharacter(above), tabSize);
+              break;
+            }
+          }
+        } else if (blank) {
+          continue;
+        }
+        var indent = useSpaces ? ' '.repeat(cols)
+          : '\t'.repeat(Math.floor(cols / tabSize)) + ' '.repeat(cols % tabSize);
+        var ws = text.length - text.replace(/^\s+/, '').length;
+        if (text.slice(0, ws) !== indent) {
+          cm.replaceRange(indent, new Pos(i, 0), new Pos(i, ws));
+        }
+      }
+      var line = first === Infinity ? ranges[0].anchor.line : first;
       if (args.curswant === undefined) {
-        return motions.moveToFirstNonWhiteSpaceCharacter(cm, ranges[0].anchor);
+        return new Pos(line, findFirstNonWhiteSpaceCharacter(cm.getLine(line)));
       }
       return new Pos(line, startOfLineColumnFor(cm, line, args.curswant));
     },

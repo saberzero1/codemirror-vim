@@ -2548,6 +2548,46 @@ exCursorCase([2, 3], 'co 0', [0, 0], true);
 exCursorCase([0, 6], 'd', [0, 1]);
 exCursorCase([0, 6], 'd', [0, 1], true);
 
+// = with no language to indent a line does what Vim's does without
+// 'indentexpr', 'cindent' or 'lisp': each line takes the indent of the
+// nearest non-blank line above, as re-indented, a line of only blanks is
+// emptied, and the indent is rebuilt from its columns with 'expandtab'.
+// Each row is Neovim 0.12.6 with tabstop=4 shiftwidth=4; the nested list
+// rows are its Markdown, which has no 'indentexpr'. = used to leave such
+// lines as they were.
+var eqCount = 0;
+function eqCase(value, line, keys, expandtab, expected, cursor) {
+  testVim('eq_autoindent_' + (++eqCount) + '_' + keys.join(''), function(cm, vim, helpers) {
+    CodeMirror.Vim.setOption('expandtab', expandtab);
+    try {
+      cm.setCursor(line, 0);
+      helpers.doKeys.apply(null, keys);
+      eq(expected, cm.getValue());
+      if (cursor) helpers.assertCursorAt(cursor[0], cursor[1]);
+    } finally {
+      CodeMirror.Vim.setOption('expandtab', undefined);
+    }
+  }, { value: value, mode: 'plain', tabSize: 4, indentUnit: 4, indentWithTabs: !expandtab });
+}
+eqCase("\tfoo\n\nbar", 2, ['=', '='], false, "\tfoo\n\n\tbar", [2, 0]);
+eqCase("\tfoo\n   \nbar", 2, ['=', '='], false, "\tfoo\n   \n\tbar", [2, 0]);
+eqCase("\tfoo\n\nbar", 0, ['=', 'G'], false, "foo\n\nbar", [0, 2]);
+eqCase("\tfoo\n   \nbar", 0, ['=', 'G'], false, "foo\n\nbar", [0, 2]);
+eqCase("  foo\nbar", 1, ['=', '='], true, "  foo\n  bar", [1, 0]);
+eqCase("  foo\nbar", 1, ['=', '='], false, "  foo\n  bar", [1, 0]);
+eqCase("\t\tfoo\nbar\nbaz", 1, ['2', '=', '='], false, "\t\tfoo\n\t\tbar\n\t\tbaz", [1, 0]);
+eqCase("\t\tfoo\nbar\nbaz", 1, ['V', 'j', '='], false, "\t\tfoo\n\t\tbar\n\t\tbaz", [1, 0]);
+eqCase("    foo\n\tbar", 1, ['=', '='], false, "    foo\n\tbar", [1, 0]);
+eqCase("a\n\tb\n\t\tc\nd", 2, ['=', '='], false, "a\n\tb\n\tc\nd", [2, 0]);
+eqCase("x\n\n\n\ty", 3, ['=', '='], false, "x\n\n\ny", [3, 0]);
+eqCase("\tfoo\nbar  ", 1, ['=', '='], false, "\tfoo\n\tbar  ", [1, 0]);
+eqCase("\tfoo\n\n", 1, ['=', '='], false, "\tfoo\n\n", [1, 0]);
+eqCase("  \tfoo\nbar", 1, ['=', '='], false, "  \tfoo\n\tbar", [1, 0]);
+eqCase("   foo\nbar", 1, ['=', '='], false, "   foo\n   bar", [1, 0]);
+eqCase("- a\n\t- b\n- c", 1, ['=', '='], false, "- a\n- b\n- c", null);
+eqCase("- a\n\t\t- b", 1, ['=', '='], false, "- a\n- b", null);
+eqCase("- a\n\t- b\n\t\t- c", 0, ['=', 'G'], false, "- a\n- b\n- c", null);
+
 // G and gg keep the screen column the same way without 'startofline', and
 // go to the first non-blank with it. Neovim 0.12.6, tabstop=4.
 var solLines = '\tfoo bar baz\n  x\n        long line here\nab\n\t\tend line';

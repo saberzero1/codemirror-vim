@@ -1961,6 +1961,16 @@ default ex command map, so `:m` resolves to `:marks` unless a host defines it;
 the plugin does.) `Vim.curswant(cm)` and `Vim.startOfLineColumn(cm, line,
 want)` expose the same rule to a host command.
 
+`=` indents a line with the editor's language where the language can
+(`languageIndentation`, CodeMirror's `getIndentation`). Where it cannot, it
+does what Vim's `=` does without `indentexpr`, `cindent` or `lisp`: the line
+takes the indent of the nearest non-blank line above, as re-indented, a line
+of only blanks is emptied, and the indent is rebuilt from its columns with
+`expandtab` and `tabstop`. It used to leave such lines as they were, which is
+every line in an editor whose language has no indent rules, such as
+Obsidian's Markdown. The test harness takes `mode: 'plain'` for an editor
+with no language.
+
 ### Operator range adjustments
 
 Three of Vim's rules for an operator's range, in this order:
