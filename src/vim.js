@@ -2726,6 +2726,9 @@ export function initVim(CM) {
             inputState.selectedCharacter;
       }
       motionArgs.repeat = repeat;
+      // This command's motion is about to replace lastMotion, which curswant
+      // reads, so take it for the operator now.
+      if (operator) operatorArgs.curswant = curswant(cm, vim, origHead);
       var preDispatchGeneration = vim._commandGeneration;
       clearInputState(cm);
       if (motion) {
@@ -3025,19 +3028,16 @@ export function initVim(CM) {
   var motions = {
     moveToTopLine: function(cm, head, motionArgs) {
       var line = getUserVisibleLines(cm).top + motionArgs.repeat -1;
-      var ch = getOption('startofline') ? findFirstNonWhiteSpaceCharacter(cm.getLine(line)) : head.ch;
-      return new Pos(line, ch);
+      return new Pos(line, startOfLineColumn(cm, cm.state.vim, head, line));
     },
     moveToMiddleLine: function(cm, head) {
       var range = getUserVisibleLines(cm);
       var line = Math.floor((range.top + range.bottom) * 0.5);
-      var ch = getOption('startofline') ? findFirstNonWhiteSpaceCharacter(cm.getLine(line)) : head.ch;
-      return new Pos(line, ch);
+      return new Pos(line, startOfLineColumn(cm, cm.state.vim, head, line));
     },
     moveToBottomLine: function(cm, head, motionArgs) {
       var line = getUserVisibleLines(cm).bottom - motionArgs.repeat +1;
-      var ch = getOption('startofline') ? findFirstNonWhiteSpaceCharacter(cm.getLine(line)) : head.ch;
-      return new Pos(line, ch);
+      return new Pos(line, startOfLineColumn(cm, cm.state.vim, head, line));
     },
     expandToLine: function(_cm, head, motionArgs) {
       // Expands forward to end of line, and then to next line if repeat is
@@ -3432,10 +3432,7 @@ export function initVim(CM) {
       if (motionArgs.repeatIsExplicit) {
         lineNum = motionArgs.repeat - cm.getOption('firstLineNumber');
       }
-      var ch = getOption('startofline')
-        ? findFirstNonWhiteSpaceCharacter(cm.getLine(lineNum))
-        : head.ch;
-      return new Pos(lineNum, ch);
+      return new Pos(lineNum, startOfLineColumn(cm, cm.state.vim, head, lineNum));
     },
     moveToStartOfDisplayLine: function(cm) {
       cm.execCommand("goDisplayLineStart");
@@ -3853,8 +3850,15 @@ export function initVim(CM) {
           }
         }
       }
+      // Vim's op_shift ends in beginline(BL_SOL | BL_FIX): the first
+      // non-blank with 'startofline', otherwise curswant on the top line, so
+      // the cursor holds its screen column as the text moves under it.
       var firstLine = cursorMin(ranges[0].anchor, ranges[0].head).line;
-      return new Pos(firstLine, 0);
+      var firstText = cm.getLine(firstLine);
+      if (getOption('startofline') || args.curswant === undefined) {
+        return new Pos(firstLine, findFirstNonWhiteSpaceCharacter(firstText));
+      }
+      return new Pos(firstLine, columnAtVirtualColumn(firstText, args.curswant, tabSize));
     },
     indentAuto: function(cm, _args, ranges) {
       cm.execCommand("indentAuto");
@@ -6799,6 +6803,57 @@ export function initVim(CM) {
   }
 
   /** @arg {string} [text] */
+  /**
+   * The screen column a normal-mode cursor at `ch` sits on, 0-based. On a tab
+   * that is the tab's last cell, as Vim draws it.
+   * @arg {string} text @arg {number} ch @arg {number} tabSize
+   */
+  function cursorVirtualColumn(text, ch, tabSize) {
+    var col = 0;
+    for (var i = 0; i < ch && i < text.length; i++) {
+      col += text[i] == '\t' ? tabSize - col % tabSize : 1;
+    }
+    if (text[ch] == '\t') col += tabSize - col % tabSize - 1;
+    return col;
+  }
+  /**
+   * The character covering screen column `want`, or the last character when
+   * the line is shorter: Vim's coladvance() in normal mode.
+   * @arg {string} text @arg {number} want @arg {number} tabSize
+   */
+  function columnAtVirtualColumn(text, want, tabSize) {
+    var col = 0;
+    for (var i = 0; i < text.length; i++) {
+      col += text[i] == '\t' ? tabSize - col % tabSize : 1;
+      if (want < col) return i;
+    }
+    return Math.max(0, text.length - 1);
+  }
+  /**
+   * Vim's curswant for a cursor at `head`: its screen column, or Infinity
+   * while a `$` is still sticky, which vertical motions keep it.
+   * @arg {CodeMirrorV} cm @arg {vimState} vim @arg {Pos} head
+   */
+  function curswant(cm, vim, head) {
+    if (vim.lastHPos === Infinity && (
+        vim.lastMotion === motions.moveToEol ||
+        vim.lastMotion === motions.moveByLines ||
+        vim.lastMotion === motions.moveByDisplayLines ||
+        vim.lastMotion === motions.moveByScroll)) {
+      return Infinity;
+    }
+    return cursorVirtualColumn(cm.getLine(head.line), head.ch, cm.getOption('tabSize'));
+  }
+  /**
+   * Where a motion governed by 'startofline' lands on `line`: the first
+   * non-blank with it, curswant without, as Vim's beginline(BL_SOL | BL_FIX).
+   * @arg {CodeMirrorV} cm @arg {vimState} vim @arg {Pos} head @arg {number} line
+   */
+  function startOfLineColumn(cm, vim, head, line) {
+    var text = cm.getLine(line);
+    if (getOption('startofline')) return findFirstNonWhiteSpaceCharacter(text);
+    return columnAtVirtualColumn(text, curswant(cm, vim, head), cm.getOption('tabSize'));
+  }
   function findFirstNonWhiteSpaceCharacter(text) {
     if (!text) {
       return 0;
@@ -7844,7 +7899,7 @@ export function initVim(CM) {
   defineOption('gdefault', false, 'boolean', ['gd']);
   defineOption('wrapscan', true, 'boolean', ['ws']);
   defineOption('joinspaces', false, 'boolean', ['js']);
-  defineOption('startofline', true, 'boolean', ['sol']);
+  defineOption('startofline', false, 'boolean', ['sol']);
   defineOption('whichwrap', 'b,s', 'string', ['ww']);
   defineOption('virtualedit', '', 'string', ['ve']);
   defineOption('shiftround', false, 'boolean', ['sr']);

@@ -1747,7 +1747,7 @@ the row containing it, which would render a 5-row margin as 3.96 rows.
 
 ### Other fixes
 
-- `operators.indent`: Cursor at column 0 after `>>` / `<<` (was first non-blank)
+- `operators.indent`: Cursor after `>` / `<` as Neovim's `op_shift` puts it (see `startofline` under Motion options). It was column 0 every time, which matched Neovim only when that is where the cursor's screen column falls.
 - `onChange`: Accept CM6-style input origins (`"input.type"`) for insert recording
 - `findNext`: Skip current match during wrap-around after incremental search
 - Golden recorder `escapeKeysForNeovim`: Convert literal `\n` to `<CR>` so ex commands execute
@@ -1906,13 +1906,25 @@ instead of `false`. The `g` flag toggles: `global = !global`.
 
 | Option | Abbr | Default | Behavior |
 |---|---|---|---|
-| `startofline` | `sol` | `true` | Vertical motions (`G`, `gg`, `H`, `M`, `L`) move cursor to first non-blank character. When off, cursor column is preserved. |
+| `startofline` | `sol` | `false` | `G`, `gg`, `H`, `M`, `L`, `>` and `<` move the cursor to the first non-blank character. When off, the cursor keeps its screen column. Off by default, as in Neovim; it was on, Vim's default. |
 | `whichwrap` | `ww` | `b,s` | Comma-separated keys whose movement wraps to the next/previous line at line boundaries. `h` and `l` enable wrapping for those motions. |
 | `virtualedit` | `ve` | `''` | Cursor positioning past end of line. `onemore` allows one position past EOL. `all` allows any position. `block` allows virtual edit in visual block mode only. |
 
-`moveToTopLine`, `moveToMiddleLine`, `moveToBottomLine`, and
-`moveToLineOrEdgeOfDocument` check `getOption('startofline')` and
-preserve `head.ch` when the option is off.
+`moveToTopLine`, `moveToMiddleLine`, `moveToBottomLine`,
+`moveToLineOrEdgeOfDocument` and `operators.indent` go through
+`startOfLineColumn`, Vim's `beginline(BL_SOL | BL_FIX)`: the first non-blank
+with the option, otherwise `coladvance(curswant)`. `curswant` is the cursor's
+screen column, counting a tab to its last cell as a normal-mode cursor sits,
+or Infinity while a `$` is still sticky, so `$G` and `$<<` land on the last
+character. They used to keep `head.ch`, a character index, which lands on
+another character wherever the two lines' tabs differ. `operators.indent`
+reads `curswant` from `operatorArgs.curswant`, taken in `evalInput` before
+the command's own motion replaces `lastMotion`.
+
+Two parts of `curswant` are not modelled. `j` and `k` keep a character index
+rather than a screen column, so after a `j` across lines with different tabs,
+`G` can land a column off from Neovim. And `dd`, `<C-d>` and the other
+commands Neovim also governs by `startofline` do not read it.
 
 `moveByCharacters` checks `getOption('whichwrap')` and wraps across
 line boundaries when `h` or `l` is listed. The `b` and `s` values

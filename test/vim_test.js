@@ -2042,7 +2042,7 @@ testVim('>{motion}', function(cm, vim, helpers) {
   var register = helpers.getRegisterController().getRegister();
   eq('', register.toString());
   is(!register.linewise);
-  helpers.assertCursorAt(0, 0);
+  helpers.assertCursorAt(0, 3);
 }, { value: ' word1\nword2\nword3 ', indentUnit: 2 });
 testVim('>>', function(cm, vim, helpers) {
   cm.setCursor(0, 3);
@@ -2053,7 +2053,7 @@ testVim('>>', function(cm, vim, helpers) {
   var register = helpers.getRegisterController().getRegister();
   eq('', register.toString());
   is(!register.linewise);
-  helpers.assertCursorAt(0, 0);
+  helpers.assertCursorAt(0, 3);
 }, { value: ' word1\nword2\nword3 ', indentUnit: 2 });
 testVim('<{motion}', function(cm, vim, helpers) {
   cm.setCursor(1, 3);
@@ -2064,7 +2064,7 @@ testVim('<{motion}', function(cm, vim, helpers) {
   var register = helpers.getRegisterController().getRegister();
   eq('', register.toString());
   is(!register.linewise);
-  helpers.assertCursorAt(0, 0);
+  helpers.assertCursorAt(0, 3);
 }, { value: '   word1\n  word2\nword3 ', indentUnit: 2 });
 testVim('<<', function(cm, vim, helpers) {
   cm.setCursor(0, 3);
@@ -2075,8 +2075,71 @@ testVim('<<', function(cm, vim, helpers) {
   var register = helpers.getRegisterController().getRegister();
   eq('', register.toString());
   is(!register.linewise);
-  helpers.assertCursorAt(0, 0);
+  helpers.assertCursorAt(0, 3);
 }, { value: '   word1\n  word2\nword3 ', indentUnit: 2 });
+// After > and <, the cursor goes to the top line at Vim's curswant: its
+// screen column, so the text moves under a cursor that stays put, or the
+// last character while a `$` is sticky. With 'startofline' it goes to the
+// first non-blank instead. Each expected position is Neovim 0.12.6's, with
+// tabstop=4 shiftwidth=4 noexpandtab. On a tab, the cursor is on its last
+// cell. The engine used to put the cursor at column 0 every time.
+var shiftTabs = { indentWithTabs: true, tabSize: 4, indentUnit: 4 };
+function shiftCase(name, value, start, keys, expected, text, sol) {
+  testVim('shift_cursor_' + name, function(cm, vim, helpers) {
+    if (sol) CodeMirror.Vim.setOption('startofline', true);
+    try {
+      cm.setCursor(start[0], start[1]);
+      helpers.doKeys.apply(null, keys);
+      eq(text, cm.getLine(expected[0]));
+      helpers.assertCursorAt(expected[0], expected[1]);
+    } finally {
+      if (sol) CodeMirror.Vim.setOption('startofline', false);
+    }
+  }, Object.assign({ value: value }, shiftTabs));
+}
+var tt = '\t\tfoo bar', t = '\tfoo bar';
+shiftCase('outdent_keeps_screen_column', tt, [0, 5], ['<', '<'], [0, 7], t);
+shiftCase('outdent_from_first_tab', tt, [0, 0], ['<', '<'], [0, 0], t);
+shiftCase('outdent_from_second_tab', tt, [0, 1], ['<', '<'], [0, 4], t);
+shiftCase('outdent_from_first_letter', tt, [0, 2], ['<', '<'], [0, 5], t);
+shiftCase('outdent_tab_to_text', t + '\n' + t, [0, 0], ['<', '<'], [0, 3], 'foo bar');
+shiftCase('outdent_spaces', '    foo bar', [0, 6], ['<', '<'], [0, 6], 'foo bar');
+shiftCase('indent_keeps_screen_column', t, [0, 5], ['>', '>'], [0, 2], tt);
+shiftCase('indent_from_tab', t, [0, 0], ['>', '>'], [0, 0], tt);
+shiftCase('indent_unindented', 'foo bar', [0, 4], ['>', '>'], [0, 1], t);
+shiftCase('outdent_after_eol', t + '\n\tx', [0, 5], ['$', '<', '<'], [0, 6], 'foo bar');
+shiftCase('indent_after_eol', t + '\n\tx', [0, 5], ['$', '>', '>'], [0, 8], tt);
+shiftCase('visual_outdent', t + '\n' + t, [0, 5], ['v', 'j', 'l', '<'], [0, 6], 'foo bar');
+shiftCase('indent_motion_down', t + '\n' + t, [0, 5], ['>', 'j'], [0, 2], tt);
+shiftCase('indent_motion_up', t + '\n' + t, [1, 5], ['>', 'k'], [0, 2], tt);
+shiftCase('indent_count', t + '\n' + t + '\n' + t, [0, 5], ['3', '>', '>'], [0, 2], tt);
+shiftCase('indent_repeat', t, [0, 5], ['>', '>', '.'], [0, 2], '\t\t\tfoo bar');
+shiftCase('indent_startofline', t + '\n' + t, [0, 5], ['>', '>'], [0, 2], tt, true);
+shiftCase('outdent_startofline', t + '\n' + t, [0, 5], ['<', '<'], [0, 0], 'foo bar', true);
+
+// G and gg keep the screen column the same way without 'startofline', and
+// go to the first non-blank with it. Neovim 0.12.6, tabstop=4.
+var solLines = '\tfoo bar baz\n  x\n        long line here\nab\n\t\tend line';
+function solCase(name, start, keys, expected, sol) {
+  testVim('startofline_' + name, function(cm, vim, helpers) {
+    if (sol) CodeMirror.Vim.setOption('startofline', true);
+    try {
+      cm.setCursor(start[0], start[1]);
+      helpers.doKeys.apply(null, keys);
+      helpers.assertCursorAt(expected[0], expected[1]);
+    } finally {
+      if (sol) CodeMirror.Vim.setOption('startofline', false);
+    }
+  }, Object.assign({ value: solLines }, shiftTabs));
+}
+solCase('G_keeps_screen_column', [0, 5], ['G'], [4, 2]);
+solCase('G_after_eol', [0, 5], ['$', 'G'], [4, 9]);
+solCase('gg_keeps_screen_column', [4, 4], ['g', 'g'], [0, 7]);
+solCase('gg_after_eol', [4, 4], ['$', 'g', 'g'], [0, 11]);
+solCase('countG_keeps_screen_column', [0, 5], ['3', 'G'], [2, 8]);
+solCase('countG_short_line', [0, 9], ['2', 'G'], [1, 2]);
+solCase('G_sol', [0, 5], ['$', 'G'], [4, 2], true);
+solCase('gg_sol', [4, 4], ['g', 'g'], [0, 1], true);
 testVim('=', function(cm, vim, helpers) {
   cm.setCursor(0, 3);
   helpers.doKeys('<C-v>', 'j', 'j');
@@ -4566,26 +4629,46 @@ testVim('page_motions', function(cm, vim, helpers) {
   helpers.assertCursorAt(100, 0);
   eq(value, cm.getValue());
 });
-testVim('HML', function(cm, vim, helpers) {
-  cm.refresh();
-  var lines = 35;
-  var textHeight = cm.defaultTextHeight();
-  cm.setSize(600, lines*textHeight);
-  cm.setCursor(120, 0);
-  helpers.doKeys('H');
-  helpers.assertCursorAt(86, 2);
-  helpers.doKeys('L');
-  helpers.assertCursorAt(120, 4);
-  helpers.doKeys('M');
-  helpers.assertCursorAt(103,4);
-}, { value: (function(){
+var hmlValue = (function(){
   var lines = new Array(100);
   var upper = '  xx\n';
   var lower = '    xx\n';
   upper = lines.join(upper);
   lower = lines.join(lower);
   return upper + lower;
-})()});
+})();
+testVim('HML', function(cm, vim, helpers) {
+  CodeMirror.Vim.setOption('startofline', true);
+  try {
+    cm.refresh();
+    var lines = 35;
+    var textHeight = cm.defaultTextHeight();
+    cm.setSize(600, lines*textHeight);
+    cm.setCursor(120, 0);
+    helpers.doKeys('H');
+    helpers.assertCursorAt(86, 2);
+    helpers.doKeys('L');
+    helpers.assertCursorAt(120, 4);
+    helpers.doKeys('M');
+    helpers.assertCursorAt(103,4);
+  } finally {
+    CodeMirror.Vim.setOption('startofline', false);
+  }
+}, { value: hmlValue });
+// Without 'startofline', Neovim's default, H, M and L keep the column.
+testVim('HML_nostartofline', function(cm, vim, helpers) {
+  cm.refresh();
+  var lines = 35;
+  var textHeight = cm.defaultTextHeight();
+  cm.setSize(600, lines*textHeight);
+  cm.setCursor(120, 0);
+  helpers.doKeys('H');
+  helpers.assertCursorAt(86, 0);
+  helpers.doKeys('L');
+  helpers.assertCursorAt(120, 0);
+  helpers.doKeys('M');
+  helpers.assertCursorAt(103, 0);
+}, { value: hmlValue });
 
 var zVals = [];
 var cursorIndexVals = [];
