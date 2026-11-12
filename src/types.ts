@@ -122,7 +122,6 @@ export type OperatorArgs = {
         visualBlock: boolean,
     },
     keepCursor?: boolean;
-    cursorCol?: number;
     /** Vim's `curswant` as the operator found it: the cursor's virtual
      * column, or Infinity while a `$` is still sticky. Read by `>` and `<`. */
     curswant?: number;

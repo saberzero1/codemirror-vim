@@ -2172,6 +2172,84 @@ barCase('ab\tcd', ['4', '|'], 2, 3);
 barCase('ab\tcd', ['6', '|'], 4, 5);
 barCase('\tfoo', ['40', '|'], 3, 39);
 
+// Linewise d and = follow 'startofline' too, as Neovim's do: off, the
+// cursor keeps curswant on the line it ends on; on, it goes to the first
+// non-blank. They used to keep the character index (d) and always go to the
+// first non-blank (=). Neovim 0.12.6, tabstop=4.
+var solDelLines = (function() {
+  var out = [];
+  for (var i = 1; i <= 60; i++) {
+    out.push(i % 3 == 0 ? '\t\tdeep line ' + i : i % 3 == 1 ? '  two spaces ' + i : 'plain line number ' + i);
+  }
+  return out.join('\n');
+})();
+var solEqLines = '\tfoo bar\n\tbaz qux quux\n\tthird line here';
+function solCmdCase(value, name, start, keys, nosol, sol) {
+  [false, true].forEach(function(on) {
+    testVim('startofline_cmd_' + name + '_' + start.join('_') + (on ? '_sol' : '_nosol'), function(cm, vim, helpers) {
+      if (on) CodeMirror.Vim.setOption('startofline', true);
+      try {
+        cm.setCursor(start[0], start[1]);
+        helpers.doKeys.apply(null, keys);
+        var want = on ? sol : nosol;
+        helpers.assertCursorAt(want[0], want[1]);
+      } finally {
+        if (on) CodeMirror.Vim.setOption('startofline', false);
+      }
+    }, Object.assign({ value: value }, shiftTabs));
+  });
+}
+solCmdCase(solDelLines, 'dd', [1, 8], ['d', 'd'], [1, 2], [1, 2]);
+solCmdCase(solDelLines, 'dj', [1, 8], ['d', 'j'], [1, 8], [1, 2]);
+solCmdCase(solDelLines, 'dk', [1, 8], ['d', 'k'], [0, 2], [0, 2]);
+solCmdCase(solDelLines, '2dd', [1, 8], ['2', 'd', 'd'], [1, 8], [1, 2]);
+solCmdCase(solDelLines, 'd2j', [4, 9], ['d', '2', 'j'], [4, 9], [4, 0]);
+solCmdCase(solDelLines, 'dG', [1, 8], ['d', 'G'], [0, 8], [0, 2]);
+solCmdCase(solDelLines, 'dgg', [10, 8], ['d', 'g', 'g'], [0, 2], [0, 2]);
+solCmdCase(solDelLines, '$dd', [1, 8], ['$', 'd', 'd'], [1, 12], [1, 2]);
+solCmdCase(solDelLines, 'dd', [2, 5], ['d', 'd'], [2, 11], [2, 2]);
+solCmdCase(solEqLines, '==', [0, 5], ['=', '='], [0, 6], [0, 0]);
+solCmdCase(solEqLines, '=j', [0, 5], ['=', 'j'], [0, 6], [0, 0]);
+solCmdCase(solEqLines, 'Vd', [1, 6], ['V', 'd'], [1, 6], [1, 1]);
+solCmdCase(solEqLines, 'Vjd', [0, 6], ['V', 'j', 'd'], [0, 6], [0, 1]);
+solCmdCase(solEqLines, '$dd', [1, 9], ['$', 'd', 'd'], [1, 15], [1, 1]);
+
+// <C-d>, <C-u>, <C-f> and <C-b> land at curswant, or the first non-blank
+// with 'startofline'. How many lines they move depends on the window, so
+// these check the column: every line past the first is `\t\tdeep line NNN`,
+// where screen column 12 is character 6 and the first non-blank is 2, as in
+// Neovim 0.12.6. They used to keep the pixel x.
+var scrollLines = (function() {
+  var out = ['plain line number zero'];
+  for (var i = 1; i < 200; i++) out.push('\t\tdeep line ' + ('00' + i).slice(-3));
+  return out.join('\n');
+})();
+function scrollCase(name, start, keys, nosolCh, solCh) {
+  [false, true].forEach(function(on) {
+    testVim('startofline_scroll_' + name + (on ? '_sol' : '_nosol'), function(cm, vim, helpers) {
+      if (on) CodeMirror.Vim.setOption('startofline', true);
+      try {
+        cm.refresh();
+        cm.setSize(600, 20 * cm.defaultTextHeight());
+        cm.setCursor(start[0], start[1]);
+        helpers.doKeys.apply(null, keys);
+        var cur = cm.getCursor();
+        is(cur.line != start[0], 'moved to another line');
+        eq(on ? solCh : nosolCh, cur.ch);
+      } finally {
+        if (on) CodeMirror.Vim.setOption('startofline', false);
+      }
+    }, Object.assign({ value: scrollLines }, shiftTabs));
+  });
+}
+scrollCase('ctrl_d', [0, 12], ['<C-d>'], 6, 2);
+scrollCase('ctrl_f', [0, 12], ['<C-f>'], 6, 2);
+scrollCase('ctrl_u', [150, 6], ['<C-u>'], 6, 2);
+scrollCase('ctrl_b', [150, 6], ['<C-b>'], 6, 2);
+scrollCase('ctrl_d_then_j', [0, 12], ['<C-d>', 'j'], 6, 2);
+scrollCase('ctrl_d_twice', [0, 12], ['<C-d>', '<C-d>'], 6, 2);
+scrollCase('ctrl_d_after_eol', [0, 21], ['$', '<C-d>'], 14, 2);
+
 // G and gg keep the screen column the same way without 'startofline', and
 // go to the first non-blank with it. Neovim 0.12.6, tabstop=4.
 var solLines = '\tfoo bar baz\n  x\n        long line here\nab\n\t\tend line';

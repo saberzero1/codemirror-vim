@@ -2995,7 +2995,6 @@ export function initVim(CM) {
       operatorArgs.repeat = repeat;
       operatorArgs.registerName = registerName;
       operatorArgs.linewise = linewise;
-      operatorArgs.cursorCol = oldHead.ch;
       var operatorMoveTo = operators[operator](
         cm, operatorArgs, cmSel.ranges, oldAnchor, newHead);
       if (vim.visualMode) {
@@ -3238,6 +3237,7 @@ export function initVim(CM) {
         case this.moveByLines:
         case this.moveByDisplayLines:
         case this.moveByScroll:
+        case this.moveByPage:
         case this.moveToColumn:
         case this.moveToEol:
           break;
@@ -3294,13 +3294,19 @@ export function initVim(CM) {
         vim.lastHPos = cursorVirtualColumn(cm.getLine(cur.line), cur.ch, cm.getOption('tabSize'));
       return cur;
     },
-    moveByPage: function(cm, head, motionArgs) {
+    moveByPage: function(cm, head, motionArgs, vim) {
       // CodeMirror only exposes functions that move the cursor page down, so
       // doing this bad hack to move the cursor and move it back. evalInput
       // will move the cursor to where it should be in the end.
       var curStart = head;
       var repeat = motionArgs.repeat;
-      return cm.findPosV(curStart, (motionArgs.forward ? repeat : -repeat), 'page');
+      var want = curswant(cm, vim, head);
+      var dest = cm.findPosV(curStart, (motionArgs.forward ? repeat : -repeat), 'page');
+      var end = new Pos(dest.line, startOfLineColumnFor(cm, dest.line, want));
+      vim.lastHPos = getOption('startofline')
+        ? cursorVirtualColumn(cm.getLine(end.line), end.ch, cm.getOption('tabSize'))
+        : want;
+      return end;
     },
     moveByParagraph: function(cm, head, motionArgs) {
       var dir = motionArgs.forward ? 1 : -1;
@@ -3318,11 +3324,20 @@ export function initVim(CM) {
         repeat = scrollbox.clientHeight / (2 * cm.defaultTextHeight());
       }
       var orig = cm.charCoords(head, 'local');
+      // The line comes from the display rows scrolled; the column is Vim's,
+      // which moveByDisplayLines would take from the pixel x instead.
+      var want = curswant(cm, vim, head);
       motionArgs.repeat = repeat;
       curEnd = motions.moveByDisplayLines(cm, head, motionArgs, vim);
       if (!curEnd) {
         return null;
       }
+      curEnd = new Pos(curEnd.line, startOfLineColumnFor(cm, curEnd.line, want));
+      // With 'startofline' the first non-blank becomes curswant, as Vim's
+      // beginline() sets it.
+      vim.lastHPos = getOption('startofline')
+        ? cursorVirtualColumn(cm.getLine(curEnd.line), curEnd.ch, cm.getOption('tabSize'))
+        : want;
       var dest = cm.charCoords(curEnd, 'local');
       cm.scrollTo(null, scrollbox.top + dest.top - orig.top);
       return curEnd;
@@ -3706,8 +3721,10 @@ export function initVim(CM) {
         cm.replaceRange('', anchor, head);
         finalHead = anchor;
         if (args.linewise) {
-          var col = args.cursorCol != null ? args.cursorCol : 0;
-          finalHead = new Pos(anchor.line, Math.min(col, lineLength(cm, anchor.line)));
+          // Vim's beginline(BL_SOL | BL_FIX), as for > and <.
+          finalHead = new Pos(anchor.line, args.curswant === undefined
+            ? findFirstNonWhiteSpaceCharacter(cm.getLine(anchor.line))
+            : startOfLineColumnFor(cm, anchor.line, args.curswant));
         } else if (text === '\n' && finalHead.ch === 0) {
           var remainingLine = cm.getLine(finalHead.line);
           if (remainingLine && /^\s+$/.test(remainingLine) && remainingLine.length >= 2) {
@@ -3858,9 +3875,13 @@ export function initVim(CM) {
       }
       return new Pos(firstLine, columnAtVirtualColumn(firstText, args.curswant, tabSize));
     },
-    indentAuto: function(cm, _args, ranges) {
+    indentAuto: function(cm, args, ranges) {
       cm.execCommand("indentAuto");
-      return motions.moveToFirstNonWhiteSpaceCharacter(cm, ranges[0].anchor);
+      var line = ranges[0].anchor.line;
+      if (args.curswant === undefined) {
+        return motions.moveToFirstNonWhiteSpaceCharacter(cm, ranges[0].anchor);
+      }
+      return new Pos(line, startOfLineColumnFor(cm, line, args.curswant));
     },
     hardWrap: function(cm, operatorArgs, ranges, oldAnchor) {
       if (!cm.hardWrap) return;
@@ -6840,7 +6861,8 @@ export function initVim(CM) {
         vim.lastMotion === motions.moveToColumn ||
         vim.lastMotion === motions.moveByLines ||
         vim.lastMotion === motions.moveByDisplayLines ||
-        vim.lastMotion === motions.moveByScroll)) {
+        vim.lastMotion === motions.moveByScroll ||
+        vim.lastMotion === motions.moveByPage)) {
       return vim.lastHPos;
     }
     return cursorVirtualColumn(cm.getLine(head.line), head.ch, cm.getOption('tabSize'));
@@ -6851,9 +6873,16 @@ export function initVim(CM) {
    * @arg {CodeMirrorV} cm @arg {vimState} vim @arg {Pos} head @arg {number} line
    */
   function startOfLineColumn(cm, vim, head, line) {
+    return startOfLineColumnFor(cm, line, curswant(cm, vim, head));
+  }
+  /**
+   * startOfLineColumn for a curswant already taken.
+   * @arg {CodeMirror} cm @arg {number} line @arg {number} want
+   */
+  function startOfLineColumnFor(cm, line, want) {
     var text = cm.getLine(line);
     if (getOption('startofline')) return findFirstNonWhiteSpaceCharacter(text);
-    return columnAtVirtualColumn(text, curswant(cm, vim, head), cm.getOption('tabSize'));
+    return columnAtVirtualColumn(text, want, cm.getOption('tabSize'));
   }
   function findFirstNonWhiteSpaceCharacter(text) {
     if (!text) {

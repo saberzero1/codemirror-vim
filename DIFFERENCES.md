@@ -1932,10 +1932,18 @@ column to `G`, `gg`, `H`, `M`, `L`, `>` and `<` while the last motion was
 vertical, so `jjG` lands where Neovim's does. They used to keep a character
 index, which lands on another character wherever two lines' tabs differ.
 
+Linewise `d` (`dd`, `dj`, `dG`, `Vd`, …) and `=` follow `startofline` the
+same way, from the `curswant` taken before the operator; `d` used to keep the
+character index and `=` always went to the first non-blank. `<C-d>`, `<C-u>`,
+`<C-f>` and `<C-b>` take the line from the rows they scroll and the column
+from `curswant`, which they keep, so a `j` after them returns to it; with
+`startofline` the first non-blank becomes `curswant`, as `beginline()` makes
+it. They used to keep the pixel x. `:N` goes through `G` and so already did.
+
 Screen columns count a tab to the next tab stop and every other UTF-16 unit
 as one cell: a wide character or an astral one is not two cells, as it is in
-Neovim. `dd`, `<C-d>` and the other commands Neovim also governs by
-`startofline` do not read it.
+Neovim. `N%`, which `startofline` also governs in Neovim, is not implemented:
+`%` with a count still matches brackets.
 
 `moveByCharacters` checks `getOption('whichwrap')` and wraps across
 line boundaries when `h` or `l` is listed. The `b` and `s` values
