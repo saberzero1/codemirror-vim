@@ -2614,6 +2614,26 @@ shiftExCase(0, "%>", "\tone\n\t\ttwo\n\t\t\tthree\n\tfour\n\tfive", [4, 1]);
 shiftExCase(0, ".,+2>", "\tone\n\t\ttwo\n\t\t\tthree\nfour\nfive", [2, 3]);
 shiftExCase(1, ">3", "one\n\t\ttwo\n\t\t\tthree\n\tfour\nfive", [3, 1]);
 
+// getOperator returns the operator a host replaces, so it can hand over.
+testVim('getOperator_hands_over_after_defineOperator', function(cm, vim, helpers) {
+  var original = CodeMirror.Vim.getOperator('indentAuto');
+  is(typeof original === 'function', 'indentAuto is defined');
+  var called = 0;
+  CodeMirror.Vim.defineOperator('indentAuto', function(cm, args, ranges, oldAnchor, newHead) {
+    called++;
+    return original(cm, args, ranges, oldAnchor, newHead);
+  });
+  try {
+    cm.setCursor(1, 0);
+    helpers.doKeys('=', '=');
+    eq(1, called);
+    eq('\tfoo\n\tbar', cm.getValue());
+  } finally {
+    CodeMirror.Vim.defineOperator('indentAuto', original);
+  }
+  is(CodeMirror.Vim.getOperator('indentAuto') === original);
+}, { value: '\tfoo\nbar', mode: 'plain', tabSize: 4, indentUnit: 4, indentWithTabs: true });
+
 // G and gg keep the screen column the same way without 'startofline', and
 // go to the first non-blank with it. Neovim 0.12.6, tabstop=4.
 var solLines = '\tfoo bar baz\n  x\n        long line here\nab\n\t\tend line';

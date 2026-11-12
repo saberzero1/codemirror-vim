@@ -1537,6 +1537,12 @@ export function initVim(CM) {
     defineAction: defineAction,
     getAction: function(name) { return actions[name]; },
     defineOperator: defineOperator,
+    /**
+     * The operator defined under `name`, so a host that replaces one with
+     * defineOperator can still hand over to it.
+     * @arg {string} name
+     */
+    getOperator: function(name) { return operators[name]; },
     setOperatorfunc: function(fn) { vimGlobalState._operatorfuncCallback = fn; },
     getOperatorfunc: function() { return vimGlobalState._operatorfuncCallback; },
 

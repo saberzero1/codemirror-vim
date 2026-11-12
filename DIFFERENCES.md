@@ -406,6 +406,12 @@ included alongside default bindings.
 
 Types `KeymapEntry` and `KeymapCompletion` added to `src/types.ts`.
 
+### `getOperator` API
+
+`getOperator(name)` returns the operator defined under `name`, so a host that
+replaces one with `defineOperator` can still hand over to it: the plugin's
+Markdown-aware `=` calls the built-in `indentAuto` when it is off.
+
 ### `getAction` API
 
 **File**: `src/vim.js`
