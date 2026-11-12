@@ -1,6 +1,6 @@
 {
   "name": "@saberzero1/codemirror-vim",
-  "version": "6.4.14",
+  "version": "6.4.15",
   "description": "Vim keybindings for CodeMirror 6",
   "author": {
     "name": "Yunchi Luo",
