@@ -2117,6 +2117,61 @@ shiftCase('indent_repeat', t, [0, 5], ['>', '>', '.'], [0, 2], '\t\t\tfoo bar');
 shiftCase('indent_startofline', t + '\n' + t, [0, 5], ['>', '>'], [0, 2], tt, true);
 shiftCase('outdent_startofline', t + '\n' + t, [0, 5], ['<', '<'], [0, 0], 'foo bar', true);
 
+// j and k keep Vim's curswant: a screen column, which on a tab is its last
+// cell, kept across shorter lines and through `$` and `|`. They used to keep
+// a character index, which lands on another character wherever two lines'
+// tabs differ. Each row is Neovim 0.12.6 with tabstop=4: the cursor, and
+// getcurpos()'s curswant less one as lastHPos (Infinity for MAXCOL).
+var jkLines = '\tfoo bar baz\nabcdefghijklmn\n  x\n\t\tend line\n        long line here\nab\tcd';
+var jkCount = 0;
+function jkCase(start, keys, expected, goal) {
+  testVim('jk_screen_column_' + (++jkCount) + '_' + keys.join(''), function(cm, vim, helpers) {
+    cm.setCursor(start[0], start[1]);
+    helpers.doKeys.apply(null, keys);
+    helpers.assertCursorAt(expected[0], expected[1]);
+    eq(goal, vim.lastHPos);
+  }, Object.assign({ value: jkLines }, shiftTabs));
+}
+jkCase([0, 0], ['j'], [1, 3], 3);
+jkCase([0, 1], ['j'], [1, 4], 4);
+jkCase([0, 5], ['j'], [1, 8], 8);
+jkCase([1, 5], ['k'], [0, 2], 5);
+jkCase([1, 2], ['j'], [2, 2], 2);
+jkCase([0, 9], ['j', 'j'], [2, 2], 12);
+jkCase([0, 9], ['j', 'j', 'j'], [3, 6], 12);
+jkCase([0, 9], ['j', 'j', 'j', 'j'], [4, 12], 12);
+jkCase([1, 12], ['j', 'j', 'j'], [4, 12], 12);
+jkCase([3, 4], ['k'], [2, 2], 10);
+jkCase([3, 4], ['k', 'k'], [1, 10], 10);
+jkCase([4, 10], ['j'], [5, 4], 10);
+jkCase([5, 2], ['k'], [4, 3], 3);
+jkCase([5, 3], ['k'], [4, 4], 4);
+jkCase([0, 5], ['j', 'l', 'j'], [2, 2], 9);
+jkCase([0, 5], ['j', '$', 'k'], [0, 11], Infinity);
+jkCase([1, 3], ['10', '|', 'j'], [2, 2], 9);
+jkCase([0, 5], ['3', 'j'], [3, 2], 8);
+jkCase([4, 9], ['3', 'k'], [1, 9], 9);
+jkCase([0, 5], ['j', 'k'], [0, 5], 8);
+jkCase([0, 5], ['+'], [1, 0], 0);
+jkCase([1, 7], ['-'], [0, 1], 4);
+
+// N| moves to screen column N, so on a tab it is the tab's cells that
+// count. Neovim 0.12.6 with tabstop=4; lastHPos is curswant less one.
+function barCase(value, keys, ch, goal) {
+  testVim('bar_screen_column_' + keys.join('') + '_' + JSON.stringify(value), function(cm, vim, helpers) {
+    cm.setCursor(0, 0);
+    helpers.doKeys.apply(null, keys);
+    helpers.assertCursorAt(0, ch);
+    eq(goal, vim.lastHPos);
+  }, Object.assign({ value: value }, shiftTabs));
+}
+barCase('\tfoo bar baz', ['10', '|'], 6, 9);
+barCase('\tfoo bar baz', ['3', '|'], 0, 2);
+barCase('\tfoo bar baz', ['5', '|'], 1, 4);
+barCase('ab\tcd', ['4', '|'], 2, 3);
+barCase('ab\tcd', ['6', '|'], 4, 5);
+barCase('\tfoo', ['40', '|'], 3, 39);
+
 // G and gg keep the screen column the same way without 'startofline', and
 // go to the first non-blank with it. Neovim 0.12.6, tabstop=4.
 var solLines = '\tfoo bar baz\n  x\n        long line here\nab\n\t\tend line';
@@ -2138,6 +2193,7 @@ solCase('gg_keeps_screen_column', [4, 4], ['g', 'g'], [0, 7]);
 solCase('gg_after_eol', [4, 4], ['$', 'g', 'g'], [0, 11]);
 solCase('countG_keeps_screen_column', [0, 5], ['3', 'G'], [2, 8]);
 solCase('countG_short_line', [0, 9], ['2', 'G'], [1, 2]);
+solCase('G_after_j_chain', [0, 9], ['j', 'j', 'G'], [4, 6]);
 solCase('G_sol', [0, 5], ['$', 'G'], [4, 2], true);
 solCase('gg_sol', [4, 4], ['g', 'g'], [0, 1], true);
 testVim('=', function(cm, vim, helpers) {

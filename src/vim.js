@@ -3231,27 +3231,25 @@ export function initVim(CM) {
     },
     moveByLines: function(cm, head, motionArgs, vim) {
       var cur = head;
-      var endCh = cur.ch;
-      // Depending what our last motion was, we may want to do different
-      // things. If our last motion was moving vertically, we want to
-      // preserve the HPos from our last horizontal move.  If our last motion
-      // was going to the end of a line, moving vertically we should go to
-      // the end of the line, etc.
+      var tabSize = cm.getOption('tabSize');
+      // lastHPos is Vim's curswant: the screen column vertical motions keep,
+      // or Infinity after `$`. After any other motion it is the cursor's.
       switch (vim.lastMotion) {
         case this.moveByLines:
         case this.moveByDisplayLines:
         case this.moveByScroll:
         case this.moveToColumn:
         case this.moveToEol:
-          endCh = vim.lastHPos;
           break;
         default:
-          vim.lastHPos = endCh;
+          vim.lastHPos = cursorVirtualColumn(cm.getLine(cur.line), cur.ch, tabSize);
       }
       var repeat = motionArgs.repeat+(motionArgs.repeatOffset||0);
       var line = motionArgs.forward ? cur.line + repeat : cur.line - repeat;
       var first = cm.firstLine();
       var last = cm.lastLine();
+      var endCh = vim.lastHPos === Infinity ? Infinity : columnAtVirtualColumn(
+        cm.getLine(Math.max(first, Math.min(last, line))), vim.lastHPos, tabSize, true);
       var posV = cm.findPosV(cur, (motionArgs.forward ? repeat : -repeat), 'line', vim.lastHSPos);
       // @ts-ignore — Obsidian extends findPosV return with focusBefore for frontmatter widget navigation
       if (posV.focusBefore) { posV.focusBefore(); return cur; }
@@ -3267,7 +3265,7 @@ export function initVim(CM) {
       }
       if (motionArgs.toFirstChar){
         endCh=findFirstNonWhiteSpaceCharacter(cm.getLine(line));
-        vim.lastHPos = endCh;
+        vim.lastHPos = cursorVirtualColumn(cm.getLine(line), endCh, tabSize);
       }
       vim.lastHSPos = cm.charCoords(new Pos(line, endCh),'div').left;
       return new Pos(line, endCh);
@@ -3293,7 +3291,7 @@ export function initVim(CM) {
         cur = res;
       }
       if (cur != head)
-        vim.lastHPos = cur.ch;
+        vim.lastHPos = cursorVirtualColumn(cm.getLine(cur.line), cur.ch, cm.getOption('tabSize'));
       return cur;
     },
     moveByPage: function(cm, head, motionArgs) {
@@ -6818,29 +6816,32 @@ export function initVim(CM) {
   }
   /**
    * The character covering screen column `want`, or the last character when
-   * the line is shorter: Vim's coladvance() in normal mode.
-   * @arg {string} text @arg {number} want @arg {number} tabSize
+   * the line is shorter: Vim's coladvance() in normal mode. With `pastEnd`,
+   * a shorter line gives its length instead, for the caller to clip by mode.
+   * @arg {string} text @arg {number} want @arg {number} tabSize @arg {boolean} [pastEnd]
    */
-  function columnAtVirtualColumn(text, want, tabSize) {
+  function columnAtVirtualColumn(text, want, tabSize, pastEnd) {
     var col = 0;
     for (var i = 0; i < text.length; i++) {
       col += text[i] == '\t' ? tabSize - col % tabSize : 1;
       if (want < col) return i;
     }
-    return Math.max(0, text.length - 1);
+    return pastEnd ? text.length : Math.max(0, text.length - 1);
   }
   /**
-   * Vim's curswant for a cursor at `head`: its screen column, or Infinity
-   * while a `$` is still sticky, which vertical motions keep it.
+   * Vim's curswant for a cursor at `head`: the screen column a vertical
+   * motion kept, Infinity while a `$` is still sticky, or else the cursor's
+   * own screen column.
    * @arg {CodeMirrorV} cm @arg {vimState} vim @arg {Pos} head
    */
   function curswant(cm, vim, head) {
-    if (vim.lastHPos === Infinity && (
+    if (vim.lastHPos !== -1 && (
         vim.lastMotion === motions.moveToEol ||
+        vim.lastMotion === motions.moveToColumn ||
         vim.lastMotion === motions.moveByLines ||
         vim.lastMotion === motions.moveByDisplayLines ||
         vim.lastMotion === motions.moveByScroll)) {
-      return Infinity;
+      return vim.lastHPos;
     }
     return cursorVirtualColumn(cm.getLine(head.line), head.ch, cm.getOption('tabSize'));
   }
@@ -7326,7 +7327,8 @@ export function initVim(CM) {
     // repeat is always >= 1, so repeat - 1 always corresponds
     // to the column we want to go to.
     var line = cm.getCursor().line;
-    return clipCursorToContent(cm, new Pos(line, repeat - 1));
+    var ch = columnAtVirtualColumn(cm.getLine(line), repeat - 1, cm.getOption('tabSize'), true);
+    return clipCursorToContent(cm, new Pos(line, ch));
   }
 
   /**
@@ -9680,7 +9682,8 @@ export function initVim(CM) {
         }
         var vim = cm.state.vim;
         vim.exMode = false;
-        vim.lastHPos = vim.lastHSPos = keepCursor ? lastPos.ch : 0;
+        vim.lastHSPos = keepCursor ? lastPos.ch : 0;
+        vim.lastHPos = keepCursor ? cursorVirtualColumn(cm.getLine(lastPos.line), lastPos.ch, cm.getOption('tabSize')) : 0;
       }
       if (callback) { callback(); }
       else if (done) {
@@ -10044,7 +10047,8 @@ export function initVim(CM) {
       updateMark(cm, vim, '>', cursorMax(head, anchor));
     } else if (!vim.insertMode) {
       // Reset lastHPos if selection was modified by something outside of vim mode e.g. by mouse.
-      vim.lastHPos = cm.getCursor().ch;
+      var clicked = cm.getCursor();
+      vim.lastHPos = cursorVirtualColumn(cm.getLine(clicked.line), clicked.ch, cm.getOption('tabSize'));
       // And the screen column gj/gk keep, as Vim resets 'curswant' on a
       // click: kept, gj after a click went back to the column of the gj
       // before it. Measured by the next vertical motion, since layout cannot

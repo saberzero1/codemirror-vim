@@ -1921,10 +1921,21 @@ another character wherever the two lines' tabs differ. `operators.indent`
 reads `curswant` from `operatorArgs.curswant`, taken in `evalInput` before
 the command's own motion replaces `lastMotion`.
 
-Two parts of `curswant` are not modelled. `j` and `k` keep a character index
-rather than a screen column, so after a `j` across lines with different tabs,
-`G` can land a column off from Neovim. And `dd`, `<C-d>` and the other
-commands Neovim also governs by `startofline` do not read it.
+`vim.lastHPos` is Vim's `curswant` in screen columns. `moveByLines` (`j`, `k`,
+`+`, `-`, `_`) sets it from the cursor when the previous motion was not
+vertical, converts it back to a character on the target line, and keeps it
+across shorter lines, so `j` from a tab lands under the tab's last cell and a
+`j` chain through a short line returns to the column it started from. `gj`,
+`gk`, `N|`, a mouse click and `:s///c` store screen columns too, and `N|`
+moves to screen column N rather than character N. `curswant` hands the kept
+column to `G`, `gg`, `H`, `M`, `L`, `>` and `<` while the last motion was
+vertical, so `jjG` lands where Neovim's does. They used to keep a character
+index, which lands on another character wherever two lines' tabs differ.
+
+Screen columns count a tab to the next tab stop and every other UTF-16 unit
+as one cell: a wide character or an astral one is not two cells, as it is in
+Neovim. `dd`, `<C-d>` and the other commands Neovim also governs by
+`startofline` do not read it.
 
 `moveByCharacters` checks `getOption('whichwrap')` and wraps across
 line boundaries when `h` or `l` is listed. The `b` and `s` values
