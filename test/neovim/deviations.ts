@@ -206,7 +206,7 @@ export const KNOWN_DEVIATIONS: Deviation[] = [
     },
 
     {
-        testPattern: /^vim_[fFtT][cdyCD],?;?$/,
+        testPattern: /^vim_[fFtT][yCD],?;?$/,
         description: 'Multi-step test with setCursor/undo between steps that flat key replay cannot reproduce',
         reason: 'environment',
         fields: ['content', 'cursor'],

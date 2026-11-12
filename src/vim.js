@@ -2935,6 +2935,7 @@ export function initVim(CM) {
       }
       var curStart, curEnd, linewise;
       var endAdjusted = false;
+      /** @type {Pos|undefined} */ var rangeStart;
       /** @type {'block'|'line'|'char'}*/ var mode;
       var cmSel;
       if (vim.visualMode) {
@@ -2967,6 +2968,9 @@ export function initVim(CM) {
           curStart = curEnd;
           curEnd = tmp;
         }
+        // Where the range starts, before it is widened to whole lines: where
+        // Vim puts the cursor after a yank.
+        rangeStart = copyCursor(curStart);
         linewise = motionArgs.linewise || operatorArgs.linewise;
         var wordMotion = vim.lastMotion === motions.moveByWords;
         // Vim stops a w whose last word ends its line at the end of that line,
@@ -3020,6 +3024,7 @@ export function initVim(CM) {
       cm.setSelections(cmSel.ranges, cmSel.primary);
       vim.lastMotion = null;
       operatorArgs.endAdjusted = endAdjusted;
+      operatorArgs.rangeStart = rangeStart;
       operatorArgs.repeat = repeat;
       operatorArgs.registerName = registerName;
       operatorArgs.linewise = linewise;
@@ -3618,7 +3623,8 @@ export function initVim(CM) {
       var searchForward = motionArgs.forward ? lastSearch.forward : !lastSearch.forward;
       var isTill = lastSearch.increment !== 0;
       var postIncrement = isTill ? (searchForward ? -1 : 1) : 0;
-      motionArgs.inclusive = !isTill;
+      // f and t are inclusive, F and T exclusive, whichever ; or , repeats.
+      motionArgs.inclusive = searchForward;
       if (isTill && motionArgs.forward && repeat > 1) repeat--;
       var searchFrom = (isTill && motionArgs.forward)
         ? offsetCursor(head, 0, -postIncrement)
@@ -3973,9 +3979,20 @@ export function initVim(CM) {
     yank: function(cm, args, ranges, oldAnchor) {
       var vim = cm.state.vim;
       var text = cm.getSelection();
-      var endPos = vim.visualMode
-        ? cursorMin(vim.sel.anchor, vim.sel.head, ranges[0].head, ranges[0].anchor)
-        : oldAnchor;
+      // As Vim leaves it: the start of the range, before a linewise motion
+      // widened it, so yb and yk move the cursor back and yj does not. A
+      // visual-line yank keeps the head's column only when the head is the
+      // top; otherwise it goes to column 0, as Neovim 0.12.6 measures.
+      var endPos;
+      if (vim.visualMode && vim.visualLine) {
+        endPos = cursorIsBefore(vim.sel.head, vim.sel.anchor)
+          ? vim.sel.head
+          : new Pos(vim.sel.anchor.line, 0);
+      } else if (vim.visualMode) {
+        endPos = cursorMin(vim.sel.anchor, vim.sel.head, ranges[0].head, ranges[0].anchor);
+      } else {
+        endPos = args.rangeStart || oldAnchor;
+      }
       vimGlobalState.registerController.pushText(
           args.registerName, 'yank',
           text, args.linewise, vim.visualBlock);

@@ -127,6 +127,8 @@ export type OperatorArgs = {
     curswant?: number;
     /** The end of an exclusive motion moved back a line (:help exclusive). */
     endAdjusted?: boolean;
+    /** Where the range starts before a linewise motion widens it. */
+    rangeStart?: Pos;
     surroundNewline?: boolean;
     surroundCharRepeat?: number;
 } 

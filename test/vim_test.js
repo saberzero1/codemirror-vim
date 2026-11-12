@@ -2333,9 +2333,7 @@ function exclusiveCase(value, start, keys, text, cursor, reg, linewise, opts) {
     cm.setCursor(start[0], start[1]);
     helpers.doKeys.apply(null, keys);
     eq(text, cm.getValue());
-    // A yank does not move the cursor to the start of a backward range, as
-    // Neovim's does, so yb checks only the text and the register.
-    if (cursor) helpers.assertCursorAt(cursor[0], cursor[1]);
+    helpers.assertCursorAt(cursor[0], cursor[1]);
     var register = helpers.getRegisterController().getRegister();
     eq(reg, register.toString());
     eq(linewise, !!register.linewise);
@@ -2346,7 +2344,7 @@ exclusiveCase("foo bar\nbaz", [0, 4], ['d', '}'], "foo ", [0, 3], "bar\nbaz", fa
 exclusiveCase("  foo bar\nbaz\n\nx", [0, 2], ['d', '}'], "\nx", [0, 0], "  foo bar\nbaz\n", true);
 exclusiveCase("  foo bar\nbaz\n\nx", [0, 5], ['d', '}'], "  foo\n\nx", [0, 4], " bar\nbaz", false);
 exclusiveCase("foo\n  bar\nbaz", [2, 0], ['d', 'b'], "foo\nbaz", [1, 0], "  bar\n", true);
-exclusiveCase("foo\n  bar\nbaz", [2, 0], ['y', 'b'], "foo\n  bar\nbaz", null, "  bar\n", true);
+exclusiveCase("foo\n  bar\nbaz", [2, 0], ['y', 'b'], "foo\n  bar\nbaz", [1, 2], "  bar\n", true);
 exclusiveCase(" word1\nword2", [0, 2], ['d', '2', 'w'], " w", [0, 1], "ord1\nword2", false);
 exclusiveCase("x word1\nword2", [0, 2], ['d', '2', 'w'], "x ", [0, 1], "word1\nword2", false);
 exclusiveCase(" word1\nword2 more", [0, 1], ['d', '2', 'w'], " more", [0, 1], "word1\nword2 ", false);
@@ -2380,6 +2378,116 @@ exclusiveCase("x foo\nbar", [0, 2], ['d', 'w'], "x \nbar", [0, 1], "foo", false)
 exclusiveCase(" word1\nword2", [0, 1], ['y', '2', 'w'], " word1\nword2", [0, 1], "word1\nword2", false);
 exclusiveCase("\n  \nword", [0, 0], ['d', 'w'], "  \nword", [0, 1], "\n", true);
 
+
+// After a yank the cursor is at the start of what was yanked, as the motion
+// or text object reached it, before a linewise motion widened it: yb, yk and
+// ygg move it back, yj and yw do not. A visual-line yank keeps the head's
+// column only when the head is above the anchor, otherwise column 0. Each
+// row is Neovim 0.12.6 with tabstop=4, with 'startofline' off and on. A yank
+// used to leave the cursor where it was.
+var yankLines = 'alpha beta gamma\n\tdelta epsilon\n  zeta eta theta\niota kappa\n\nlambda mu nu\nxi omicron pi';
+var yankCount = 0;
+function yankCase(sol, start, keys, expected) {
+  testVim('yank_cursor_' + (++yankCount) + '_' + keys.join('') + (sol ? '_sol' : ''), function(cm, vim, helpers) {
+    if (sol) CodeMirror.Vim.setOption('startofline', true);
+    try {
+      cm.setCursor(start[0], start[1]);
+      helpers.doKeys.apply(null, keys);
+      eq(yankLines, cm.getValue());
+      helpers.assertCursorAt(expected[0], expected[1]);
+    } finally {
+      if (sol) CodeMirror.Vim.setOption('startofline', false);
+    }
+  }, Object.assign({ value: yankLines }, shiftTabs));
+}
+yankCase(false, [0, 11], ['y', 'b'], [0, 6]);
+yankCase(false, [0, 11], ['y', '0'], [0, 0]);
+yankCase(false, [0, 11], ['y', 'h'], [0, 10]);
+yankCase(false, [0, 11], ['y', '^'], [0, 0]);
+yankCase(false, [1, 7], ['y', 'b'], [1, 1]);
+yankCase(false, [1, 1], ['y', 'b'], [0, 11]);
+yankCase(false, [0, 6], ['y', 'w'], [0, 6]);
+yankCase(false, [0, 6], ['y', 'e'], [0, 6]);
+yankCase(false, [0, 6], ['y', '$'], [0, 6]);
+yankCase(false, [2, 8], ['y', 'k'], [1, 5]);
+yankCase(false, [2, 8], ['2', 'y', 'k'], [0, 8]);
+yankCase(false, [1, 7], ['y', 'j'], [1, 7]);
+yankCase(false, [2, 8], ['y', 'y'], [2, 8]);
+yankCase(false, [2, 8], ['2', 'y', 'y'], [2, 8]);
+yankCase(false, [6, 4], ['y', '{'], [4, 0]);
+yankCase(false, [3, 6], ['y', '}'], [3, 6]);
+yankCase(false, [2, 8], ['y', 'i', 'p'], [0, 0]);
+yankCase(false, [2, 8], ['y', 'i', 'w'], [2, 7]);
+yankCase(false, [2, 8], ['y', 'a', 'w'], [2, 7]);
+yankCase(false, [3, 6], ['y', 'g', 'g'], [0, 6]);
+yankCase(false, [1, 7], ['y', 'G'], [1, 7]);
+yankCase(false, [6, 4], ['y', '50', '%'], [3, 4]);
+yankCase(false, [0, 2], ['y', 'f', 'a'], [0, 2]);
+yankCase(false, [0, 12], ['y', 'F', 'a'], [0, 9]);
+yankCase(false, [0, 12], ['y', 'T', 'a'], [0, 10]);
+yankCase(false, [2, 8], ['v', 'b', 'y'], [2, 7]);
+yankCase(false, [2, 8], ['v', 'e', 'y'], [2, 8]);
+yankCase(false, [2, 8], ['v', 'k', 'y'], [1, 5]);
+yankCase(false, [2, 8], ['V', 'k', 'y'], [1, 5]);
+yankCase(false, [2, 8], ['V', 'j', 'y'], [2, 0]);
+yankCase(false, [2, 8], ['<C-v>', 'k', 'b', 'y'], [1, 1]);
+yankCase(false, [2, 8], ['$', 'y', 'k'], [1, 13]);
+yankCase(false, [0, 4], ['j', 'y', 'k'], [0, 4]);
+yankCase(false, [2, 8], ['v', 'j', 'y'], [2, 8]);
+yankCase(true, [0, 11], ['y', 'b'], [0, 6]);
+yankCase(true, [0, 11], ['y', '0'], [0, 0]);
+yankCase(true, [0, 11], ['y', 'h'], [0, 10]);
+yankCase(true, [0, 11], ['y', '^'], [0, 0]);
+yankCase(true, [1, 7], ['y', 'b'], [1, 1]);
+yankCase(true, [1, 1], ['y', 'b'], [0, 11]);
+yankCase(true, [0, 6], ['y', 'w'], [0, 6]);
+yankCase(true, [0, 6], ['y', 'e'], [0, 6]);
+yankCase(true, [0, 6], ['y', '$'], [0, 6]);
+yankCase(true, [2, 8], ['y', 'k'], [1, 5]);
+yankCase(true, [2, 8], ['2', 'y', 'k'], [0, 8]);
+yankCase(true, [1, 7], ['y', 'j'], [1, 7]);
+yankCase(true, [2, 8], ['y', 'y'], [2, 8]);
+yankCase(true, [2, 8], ['2', 'y', 'y'], [2, 8]);
+yankCase(true, [6, 4], ['y', '{'], [4, 0]);
+yankCase(true, [3, 6], ['y', '}'], [3, 6]);
+yankCase(true, [2, 8], ['y', 'i', 'p'], [0, 0]);
+yankCase(true, [2, 8], ['y', 'i', 'w'], [2, 7]);
+yankCase(true, [2, 8], ['y', 'a', 'w'], [2, 7]);
+yankCase(true, [3, 6], ['y', 'g', 'g'], [0, 0]);
+yankCase(true, [1, 7], ['y', 'G'], [1, 7]);
+yankCase(true, [6, 4], ['y', '50', '%'], [3, 0]);
+yankCase(true, [0, 2], ['y', 'f', 'a'], [0, 2]);
+yankCase(true, [0, 12], ['y', 'F', 'a'], [0, 9]);
+yankCase(true, [0, 12], ['y', 'T', 'a'], [0, 10]);
+yankCase(true, [2, 8], ['v', 'b', 'y'], [2, 7]);
+yankCase(true, [2, 8], ['v', 'e', 'y'], [2, 8]);
+yankCase(true, [2, 8], ['v', 'k', 'y'], [1, 5]);
+yankCase(true, [2, 8], ['V', 'k', 'y'], [1, 5]);
+yankCase(true, [2, 8], ['V', 'j', 'y'], [2, 0]);
+yankCase(true, [2, 8], ['<C-v>', 'k', 'b', 'y'], [1, 1]);
+yankCase(true, [2, 8], ['$', 'y', 'k'], [1, 13]);
+yankCase(true, [0, 4], ['j', 'y', 'k'], [0, 4]);
+yankCase(true, [2, 8], ['v', 'j', 'y'], [2, 8]);
+yankCase(false, [2, 8], ['V', 'y'], [2, 0]);
+yankCase(false, [2, 8], ['V', '2', 'j', 'y'], [2, 0]);
+yankCase(false, [3, 6], ['V', 'k', 'k', 'y'], [1, 3]);
+yankCase(false, [2, 8], ['V', 'j', 'k', 'y'], [2, 0]);
+yankCase(false, [2, 8], ['V', 'j', 'o', 'y'], [2, 8]);
+yankCase(false, [2, 8], ['V', 'k', 'o', 'y'], [1, 0]);
+yankCase(false, [2, 8], ['v', 'j', 'o', 'y'], [2, 8]);
+yankCase(false, [2, 8], ['v', 'k', 'o', 'y'], [1, 5]);
+yankCase(false, [2, 8], ['<C-v>', 'j', 'l', 'y'], [2, 8]);
+yankCase(false, [2, 8], ['<C-v>', 'j', 'h', 'y'], [2, 7]);
+yankCase(true, [2, 8], ['V', 'y'], [2, 0]);
+yankCase(true, [2, 8], ['V', '2', 'j', 'y'], [2, 0]);
+yankCase(true, [3, 6], ['V', 'k', 'k', 'y'], [1, 3]);
+yankCase(true, [2, 8], ['V', 'j', 'k', 'y'], [2, 0]);
+yankCase(true, [2, 8], ['V', 'j', 'o', 'y'], [2, 8]);
+yankCase(true, [2, 8], ['V', 'k', 'o', 'y'], [1, 0]);
+yankCase(true, [2, 8], ['v', 'j', 'o', 'y'], [2, 8]);
+yankCase(true, [2, 8], ['v', 'k', 'o', 'y'], [1, 5]);
+yankCase(true, [2, 8], ['<C-v>', 'j', 'l', 'y'], [2, 8]);
+yankCase(true, [2, 8], ['<C-v>', 'j', 'h', 'y'], [2, 7]);
 
 // G and gg keep the screen column the same way without 'startofline', and
 // go to the first non-blank with it. Neovim 0.12.6, tabstop=4.
@@ -4709,14 +4817,16 @@ testVim('fd,;', function(cm, vim, helpers) {
   helpers.doKeys('u');
   cm.setCursor(0, 9);
   helpers.doKeys('d', ',');
-  eq('0123', cm.getValue());
+  // F and T are exclusive whichever ; or , repeats them, as in Neovim 0.12.6.
+  eq('01239', cm.getValue());
 }, { value: '0123456789'});
 testVim('Fd,;', function(cm, vim, helpers) {
   cm.setCursor(0, 9);
   helpers.doKeys('F', '4');
   cm.setCursor(0, 9);
   helpers.doKeys('d', ';');
-  eq('0123', cm.getValue());
+  // F and T are exclusive whichever ; or , repeats them, as in Neovim 0.12.6.
+  eq('01239', cm.getValue());
   helpers.doKeys('u');
   cm.setCursor(0, 0);
   helpers.doKeys('d', ',');
@@ -4727,7 +4837,8 @@ testVim('td,;', function(cm, vim, helpers) {
   helpers.doKeys('t', '4');
   cm.setCursor(0, 0);
   helpers.doKeys('d', ';');
-  eq('3456789', cm.getValue());
+  // t is inclusive whichever ; or , repeats it, as in Neovim 0.12.6.
+  eq('456789', cm.getValue());
   helpers.doKeys('u');
   cm.setCursor(0, 9);
   helpers.doKeys('d', ',');
@@ -4742,7 +4853,8 @@ testVim('Td,;', function(cm, vim, helpers) {
   helpers.doKeys('u');
   cm.setCursor(0, 0);
   helpers.doKeys('d', ',');
-  eq('3456789', cm.getValue());
+  // t is inclusive whichever ; or , repeats it, as in Neovim 0.12.6.
+  eq('456789', cm.getValue());
 }, { value: '0123456789'});
 testVim('fc,;', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
@@ -4753,14 +4865,16 @@ testVim('fc,;', function(cm, vim, helpers) {
   helpers.doKeys('u');
   cm.setCursor(0, 9);
   helpers.doKeys('c', ',');
-  eq('0123', cm.getValue());
+  // F and T are exclusive whichever ; or , repeats them, as in Neovim 0.12.6.
+  eq('01239', cm.getValue());
 }, { value: '0123456789'});
 testVim('Fc,;', function(cm, vim, helpers) {
   cm.setCursor(0, 9);
   helpers.doKeys('F', '4');
   cm.setCursor(0, 9);
   helpers.doKeys('c', ';', '<Esc>');
-  eq('0123', cm.getValue());
+  // F and T are exclusive whichever ; or , repeats them, as in Neovim 0.12.6.
+  eq('01239', cm.getValue());
   helpers.doKeys('u');
   cm.setCursor(0, 0);
   helpers.doKeys('c', ',');
@@ -4771,7 +4885,8 @@ testVim('tc,;', function(cm, vim, helpers) {
   helpers.doKeys('t', '4');
   cm.setCursor(0, 0);
   helpers.doKeys('c', ';', '<Esc>');
-  eq('3456789', cm.getValue());
+  // t is inclusive whichever ; or , repeats it, as in Neovim 0.12.6.
+  eq('456789', cm.getValue());
   helpers.doKeys('u');
   cm.setCursor(0, 9);
   helpers.doKeys('c', ',');
@@ -4786,7 +4901,8 @@ testVim('Tc,;', function(cm, vim, helpers) {
   helpers.doKeys('u');
   cm.setCursor(0, 0);
   helpers.doKeys('c', ',');
-  eq('3456789', cm.getValue());
+  // t is inclusive whichever ; or , repeats it, as in Neovim 0.12.6.
+  eq('456789', cm.getValue());
 }, { value: '0123456789'});
 testVim('fy,;', function(cm, vim, helpers) {
   cm.setCursor(0, 0);
@@ -4797,14 +4913,16 @@ testVim('fy,;', function(cm, vim, helpers) {
   helpers.doKeys('u');
   cm.setCursor(0, 9);
   helpers.doKeys('y', ',', 'P');
-  eq('0123456784567899', cm.getValue());
+  // The yank moves the cursor back to 4, as in Neovim 0.12.6.
+  eq('012345678456789', cm.getValue());
 }, { value: '0123456789'});
 testVim('Fy,;', function(cm, vim, helpers) {
   cm.setCursor(0, 9);
   helpers.doKeys('F', '4');
   cm.setCursor(0, 9);
   helpers.doKeys('y', ';', 'p');
-  eq('0123456789456789', cm.getValue());
+  // The yank moves the cursor back to 4, as in Neovim 0.12.6.
+  eq('012344567856789', cm.getValue());
   helpers.doKeys('u');
   cm.setCursor(0, 0);
   helpers.doKeys('y', ',', 'P');
@@ -4815,22 +4933,26 @@ testVim('ty,;', function(cm, vim, helpers) {
   helpers.doKeys('t', '4');
   cm.setCursor(0, 0);
   helpers.doKeys('y', ';', 'P');
-  eq('0120123456789', cm.getValue());
+  // t is inclusive when ; repeats it, as in Neovim 0.12.6.
+  eq('01230123456789', cm.getValue());
   helpers.doKeys('u');
   cm.setCursor(0, 9);
   helpers.doKeys('y', ',', 'p');
-  eq('01234567895678', cm.getValue());
+  // The yank moves the cursor back to 5, as in Neovim 0.12.6.
+  eq('01234556786789', cm.getValue());
 }, { value: '0123456789'});
 testVim('Ty,;', function(cm, vim, helpers) {
   cm.setCursor(0, 9);
   helpers.doKeys('T', '4');
   cm.setCursor(0, 9);
   helpers.doKeys('y', ';', 'p');
-  eq('01234567895678', cm.getValue());
+  // The yank moves the cursor back to 5, as in Neovim 0.12.6.
+  eq('01234556786789', cm.getValue());
   helpers.doKeys('u');
   cm.setCursor(0, 0);
   helpers.doKeys('y', ',', 'P');
-  eq('0120123456789', cm.getValue());
+  // t is inclusive when , reverses T, as in Neovim 0.12.6.
+  eq('01230123456789', cm.getValue());
 }, { value: '0123456789'});
 testVim('vFT', function(cm, vim, helpers) {
   cm.setCursor(0, 0);

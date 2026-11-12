@@ -1977,8 +1977,18 @@ After a linewise `d`, `<` or `>`, the cursor keeps `curswant` only without
 `startofline` and when rule 2 did not move the end; otherwise it goes to the
 first non-blank, as Vim's `do_pending_operator` leaves it.
 
-A yank does not move the cursor to the start of a backward range, as Neovim's
-does: `yb` and `yk` leave it where it was.
+After a yank the cursor goes where Vim leaves it: the start of the range as
+the motion or text object reached it, before a linewise motion widened it
+(`operatorArgs.rangeStart`). So `yb`, `yk`, `ygg` and `yiw` move it back and
+`yj` and `yw` do not; `yk` lands at the `curswant` column. A visual-line yank
+keeps the head's column only when the head is above the anchor, and otherwise
+goes to column 0. A yank used to leave the cursor where it was.
+
+`;` and `,` take their motion type from the direction they search: inclusive
+forward, as `f` and `t` are, and exclusive backward, as `F` and `T` are. They
+used to take it from whether the last search was a `t`, so `d,` after `f4`
+took the character under the cursor with it and `d;` after `t4` stopped a
+character short.
 
 `moveByCharacters` checks `getOption('whichwrap')` and wraps across
 line boundaries when `h` or `l` is listed. The `b` and `s` values
