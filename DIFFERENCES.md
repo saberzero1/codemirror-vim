@@ -1971,6 +1971,12 @@ every line in an editor whose language has no indent rules, such as
 Obsidian's Markdown. The test harness takes `mode: 'plain'` for an editor
 with no language.
 
+`:[range]>` and `:[range]<` shift lines by `shiftwidth`, as Vim's do: each
+further `>` or `<` shifts once more (`:>>>`), a count shifts that many lines
+from the range's last (`:> 3`, `:>3`), and the cursor ends on the last
+line's first non-blank. They were not defined. `ex_special_names` no longer
+redefines `<` and `>`, which would replace them for every later test.
+
 ### Operator range adjustments
 
 Three of Vim's rules for an operator's range, in this order:

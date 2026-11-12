@@ -363,6 +363,8 @@ export function initVim(CM) {
     { name: 'normal', shortName: 'norm' },
     { name: 'global', shortName: 'g' },
     { name: 'copy', shortName: 'co' },
+    { name: '>', shortName: '>' },
+    { name: '<', shortName: '<' },
     { name: 't' }
   ];
 
@@ -7047,6 +7049,33 @@ export function initVim(CM) {
     if (getOption('startofline')) return findFirstNonWhiteSpaceCharacter(text);
     return columnAtVirtualColumn(text, want, cm.getOption('tabSize'));
   }
+  /**
+   * :[range]> [count] and :<, as Vim's: each further > or < shifts once more,
+   * a count shifts that many lines from the range's last, and the cursor
+   * ends on the last line's first non-blank.
+   * @arg {CodeMirrorV} cm @arg {ExParams} params @arg {boolean} right
+   */
+  function shiftExLines(cm, params, right) {
+    var m = /^\s*([<>]*)\s*(\d*)\s*$/.exec(params.argString || '');
+    if (!m) {
+      showConfirm(cm, 'Trailing characters');
+      return;
+    }
+    var times = 1 + m[1].length;
+    var line = params.selectionLine;
+    var lineEnd = isNaN(params.selectionLineEnd) ? line : params.selectionLineEnd;
+    if (m[2]) {
+      line = lineEnd;
+      lineEnd = Math.min(line + parseInt(m[2], 10) - 1, cm.lastLine());
+    }
+    for (var i = 0; i < times; i++) {
+      var range = { anchor: new Pos(line, 0), head: new Pos(lineEnd, lineLength(cm, lineEnd)) };
+      cm.setSelections([range]);
+      operators.indent(cm, { indentRight: right, linewise: true, repeat: 1 },
+        [{ anchor: new Pos(line, 0), head: new Pos(lineEnd + 1, 0) }]);
+    }
+    cm.setCursor(new Pos(lineEnd, findFirstNonWhiteSpaceCharacter(cm.getLine(lineEnd))));
+  }
   function findFirstNonWhiteSpaceCharacter(text) {
     if (!text) {
       return 0;
@@ -9202,6 +9231,10 @@ export function initVim(CM) {
     t: function(cm, params) {
       this.copy(cm, params);
     },
+    /** @arg {CodeMirrorV} cm @arg {ExParams} params */
+    '>': function(cm, params) { shiftExLines(cm, params, true); },
+    /** @arg {CodeMirrorV} cm @arg {ExParams} params */
+    '<': function(cm, params) { shiftExLines(cm, params, false); },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     set: function(cm, params) {
       var setArgs = params.args;

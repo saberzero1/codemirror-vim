@@ -2588,6 +2588,32 @@ eqCase("- a\n\t- b\n- c", 1, ['=', '='], false, "- a\n- b\n- c", null);
 eqCase("- a\n\t\t- b", 1, ['=', '='], false, "- a\n- b", null);
 eqCase("- a\n\t- b\n\t\t- c", 0, ['=', 'G'], false, "- a\n- b\n- c", null);
 
+// :> and :< shift lines as Vim's do: each further > or < once more, a
+// count from the range's last line, the cursor on the last line's first
+// non-blank. Each row is Neovim 0.12.6 with tabstop=4 shiftwidth=4.
+var shiftExLines = 'one\n\ttwo\n\t\tthree\nfour\nfive';
+function shiftExCase(line, ex, expected, cursor) {
+  testVim('ex_shift_' + ex.replace(/[^<>0-9,%.+]/g, '_') + '_' + line, function(cm, vim, helpers) {
+    cm.setCursor(line, 0);
+    helpers.doEx(ex);
+    eq(expected, cm.getValue());
+    helpers.assertCursorAt(cursor[0], cursor[1]);
+  }, Object.assign({ value: shiftExLines }, shiftTabs));
+}
+shiftExCase(1, ">", "one\n\t\ttwo\n\t\tthree\nfour\nfive", [1, 2]);
+shiftExCase(1, ">>", "one\n\t\t\ttwo\n\t\tthree\nfour\nfive", [1, 3]);
+shiftExCase(1, ">>>", "one\n\t\t\t\ttwo\n\t\tthree\nfour\nfive", [1, 4]);
+shiftExCase(1, "<", "one\ntwo\n\t\tthree\nfour\nfive", [1, 0]);
+shiftExCase(2, "<<", "one\n\ttwo\nthree\nfour\nfive", [2, 0]);
+shiftExCase(2, "<<<", "one\n\ttwo\nthree\nfour\nfive", [2, 0]);
+shiftExCase(0, "> 3", "\tone\n\t\ttwo\n\t\t\tthree\nfour\nfive", [2, 3]);
+shiftExCase(0, "2,3>", "one\n\t\ttwo\n\t\t\tthree\nfour\nfive", [2, 3]);
+shiftExCase(0, "2,3>> 2", "one\n\ttwo\n\t\t\t\tthree\n\t\tfour\nfive", [3, 2]);
+shiftExCase(3, "<", "one\n\ttwo\n\t\tthree\nfour\nfive", [3, 0]);
+shiftExCase(0, "%>", "\tone\n\t\ttwo\n\t\t\tthree\n\tfour\n\tfive", [4, 1]);
+shiftExCase(0, ".,+2>", "\tone\n\t\ttwo\n\t\t\tthree\nfour\nfive", [2, 3]);
+shiftExCase(1, ">3", "one\n\t\ttwo\n\t\t\tthree\n\tfour\nfive", [3, 1]);
+
 // G and gg keep the screen column the same way without 'startofline', and
 // go to the first non-blank with it. Neovim 0.12.6, tabstop=4.
 var solLines = '\tfoo bar baz\n  x\n        long line here\nab\n\t\tend line';
@@ -6485,7 +6511,9 @@ testVim('ex_api_test', function(cm, vim, helpers) {
 // Testing ex-commands with non-alpha names.
 testVim('ex_special_names', function(cm, vim, helpers) {
   var ran,val;
-  var cmds = ['!','!!','#','&','<','=','>','@','@@','~','regtest1','RT2'];
+  // Not < or >: they are real commands now, which this test would replace
+  // for every test after it, and ex_shift parses them, counts included.
+  var cmds = ['!','!!','#','&','=','@','@@','~','regtest1','RT2'];
   cmds.forEach(function(name){
     CodeMirror.Vim.defineEx(name,'',function(cm,params){
       ran=params.commandName;
