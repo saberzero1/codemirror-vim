@@ -1066,8 +1066,10 @@ testVim('dw_repeat', function(cm, vim, helpers) {
   helpers.doKeys('d', '2', 'w');
   eq('', cm.getValue());
   var register = helpers.getRegisterController().getRegister();
-  eq(' word1\nword2', register.toString());
-  is(!register.linewise);
+  // Linewise, as in Neovim 0.12.6: the motion runs off the end of the
+  // buffer from inside the indent.
+  eq(' word1\nword2\n', register.toString());
+  is(register.linewise);
   helpers.assertCursorAt(0, 0);
 }, { value: ' word1\nword2' });
 testVim('de_word_start_and_empty_lines', function(cm, vim, helpers) {
@@ -1152,8 +1154,10 @@ testVim('d_reverse', function(cm, vim, helpers) {
   helpers.doKeys('d', 'b');
   eq('word2 ', cm.getValue());
   var register = helpers.getRegisterController().getRegister();
+  // Linewise, as in Neovim 0.12.6: db ends in column 0 of the next line and
+  // starts inside the indent.
   eq(' word1\n', register.toString());
-  is(!register.linewise);
+  is(register.linewise);
   helpers.assertCursorAt(0, 0);
 }, { value: ' word1\nword2 ' });
 testVim('dd', function(cm, vim, helpers) {
@@ -2249,6 +2253,133 @@ scrollCase('ctrl_b', [150, 6], ['<C-b>'], 6, 2);
 scrollCase('ctrl_d_then_j', [0, 12], ['<C-d>', 'j'], 6, 2);
 scrollCase('ctrl_d_twice', [0, 12], ['<C-d>', '<C-d>'], 6, 2);
 scrollCase('ctrl_d_after_eol', [0, 21], ['$', '<C-d>'], 14, 2);
+
+// {count}% goes {count} percent of the way through the file: line
+// (count * lines + 99) / 100, at the 'startofline' column. `%` with a count
+// used to match brackets. Neovim 0.12.6 makes it a charwise exclusive motion,
+// although its help says linewise, and a count past 100 fails, cancelling an
+// operator. Each row is Neovim's, with tabstop=4.
+var pctLines = (function() {
+  var out = [];
+  for (var i = 1; i <= 37; i++) {
+    var n = ('0' + i).slice(-2);
+    out.push(i % 2 == 0 ? '\t\tdeep ' + n + ' line' : 'plain line ' + n + ' words');
+  }
+  return out.join('\n');
+})();
+function pctCase(name, start, keys, expected, sol, check) {
+  testVim('count_percent_' + name + (sol ? '_sol' : ''), function(cm, vim, helpers) {
+    if (sol) CodeMirror.Vim.setOption('startofline', true);
+    try {
+      cm.setCursor(start[0], start[1]);
+      helpers.doKeys.apply(null, keys);
+      helpers.assertCursorAt(expected[0], expected[1]);
+      if (check) check(cm, vim, helpers);
+    } finally {
+      if (sol) CodeMirror.Vim.setOption('startofline', false);
+    }
+  }, Object.assign({ value: pctLines }, shiftTabs));
+}
+function lineCount(n) { return function(cm) { eq(n, cm.lineCount()); }; }
+function charwiseRegister(head) {
+  return function(cm, vim, helpers) {
+    var reg = helpers.getRegisterController().getRegister();
+    is(!reg.linewise, 'charwise register');
+    eq(head, reg.toString().slice(0, head.length));
+  };
+}
+pctCase('1', [0, 12], ['1', '%'], [0, 12]);
+pctCase('50', [0, 12], ['5', '0', '%'], [18, 12]);
+pctCase('99', [0, 12], ['9', '9', '%'], [36, 12]);
+pctCase('100', [0, 12], ['1', '0', '0', '%'], [36, 12]);
+pctCase('101_fails', [0, 12], ['1', '0', '1', '%'], [0, 12]);
+pctCase('200_fails', [0, 12], ['2', '0', '0', '%'], [0, 12]);
+pctCase('1_from_end', [36, 3], ['1', '%'], [0, 3]);
+pctCase('3', [0, 12], ['3', '%'], [1, 6]);
+pctCase('51', [0, 12], ['5', '1', '%'], [18, 12]);
+pctCase('after_eol', [0, 12], ['$', '5', '0', '%'], [18, 18]);
+pctCase('then_j', [0, 12], ['5', '0', '%', 'j'], [19, 6]);
+pctCase('jumplist', [0, 12], ['5', '0', '%', '<C-o>'], [0, 12]);
+pctCase('visual', [0, 12], ['v', '5', '0', '%'], [18, 13], false, function(cm, vim) {
+  // The editor's head is one past the inclusive visual head.
+  eq(18, vim.sel.head.line); eq(12, vim.sel.head.ch);
+});
+pctCase('d_forward', [0, 12], ['d', '5', '0', '%'], [0, 12], false, lineCount(19));
+pctCase('d_backward', [20, 3], ['d', '1', '0', '%'], [3, 0], false, lineCount(20));
+pctCase('y_charwise', [0, 12], ['y', '5', '0', '%'], [0, 12], false, charwiseRegister('1 words\n\t\tdeep 02'));
+pctCase('d_past_100', [0, 12], ['d', '1', '0', '1', '%'], [0, 12], false, lineCount(37));
+pctCase('1', [0, 12], ['1', '%'], [0, 0], true);
+pctCase('50', [0, 12], ['5', '0', '%'], [18, 0], true);
+pctCase('3', [0, 12], ['3', '%'], [1, 2], true);
+pctCase('after_eol', [0, 12], ['$', '5', '0', '%'], [18, 0], true);
+pctCase('then_j', [0, 12], ['5', '0', '%', 'j'], [19, 0], true);
+pctCase('d_forward', [0, 12], ['d', '5', '0', '%'], [0, 11], true, lineCount(20));
+pctCase('d_backward', [20, 3], ['d', '1', '0', '%'], [3, 2], true, lineCount(20));
+// % without a count still matches brackets.
+testVim('count_percent_no_count_matches_brackets', function(cm, vim, helpers) {
+  cm.setCursor(0, 0);
+  helpers.doKeys('%');
+  helpers.assertCursorAt(0, 3);
+}, { value: '(ab) x' });
+
+// An exclusive motion that ends in column 0 of a later line ends instead on
+// the line before (:help exclusive): linewise when it starts in the indent,
+// otherwise inclusive to that line's last character. A w or W that runs off
+// the end of the buffer counts as ending in column 0 of the line after it.
+// Each row is Neovim 0.12.6: the text, the cursor, the register and its type.
+var exclusiveCount = 0;
+function exclusiveCase(value, start, keys, text, cursor, reg, linewise, opts) {
+  testVim('exclusive_col0_' + (++exclusiveCount) + '_' + keys.join(''), function(cm, vim, helpers) {
+    cm.setCursor(start[0], start[1]);
+    helpers.doKeys.apply(null, keys);
+    eq(text, cm.getValue());
+    // A yank does not move the cursor to the start of a backward range, as
+    // Neovim's does, so yb checks only the text and the register.
+    if (cursor) helpers.assertCursorAt(cursor[0], cursor[1]);
+    var register = helpers.getRegisterController().getRegister();
+    eq(reg, register.toString());
+    eq(linewise, !!register.linewise);
+  }, Object.assign({ value: value }, opts));
+}
+exclusiveCase(" word1\nword2 ", [1, 0], ['d', 'b'], "word2 ", [0, 0], " word1\n", true);
+exclusiveCase("foo bar\nbaz", [0, 4], ['d', '}'], "foo ", [0, 3], "bar\nbaz", false);
+exclusiveCase("  foo bar\nbaz\n\nx", [0, 2], ['d', '}'], "\nx", [0, 0], "  foo bar\nbaz\n", true);
+exclusiveCase("  foo bar\nbaz\n\nx", [0, 5], ['d', '}'], "  foo\n\nx", [0, 4], " bar\nbaz", false);
+exclusiveCase("foo\n  bar\nbaz", [2, 0], ['d', 'b'], "foo\nbaz", [1, 0], "  bar\n", true);
+exclusiveCase("foo\n  bar\nbaz", [2, 0], ['y', 'b'], "foo\n  bar\nbaz", null, "  bar\n", true);
+exclusiveCase(" word1\nword2", [0, 2], ['d', '2', 'w'], " w", [0, 1], "ord1\nword2", false);
+exclusiveCase("x word1\nword2", [0, 2], ['d', '2', 'w'], "x ", [0, 1], "word1\nword2", false);
+exclusiveCase(" word1\nword2 more", [0, 1], ['d', '2', 'w'], " more", [0, 1], "word1\nword2 ", false);
+exclusiveCase("a\nb", [0, 0], ['d', '2', 'w'], "", [0, 0], "a\nb\n", true);
+exclusiveCase(" a b\nc", [0, 1], ['d', '3', 'w'], "", [0, 0], " a b\nc\n", true);
+exclusiveCase("a b", [0, 0], ['d', '5', 'w'], "", [0, 0], "a b", false);
+exclusiveCase(" a\nb", [0, 1], ['d', '2', 'W'], "", [0, 0], " a\nb\n", true);
+exclusiveCase(" word1\nword2\nz", [0, 1], ['d', '2', 'w'], "z", [0, 0], " word1\nword2\n", true);
+// A text object over whole lines stays charwise for d, as a Neovim plugin's
+// does: dic leaves the blank line (Neovim 0.12.6, with an omap that selects
+// lines 3 to 4 visually).
+testVim('exclusive_col0_textobject_d_keeps_blank_line', function(cm, vim, helpers) {
+  CodeMirror.Vim.defineMotion('wholeLinesForTest', function() {
+    return [new Pos(2, 0), new Pos(3, 12)];
+  });
+  CodeMirror.Vim.mapCommand('iQ', 'motion', 'wholeLinesForTest', undefined, { context: 'operatorPending' });
+  try {
+    cm.setCursor(2, 5);
+    helpers.doKeys('d', 'i', 'Q');
+    eq('before\n```js\n\n```\nafter', cm.getValue());
+    is(!helpers.getRegisterController().getRegister().linewise);
+  } finally {
+    CodeMirror.Vim.unmap('iQ', 'operatorPending');
+  }
+}, { value: 'before\n```js\nconst x = 1;\nconst y = 2;\n```\nafter' });
+exclusiveCase("<details>\ninner content\n</details>", [1, 0], ['d', 'i', 't'], "<details></details>", [0, 9], "\ninner content\n", false, { mode: 'xml' });
+exclusiveCase("<a>\n  x\n</a>", [1, 2], ['d', 'i', 't'], "<a></a>", [0, 3], "\n  x\n", false, { mode: 'xml' });
+exclusiveCase("x <b>\ny\n</b>", [1, 0], ['d', 'a', 't'], "x ", [0, 1], "<b>\ny\n</b>", false, { mode: 'xml' });
+exclusiveCase("  foo\nbar", [0, 2], ['d', 'w'], "  \nbar", [0, 1], "foo", false);
+exclusiveCase("x foo\nbar", [0, 2], ['d', 'w'], "x \nbar", [0, 1], "foo", false);
+exclusiveCase(" word1\nword2", [0, 1], ['y', '2', 'w'], " word1\nword2", [0, 1], "word1\nword2", false);
+exclusiveCase("\n  \nword", [0, 0], ['d', 'w'], "  \nword", [0, 1], "\n", true);
+
 
 // G and gg keep the screen column the same way without 'startofline', and
 // go to the first non-blank with it. Neovim 0.12.6, tabstop=4.

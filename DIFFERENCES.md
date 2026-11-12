@@ -1942,8 +1942,43 @@ it. They used to keep the pixel x. `:N` goes through `G` and so already did.
 
 Screen columns count a tab to the next tab stop and every other UTF-16 unit
 as one cell: a wide character or an astral one is not two cells, as it is in
-Neovim. `N%`, which `startofline` also governs in Neovim, is not implemented:
-`%` with a count still matches brackets.
+Neovim.
+
+`{count}%` goes `{count}` percent of the way through the file, to line
+`(count * lines + 99) / 100` at the `startofline` column; `%` with a count
+used to match brackets. It is a jump and, as Neovim 0.12.6 measures although
+its help says linewise, a charwise exclusive motion; past 100 it fails,
+cancelling an operator.
+
+### Operator range adjustments
+
+Three of Vim's rules for an operator's range, in this order:
+
+1. A `w` or `W` whose last word ends its line stops at the end of that line,
+   not in the next one (`clipToLine`). It used to apply to every forward
+   motion.
+2. An exclusive motion that ends in column 0 of a later line ends on the line
+   before (`:help exclusive`): linewise if it starts in the indent, otherwise
+   inclusive to that line's last character. Text objects are exempt, so `dit`
+   across lines stays charwise. This is what makes `d}`, `db`,
+   `d/pat` and `d{count}%` from inside the indent linewise. `gq` then puts the
+   cursor a line further down, as Vim's `op_format` does.
+3. A charwise `d` across lines with only blanks before its start and after its
+   end deletes those lines whole (`:help d`). This replaces a narrower rule
+   that widened such a delete's start to column 0, which matched the text of
+   `db` and `d2w` cases but not their linewise register, and widened
+   `d{count}%` where Neovim does not. Text objects are exempt here too, as a
+   Neovim plugin's text object is, since it selects visually: a charwise
+   object over whole lines leaves the blank line. Neovim's own built-in
+   objects are not exempt, so a multi-line built-in object starting in the
+   indent can still differ.
+
+After a linewise `d`, `<` or `>`, the cursor keeps `curswant` only without
+`startofline` and when rule 2 did not move the end; otherwise it goes to the
+first non-blank, as Vim's `do_pending_operator` leaves it.
+
+A yank does not move the cursor to the start of a backward range, as Neovim's
+does: `yb` and `yk` leave it where it was.
 
 `moveByCharacters` checks `getOption('whichwrap')` and wraps across
 line boundaries when `h` or `l` is listed. The `b` and `s` values

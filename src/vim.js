@@ -168,7 +168,7 @@ export function initVim(CM) {
     { keys: '-', type: 'motion', motion: 'moveByLines', motionArgs: { forward: false, toFirstChar:true, linewise: true }},
     { keys: '_', type: 'motion', motion: 'moveByLines', motionArgs: { forward: true, toFirstChar:true, repeatOffset:-1, linewise: true }},
     { keys: '$', type: 'motion', motion: 'moveToEol', motionArgs: { inclusive: true, foldopen: 'hor' }},
-    { keys: '%', type: 'motion', motion: 'moveToMatchedSymbol', motionArgs: { inclusive: true, toJumplist: true, foldopen: 'percent' }},
+    { keys: '%', type: 'motion', motion: 'moveToMatchedSymbol', motionArgs: { inclusive: true, toJumplist: true, foldopen: 'percent', explicitRepeat: true }},
     { keys: 'f<character>', type: 'motion', motion: 'moveToCharacter', motionArgs: { forward: true , inclusive: true, foldopen: 'hor' }},
     { keys: 'F<character>', type: 'motion', motion: 'moveToCharacter', motionArgs: { forward: false, foldopen: 'hor' }},
     { keys: 't<character>', type: 'motion', motion: 'moveTillCharacter', motionArgs: { forward: true, inclusive: true, foldopen: 'hor' }},
@@ -2934,6 +2934,7 @@ export function initVim(CM) {
         };
       }
       var curStart, curEnd, linewise;
+      var endAdjusted = false;
       /** @type {'block'|'line'|'char'}*/ var mode;
       var cmSel;
       if (vim.visualMode) {
@@ -2967,16 +2968,42 @@ export function initVim(CM) {
           curEnd = tmp;
         }
         linewise = motionArgs.linewise || operatorArgs.linewise;
-        if (linewise) {
-          expandSelectionToLine(cm, curStart, curEnd);
-        } else if (motionArgs.forward) {
+        var wordMotion = vim.lastMotion === motions.moveByWords;
+        // Vim stops a w whose last word ends its line at the end of that line,
+        // not in the next one, which clipToLine does.
+        if (!linewise && motionArgs.forward && wordMotion) {
           clipToLine(cm, curStart, curEnd);
         }
-        if (operator === 'delete' && curStart.line < curEnd.line && !linewise) {
-          var prefix = cm.getLine(curStart.line).substring(0, curStart.ch);
-          if (prefix.length > 0 && /^\s*$/.test(prefix)) {
-            curStart = new Pos(curStart.line, 0);
+        var startInIndent = /^\s*$/.test(cm.getLine(curStart.line).slice(0, curStart.ch));
+        // An exclusive motion that ends in column 0 of a later line ends on
+        // the line before (:help exclusive): linewise if it starts in the
+        // indent, otherwise inclusive to that line's last character.
+        // A text object (a motion that returned a range) keeps its own
+        // range, as Neovim's does: dit across lines stays charwise.
+        if (!linewise && !newAnchor && !motionArgs.inclusive && curEnd.ch === 0 &&
+            curEnd.line > curStart.line) {
+          endAdjusted = true;
+          var endLine = curEnd.line - 1;
+          if (startInIndent) {
+            linewise = true;
+            curEnd = new Pos(endLine, 0);
+          } else {
+            curEnd = new Pos(endLine, lineLength(cm, endLine));
           }
+        } else if (!linewise && motionArgs.forward && !wordMotion) {
+          clipToLine(cm, curStart, curEnd);
+        }
+        // A charwise d across lines with only blanks before its start and
+        // after its end deletes those lines whole (:help d). Not for a text
+        // object: Neovim skips it for a visual selection, which is how its
+        // plugins' text objects select, so their dic keeps the blank line.
+        if (!linewise && !newAnchor && operator === 'delete' &&
+            curEnd.line > curStart.line && startInIndent) {
+          var after = cm.getLine(curEnd.line).slice(curEnd.ch + (motionArgs.inclusive ? 1 : 0));
+          if (/^\s*$/.test(after)) linewise = true;
+        }
+        if (linewise) {
+          expandSelectionToLine(cm, curStart, curEnd);
         }
         mode = 'char';
         var exclusive = !motionArgs.inclusive || linewise;
@@ -2992,6 +3019,7 @@ export function initVim(CM) {
       }
       cm.setSelections(cmSel.ranges, cmSel.primary);
       vim.lastMotion = null;
+      operatorArgs.endAdjusted = endAdjusted;
       operatorArgs.repeat = repeat;
       operatorArgs.registerName = registerName;
       operatorArgs.linewise = linewise;
@@ -3402,7 +3430,18 @@ export function initVim(CM) {
       var ch = Math.floor(line.length / 2);
       return new Pos(head.line, ch);
     },
-    moveToMatchedSymbol: function(cm, head) {
+    moveToMatchedSymbol: function(cm, head, motionArgs, vim) {
+      // {count}% goes {count} percent of the way through the file, on the
+      // line Vim computes as (count * lines + 99) / 100, at the 'startofline'
+      // column. Neovim 0.12.6 makes it charwise exclusive, although its help
+      // says linewise; past 100 it fails, cancelling an operator.
+      if (motionArgs && motionArgs.repeatIsExplicit) {
+        if (motionArgs.repeat > 100) return null;
+        var target = cm.firstLine() + Math.floor((motionArgs.repeat * cm.lineCount() + 99) / 100) - 1;
+        target = Math.max(cm.firstLine(), Math.min(cm.lastLine(), target));
+        motionArgs.inclusive = false;
+        return new Pos(target, startOfLineColumn(cm, vim, head, target));
+      }
       var cursor = head;
       var line = cursor.line;
       var ch = cursor.ch;
@@ -3721,8 +3760,10 @@ export function initVim(CM) {
         cm.replaceRange('', anchor, head);
         finalHead = anchor;
         if (args.linewise) {
-          // Vim's beginline(BL_SOL | BL_FIX), as for > and <.
-          finalHead = new Pos(anchor.line, args.curswant === undefined
+          // The first non-blank, as Vim's op_delete leaves it; curswant only
+          // without 'startofline', and not when the motion's end was moved
+          // back a line, which Vim's do_pending_operator leaves alone.
+          finalHead = new Pos(anchor.line, args.curswant === undefined || args.endAdjusted
             ? findFirstNonWhiteSpaceCharacter(cm.getLine(anchor.line))
             : startOfLineColumnFor(cm, anchor.line, args.curswant));
         } else if (text === '\n' && finalHead.ch === 0) {
@@ -3870,7 +3911,7 @@ export function initVim(CM) {
       // the cursor holds its screen column as the text moves under it.
       var firstLine = cursorMin(ranges[0].anchor, ranges[0].head).line;
       var firstText = cm.getLine(firstLine);
-      if (getOption('startofline') || args.curswant === undefined) {
+      if (getOption('startofline') || args.curswant === undefined || args.endAdjusted) {
         return new Pos(firstLine, findFirstNonWhiteSpaceCharacter(firstText));
       }
       return new Pos(firstLine, columnAtVirtualColumn(firstText, args.curswant, tabSize));
@@ -3889,7 +3930,9 @@ export function initVim(CM) {
       var to = ranges[0].head.line;
       if (operatorArgs.linewise) to--;
       var endRow = cm.hardWrap({from: from, to: to});
-      if (endRow > from && operatorArgs.linewise) endRow--;
+      // Vim's op_format puts the cursor a line further down when the motion's
+      // end was moved back a line, which cancels this.
+      if (endRow > from && operatorArgs.linewise && !operatorArgs.endAdjusted) endRow--;
       return operatorArgs.keepCursor ? oldAnchor : new Pos(endRow, 0);
     },
     toggleComment: function(cm, _args, ranges, oldAnchor, newHead) {

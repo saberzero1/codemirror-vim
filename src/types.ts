@@ -125,6 +125,8 @@ export type OperatorArgs = {
     /** Vim's `curswant` as the operator found it: the cursor's virtual
      * column, or Infinity while a `$` is still sticky. Read by `>` and `<`. */
     curswant?: number;
+    /** The end of an exclusive motion moved back a line (:help exclusive). */
+    endAdjusted?: boolean;
     surroundNewline?: boolean;
     surroundCharRepeat?: number;
 } 
@@ -230,7 +232,7 @@ export type vimMotions = {
     moveToEol(cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs, vim: vimState): Pos
     moveToFirstNonWhiteSpaceCharacter(cm: CodeMirrorV, head: Pos): Pos
     moveToLastNonWhiteSpaceCharacter(cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs): Pos
-    moveToMatchedSymbol(cm: CodeMirrorV, head: Pos): Pos | undefined
+    moveToMatchedSymbol(cm: CodeMirrorV, head: Pos, motionArgs: MotionArgs, vim: vimState): Pos | null | undefined
     moveToStartOfLine(_cm: CodeMirrorV, head: Pos, motionArgs?: MotionArgs, vim?: vimState): Pos
     moveToLineOrEdgeOfDocument(cm: CodeMirrorV, _head: Pos, motionArgs: MotionArgs): Pos
     moveToStartOfDisplayLine(cm: CodeMirrorV): Pos
