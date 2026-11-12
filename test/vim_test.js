@@ -2489,6 +2489,38 @@ yankCase(true, [2, 8], ['v', 'k', 'o', 'y'], [1, 5]);
 yankCase(true, [2, 8], ['<C-v>', 'j', 'l', 'y'], [2, 8]);
 yankCase(true, [2, 8], ['<C-v>', 'j', 'h', 'y'], [2, 7]);
 
+// Screen columns count a wide character or an emoji as two cells, a cursor
+// on one sitting on its first, and a combining mark as none. Each row is
+// Neovim 0.12.6 with tabstop=4, as UTF-16 columns: the start, reached with
+// 0 and l so curswant is Vim's own, and where j, k, G and | land.
+var wideLines = '\u4e2d\u6587\u5b57\u7b26\u6d4b\u8bd5\nabcdefghijkl\n\ud83d\ude00\ud83d\ude00x\ud83d\ude00y\ne\u0301e\u0301abcdef\n\tab\u4e2dcd\n\u65e5\u672c';
+var wideCount = 0;
+function wideCase(start, keys, expected) {
+  testVim('wide_screen_column_' + (++wideCount) + '_' + keys.join(''), function(cm, vim, helpers) {
+    cm.setCursor(start[0], start[1]);
+    helpers.doKeys.apply(null, keys);
+    helpers.assertCursorAt(expected[0], expected[1]);
+  }, Object.assign({ value: wideLines }, shiftTabs));
+}
+wideCase([0, 4], ['j'], [1, 8]);
+wideCase([1, 5], ['k'], [0, 2]);
+wideCase([1, 3], ['k'], [0, 1]);
+wideCase([1, 7], ['k', 'k'], [0, 3]);
+wideCase([0, 2], ['j', 'j'], [2, 4]);
+wideCase([2, 4], ['k'], [1, 4]);
+wideCase([2, 5], ['j'], [3, 7]);
+wideCase([3, 6], ['k'], [2, 4]);
+wideCase([1, 2], ['j', 'j'], [3, 4]);
+wideCase([1, 5], ['j', 'j'], [3, 7]);
+wideCase([1, 9], ['j', 'j', 'j', 'j'], [5, 1]);
+wideCase([4, 5], ['k'], [3, 9]);
+wideCase([1, 6], ['j', 'j', 'j'], [4, 3]);
+wideCase([1, 4], ['G'], [5, 1]);
+wideCase([0, 5], ['j'], [1, 10]);
+wideCase([1, 0], ['7', '|'], [1, 6]);
+wideCase([0, 0], ['5', '|'], [0, 2]);
+wideCase([4, 0], ['8', '|'], [4, 3]);
+
 // G and gg keep the screen column the same way without 'startofline', and
 // go to the first non-blank with it. Neovim 0.12.6, tabstop=4.
 var solLines = '\tfoo bar baz\n  x\n        long line here\nab\n\t\tend line';

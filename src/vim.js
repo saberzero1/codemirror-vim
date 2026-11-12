@@ -6883,14 +6883,56 @@ export function initVim(CM) {
 
   /** @arg {string} [text] */
   /**
-   * The screen column a normal-mode cursor at `ch` sits on, 0-based. On a tab
-   * that is the tab's last cell, as Vim draws it.
+   * The screen cells a character takes, as Neovim counts them: two for a
+   * wide or emoji character, none for a combining mark, a variation selector,
+   * a joiner or a skin-tone modifier, which belong to the character before.
+   * @arg {number} cp
+   */
+  function charCells(cp) {
+    if (cp < 0x300) return 1;
+    if ((cp >= 0x300 && cp <= 0x36f) || (cp >= 0x1ab0 && cp <= 0x1aff) ||
+        (cp >= 0x1dc0 && cp <= 0x1dff) || (cp >= 0x20d0 && cp <= 0x20ff) ||
+        cp === 0x200b || cp === 0x200c || cp === 0x200d ||
+        (cp >= 0xfe00 && cp <= 0xfe0f) || (cp >= 0xfe20 && cp <= 0xfe2f) ||
+        (cp >= 0x1f3fb && cp <= 0x1f3ff) || (cp >= 0xe0100 && cp <= 0xe01ef)) {
+      return 0;
+    }
+    if ((cp >= 0x1100 && cp <= 0x115f) || (cp >= 0x2e80 && cp <= 0xa4cf && cp !== 0x303f) ||
+        (cp >= 0xac00 && cp <= 0xd7a3) || (cp >= 0xf900 && cp <= 0xfaff) ||
+        (cp >= 0xfe10 && cp <= 0xfe6f) || (cp >= 0xff01 && cp <= 0xff60) ||
+        (cp >= 0xffe0 && cp <= 0xffe6) || (cp >= 0x20000 && cp <= 0x3fffd) ||
+        // Emoji shown wide.
+        cp === 0x231a || cp === 0x231b || (cp >= 0x23e9 && cp <= 0x23ec) ||
+        cp === 0x23f0 || cp === 0x23f3 || cp === 0x25fd || cp === 0x25fe ||
+        cp === 0x2614 || cp === 0x2615 || (cp >= 0x2648 && cp <= 0x2653) ||
+        cp === 0x267f || cp === 0x2693 || cp === 0x26a1 || cp === 0x26aa ||
+        cp === 0x26ab || cp === 0x26bd || cp === 0x26be || cp === 0x26c4 ||
+        cp === 0x26c5 || cp === 0x26ce || cp === 0x26d4 || cp === 0x26ea ||
+        cp === 0x26f2 || cp === 0x26f3 || cp === 0x26f5 || cp === 0x26fa ||
+        cp === 0x26fd || cp === 0x2705 || cp === 0x270a || cp === 0x270b ||
+        cp === 0x2728 || cp === 0x274c || cp === 0x274e || (cp >= 0x2753 && cp <= 0x2755) ||
+        cp === 0x2757 || (cp >= 0x2795 && cp <= 0x2797) || cp === 0x27b0 ||
+        cp === 0x27bf || cp === 0x2b1b || cp === 0x2b1c || cp === 0x2b50 ||
+        cp === 0x2b55 || cp === 0x1f004 || cp === 0x1f0cf || cp === 0x1f18e ||
+        (cp >= 0x1f191 && cp <= 0x1f19a) || (cp >= 0x1f200 && cp <= 0x1f251) ||
+        (cp >= 0x1f300 && cp <= 0x1f64f) || (cp >= 0x1f680 && cp <= 0x1f6ff) ||
+        (cp >= 0x1f7e0 && cp <= 0x1f7eb) || (cp >= 0x1f900 && cp <= 0x1f9ff) ||
+        (cp >= 0x1fa70 && cp <= 0x1faff)) {
+      return 2;
+    }
+    return 1;
+  }
+  /**
+   * The screen column a normal-mode cursor at `ch` sits on, 0-based: a wide
+   * character's first cell, as Vim draws it, but a tab's last.
    * @arg {string} text @arg {number} ch @arg {number} tabSize
    */
   function cursorVirtualColumn(text, ch, tabSize) {
     var col = 0;
-    for (var i = 0; i < ch && i < text.length; i++) {
-      col += text[i] == '\t' ? tabSize - col % tabSize : 1;
+    for (var i = 0; i < ch && i < text.length;) {
+      var cp = /** @type {number} */ (text.codePointAt(i));
+      col += cp === 9 ? tabSize - col % tabSize : charCells(cp);
+      i += cp > 0xffff ? 2 : 1;
     }
     if (text[ch] == '\t') col += tabSize - col % tabSize - 1;
     return col;
@@ -6902,12 +6944,18 @@ export function initVim(CM) {
    * @arg {string} text @arg {number} want @arg {number} tabSize @arg {boolean} [pastEnd]
    */
   function columnAtVirtualColumn(text, want, tabSize, pastEnd) {
-    var col = 0;
-    for (var i = 0; i < text.length; i++) {
-      col += text[i] == '\t' ? tabSize - col % tabSize : 1;
-      if (want < col) return i;
+    var col = 0, last = 0;
+    for (var i = 0; i < text.length;) {
+      var cp = /** @type {number} */ (text.codePointAt(i));
+      var cells = cp === 9 ? tabSize - col % tabSize : charCells(cp);
+      if (cells > 0) {
+        last = i;
+        col += cells;
+        if (want < col) return i;
+      }
+      i += cp > 0xffff ? 2 : 1;
     }
-    return pastEnd ? text.length : Math.max(0, text.length - 1);
+    return pastEnd ? text.length : last;
   }
   /**
    * Vim's curswant for a cursor at `head`: the screen column a vertical

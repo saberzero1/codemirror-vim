@@ -1940,9 +1940,12 @@ from `curswant`, which they keep, so a `j` after them returns to it; with
 `startofline` the first non-blank becomes `curswant`, as `beginline()` makes
 it. They used to keep the pixel x. `:N` goes through `G` and so already did.
 
-Screen columns count a tab to the next tab stop and every other UTF-16 unit
-as one cell: a wide character or an astral one is not two cells, as it is in
-Neovim.
+Screen columns count a tab to the next tab stop and other characters as
+Neovim does (`charCells`): two cells for a wide character or an emoji, none
+for a combining mark, a variation selector, a zero-width joiner or a
+skin-tone modifier, which belong to the character before, and one otherwise.
+A surrogate pair is one character, and a cursor on a wide character sits on
+its first cell. A flag counts its two regional indicators as one cell each.
 
 `{count}%` goes `{count}` percent of the way through the file, to line
 `(count * lines + 99) / 100` at the `startofline` column; `%` with a count
