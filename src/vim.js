@@ -3048,9 +3048,14 @@ export function initVim(CM) {
       operatorArgs.rangeStart = rangeStart;
       operatorArgs.repeat = repeat;
       operatorArgs.registerName = registerName;
+      // The range rules above can make this run linewise. operatorArgs is
+      // what . repeats, so it gets back the linewise it came with: the rules
+      // are worked out again where the repeat lands.
+      var givenLinewise = operatorArgs.linewise;
       operatorArgs.linewise = linewise;
       var operatorMoveTo = operators[operator](
         cm, operatorArgs, cmSel.ranges, oldAnchor, newHead);
+      operatorArgs.linewise = givenLinewise;
       if (vim.visualMode) {
         exitVisualMode(cm, operatorMoveTo != null);
       }

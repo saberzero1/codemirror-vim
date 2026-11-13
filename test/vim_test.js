@@ -2353,6 +2353,11 @@ exclusiveCase(" a b\nc", [0, 1], ['d', '3', 'w'], "", [0, 0], " a b\nc\n", true)
 exclusiveCase("a b", [0, 0], ['d', '5', 'w'], "", [0, 0], "a b", false);
 exclusiveCase(" a\nb", [0, 1], ['d', '2', 'W'], "", [0, 0], " a\nb\n", true);
 exclusiveCase(" word1\nword2\nz", [0, 1], ['d', '2', 'w'], "z", [0, 0], " word1\nword2\n", true);
+// . works the rules out again where it repeats: the first d} below is made
+// linewise by them, and must not hand that to the repeat on another line.
+exclusiveCase("a\none\n\ntwo\n\nthree", [1, 0], ['d', '}', 'j', '.'], "a\n\n\nthree", [2, 0], "two\n", true);
+exclusiveCase("a\none\n\ntwo\n\nthree", [1, 0], ['c', '}', 'x', '<Esc>', 'j', '.'], "a\nx\nx\n\nthree", [2, 0], "\ntwo\n", true);
+exclusiveCase("a\none\n\ntwo\n\nthree", [1, 1], ['d', '}', 'j', '0', '.'], "a\no\n\nthree", [2, 0], "\ntwo\n", true);
 // A text object over whole lines stays charwise for d, as a Neovim plugin's
 // does: dic leaves the blank line (Neovim 0.12.6, with an omap that selects
 // lines 3 to 4 visually).
